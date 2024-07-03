@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Set {
+  id            String   @id @default(cuid())
+  weight        BigInt?
+  duration      String?
+  repetitions   BigInt?
+  session       Session  @relation(fields: [session_id], references: [id])
+  session_id    String
+  exercise_name Exercise @relation(fields: [exercise_id], references: [id])
+  exercise_id   String
+  createDate    DateTime @default(now())
+  updateDate    DateTime @updatedAt
+}
+
+model Session {
+  id   String   @id @default(cuid())
+  date DateTime @unique
+  sets Set[]
+}
+
+model Exercise {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  format      String
+  bodypart    Bodypart @relation(fields: [bodypart_id], references: [id])
+  bodypart_id String
+  sets        Set[]
+}
+
+model Bodypart {
+  id        String     @id @default(cuid())
+  name      String
+  exercises Exercise[]
+}
