@@ -8,6 +8,15 @@ export async function GET(request: Request) {
 }
 export async function POST(req: NextRequest) {
   const body = await req.json();
+  const set = await prisma.set.create({
+    data: {
+      weight: body.weight,
+      duration: body.duration,
+      repetitions: body.repetitions,
+      session_id: body.session_id,
+      exercise_id: body.exercise_id,
+    },
+  });
 
-  return new Response('OK');
+  return Response.json({ set });
 }
