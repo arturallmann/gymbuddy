@@ -15,9 +15,9 @@ datasource db {
 
 model Set {
   id            String   @id @default(cuid())
-  weight        BigInt?
+  weight        Int?
   duration      String?
-  repetitions   BigInt?
+  repetitions   Int?
   session       Session  @relation(fields: [session_id], references: [id])
   session_id    String
   exercise_name Exercise @relation(fields: [exercise_id], references: [id])
