@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.gymbuddy.app',
+  appId: 'com.example.app',
   appName: 'gymbuddy',
   webDir: 'out',
   bundledWebRuntime: false,
