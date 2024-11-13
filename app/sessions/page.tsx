@@ -24,7 +24,7 @@ export default function Exercises() {
     });
     const dates = await response.json();
     let exists: boolean = false;
-    for (let i = 0; i <= dates.sessions.length; i++) {
+    for (let i = 0; i < dates.sessions.length; i++) {
       if (date === dates.sessions[i].date.substring(0, 10)) {
         exists = true;
         break;
