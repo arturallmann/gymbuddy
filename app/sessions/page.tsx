@@ -1,5 +1,5 @@
 'use client';
-export default function Exercises() {
+export default function Sessions() {
   const createNewDay = async () => {
     const currentDate = new Date().toISOString();
     try {
@@ -39,7 +39,7 @@ export default function Exercises() {
       <div className="bg-sky-950 flex top-0 left-0 h-20 w-screen">
         <input
           type="date"
-          value={new Date().toISOString().substring(0, 10)}
+          defaultValue={new Date().toISOString().substring(0, 10)}
           className="bg-sky-950 flex place-content-center w-screen"
         />
       </div>
