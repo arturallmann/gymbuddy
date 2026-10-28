@@ -174,7 +174,7 @@ export const exerciseImages = sqliteTable(
     attribution: text('attribution'),
     ...timestamps,
   },
-  (t) => [index('exercise_images_exercise_idx').on(t.exerciseId, t.position)],
+  (t) => [uniqueIndex('exercise_images_exercise_position_idx').on(t.exerciseId, t.position)],
 );
 
 export const exercisePreferences = sqliteTable(

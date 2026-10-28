@@ -1,8 +1,9 @@
 import { Capacitor } from '@capacitor/core';
 import { CapacitorSQLite, SQLiteConnection } from '@capacitor-community/sqlite';
-import { createDatabase, type AppDatabase } from './driver';
+import { createDatabase, type AppDatabase, type SqlConnection } from './driver';
 import { runMigrations } from './migrate';
 import { migrations } from './migrations';
+import { seedLibraryIfEmpty } from './seed';
 
 const DATABASE_NAME = 'gymbuddy';
 
@@ -21,7 +22,8 @@ export function getDatabase(): Promise<AppDatabase> {
 
 async function openDatabase(): Promise<AppDatabase> {
   const sqlite = new SQLiteConnection(CapacitorSQLite);
-  if (Capacitor.getPlatform() === 'web') {
+  const isWeb = Capacitor.getPlatform() === 'web';
+  if (isWeb) {
     await initWebStore(sqlite);
   }
 
@@ -35,8 +37,26 @@ async function openDatabase(): Promise<AppDatabase> {
   await conn.open();
   await conn.execute('PRAGMA foreign_keys = ON;', false);
 
-  await runMigrations(conn, migrations);
-  return createDatabase(conn);
+  // The web version saves to IndexedDB after each write outside a transaction,
+  // but not after a commit. Save after each commit, too.
+  const connection: SqlConnection = isWeb
+    ? {
+        query: (statement, values) => conn.query(statement, values),
+        run: (statement, values, transaction, returnMode) =>
+          conn.run(statement, values, transaction, returnMode),
+        beginTransaction: () => conn.beginTransaction(),
+        rollbackTransaction: () => conn.rollbackTransaction(),
+        commitTransaction: async () => {
+          await conn.commitTransaction();
+          await sqlite.saveToStore(DATABASE_NAME);
+        },
+      }
+    : conn;
+
+  await runMigrations(connection, migrations);
+  const db = createDatabase(connection);
+  await seedLibraryIfEmpty(db);
+  return db;
 }
 
 // The browser has no native SQLite. The plugin's web version runs SQLite as

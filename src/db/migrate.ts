@@ -20,7 +20,7 @@ export async function runMigrations(conn: SqlConnection, migrations: Migration[]
     return;
   }
 
-  await conn.run('BEGIN', [], false);
+  await conn.beginTransaction();
   try {
     for (const migration of pending) {
       for (const statement of migration.statements) {
@@ -32,9 +32,9 @@ export async function runMigrations(conn: SqlConnection, migrations: Migration[]
         false,
       );
     }
-    await conn.run('COMMIT', [], false);
+    await conn.commitTransaction();
   } catch (error) {
-    await conn.run('ROLLBACK', [], false);
+    await conn.rollbackTransaction();
     throw error;
   }
 }

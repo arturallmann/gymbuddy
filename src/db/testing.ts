@@ -21,6 +21,15 @@ export function createTestConnection(): SqlConnection {
       prepared.run(...values);
       return { changes: {} };
     },
+    async beginTransaction() {
+      sqlite.exec('BEGIN');
+    },
+    async commitTransaction() {
+      sqlite.exec('COMMIT');
+    },
+    async rollbackTransaction() {
+      sqlite.exec('ROLLBACK');
+    },
   };
 }
 
