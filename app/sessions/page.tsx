@@ -15,7 +15,7 @@ export default function Sessions() {
     }
   };
   const CheckForCurrentDay = async () => {
-    const date: String = new Date().toISOString().substring(0, 10);
+    const date: string = new Date().toISOString().substring(0, 10);
     const response = await fetch('/api/sessions', {
       method: 'GET',
       headers: {
