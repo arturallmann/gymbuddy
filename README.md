@@ -9,7 +9,7 @@ The app is in early development. See `docs/ROADMAP.md` for the current phase.
 
 - Next.js with static export (`output: 'export'`), React, TypeScript, Tailwind
 - Capacitor wraps the static build as an Android and iOS app
-- SQLite on the phone through Drizzle (planned, Phase 1)
+- SQLite on the phone through Drizzle and `@capacitor-community/sqlite`
 
 There is no server. The app must build as static files.
 
@@ -28,6 +28,7 @@ There is no server. The app must build as static files.
 | `npm run lint` | Lint |
 | `npm test` | Unit tests (Vitest) |
 | `npm run build` | Static build into `out/` |
+| `npm run db:generate` | Generate a migration after changing `src/db/schema.ts` |
 | `npx cap sync android` | Copy `out/` into the Android project |
 | `npx cap open android` | Open the Android project in Android Studio |
 | `npm run android` | Build, sync and install the app on a connected Android phone |
