@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "android": "next build && cap run android",
-    "db:generate": "drizzle-kit generate && node scripts/bundle-migrations.mjs"
+    "db:generate": "drizzle-kit generate && node scripts/bundle-migrations.mjs",
+    "predev": "node scripts/copy-sql-wasm.mjs"
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^8.1.1",
@@ -23,6 +24,7 @@
     "drizzle-orm": "^0.45.4",
     "eslint": "^10.13.0",
     "eslint-config-next": "^16.4.3",
+    "jeep-sqlite": "^2.8.0",
     "next": "^16.4.3",
     "postcss": "8.4.29",
     "react": "^19.3.1",
@@ -35,6 +37,7 @@
     "@types/better-sqlite3": "^9.6.0",
     "better-sqlite3": "^13.0.3",
     "drizzle-kit": "^0.31.11",
+    "sql.js-for-jeep-sqlite": "npm:sql.js@1.11.0",
     "vitest": "^5.0.5"
   }
 }
