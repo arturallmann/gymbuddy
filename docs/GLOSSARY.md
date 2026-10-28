@@ -45,6 +45,7 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 | Category | `category` | `strength`, `cardio`, `stretch` or `mobility`. | type, kind |
 | Equipment | `equipment` | What the exercise needs, such as barbell or cable. | gear, tool |
 | Library exercise | exercise with `userId` = NULL | An exercise that ships with the app. | default exercise, built-in exercise |
+| Library version | `libraryVersion` | The free-exercise-db commit plus `SEED_VERSION`, such as `f00c92c…:1`. A change makes the app seed the library again. | library release, data version |
 | Custom exercise | exercise with `userId` set | An exercise the user created. | user exercise, own exercise |
 | Load type | `loadType` | How the app reads a set's weight: `external`, `bodyweight` or `none`. | format, weight type, mode |
 | Added weight | `weightGrams` on a bodyweight exercise | Weight on top of bodyweight. Shown as "BW + 5 kg". Negative = assisted. | extra weight, plus weight |
@@ -98,6 +99,7 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 |---|---|---|
 | Delete | For user data: writing the current time to `deletedAt`. Rows are never removed. (Deleting repo files is normal.) | erase, hard delete |
 | User | The person using the app. One local user per phone. | athlete, member, account (until online features exist) |
+| App state | Table `app_state` | Values the app keeps for itself, such as the library version. Never choices of the user (those are settings). | meta, config, settings |
 | Sync | Sending changed rows to a server. Not built yet. | upload, backup (backup is a future feature that uses sync) |
 
 ## Writing rules

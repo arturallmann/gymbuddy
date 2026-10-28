@@ -1,4 +1,6 @@
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
+import libraryData from '../../data/free-exercise-db/version.json';
+import { readAppState, writeAppState } from './appState';
 import type { AppDatabase } from './driver';
 import {
   exerciseImages,
@@ -30,6 +32,8 @@ const SOURCE: ExerciseSource = 'free-exercise-db';
 const IMAGE_LICENSE = 'Unlicense';
 const IMAGE_ATTRIBUTION = 'free-exercise-db (github.com/yuhonas/free-exercise-db)';
 const DEFAULT_STRETCH_SECONDS = 30;
+// Raise this when toLibraryExercise() changes, so phones seed the library again.
+export const SEED_VERSION = 1;
 // Rows per INSERT. Each statement is one call into native code.
 const CHUNK_SIZE = 50;
 
@@ -197,16 +201,19 @@ export async function seedLibrary(db: AppDatabase, source: SourceExercise[]) {
   });
 }
 
-// Seeds the library on first start only.
-export async function seedLibraryIfEmpty(db: AppDatabase) {
-  const existing = await db
-    .select({ id: exercises.id })
-    .from(exercises)
-    .where(and(eq(exercises.source, SOURCE), isNull(exercises.deletedAt)))
-    .limit(1);
-  if (existing.length > 0) {
+// The free-exercise-db commit and the seed version, such as "f00c92c…:1".
+export function libraryVersion(commit: string = libraryData.commit): string {
+  return `${commit}:${SEED_VERSION}`;
+}
+
+// Seeds the library on first start and after an app update with a new library version.
+// Loads the large library file only then, so a normal start stays fast.
+export async function seedLibraryIfChanged(db: AppDatabase, version: string = libraryVersion()) {
+  if ((await readAppState(db, 'libraryVersion')) === version) {
     return;
   }
   const { default: source } = await import('../../data/free-exercise-db/exercises.json');
   await seedLibrary(db, source as SourceExercise[]);
+  // Written after the seed: if the app stops in between, the next start seeds again.
+  await writeAppState(db, 'libraryVersion', version);
 }

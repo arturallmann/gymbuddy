@@ -8,6 +8,7 @@ The source of truth is `src/db/schema.ts`. This file explains the meaning behind
 |---|---|
 | users | One local user per phone. Later linked to an online account. |
 | user_settings | Units, feature toggles, preset and first-time setup state. One row per user. |
+| app_state | Values the app keeps for itself, one row per key (`libraryVersion`). Not user data. |
 | muscle_groups | Muscle areas such as back, biceps, hamstrings. |
 | exercises | Library exercises (`userId` is null) and custom exercises (`userId` set). |
 | exercise_muscle_groups | Links exercises to muscle groups, with role `primary` or `secondary`. |
@@ -169,3 +170,9 @@ Stretches normally go in `cooldown`. The timer uses `exercises.defaultDurationSe
 The library comes from free-exercise-db (public domain).
 `source` = `free-exercise-db` and `sourceId` = its exercise id.
 Re-running the seed updates these rows and never touches `source = 'custom'` rows.
+
+The seed runs on first start and whenever the library version changes:
+the commit in `data/free-exercise-db/version.json` or `SEED_VERSION` in `src/db/seed.ts`.
+`app_state.libraryVersion` holds the version the phone seeded last.
+Raise `SEED_VERSION` when `toLibraryExercise()` maps exercises differently.
+Exercises that free-exercise-db removes stay on the phone, because workouts and exercise preferences use them.

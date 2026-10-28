@@ -60,5 +60,14 @@ export const migrations: Migration[] = [
       "DROP INDEX `exercise_preferences_user_exercise_idx`;",
       "CREATE UNIQUE INDEX `exercise_preferences_user_exercise_idx` ON `exercise_preferences` (`userId`,`exerciseId`) WHERE \"deletedAt\" IS NULL;"
     ]
+  },
+  {
+    "tag": "0003_warm_shiver_man",
+    "when": 1793205468729,
+    "hash": "ca44975ef5a6ce1d50c7d36896a43593a546fb574bff185a4952d2c3d0bf73a9",
+    "statements": [
+      "CREATE TABLE `app_state` (\n\t`id` text PRIMARY KEY NOT NULL,\n\t`key` text NOT NULL,\n\t`value` text NOT NULL,\n\t`createdAt` integer NOT NULL,\n\t`updatedAt` integer NOT NULL,\n\t`deletedAt` integer\n);",
+      "CREATE UNIQUE INDEX `app_state_key_unique` ON `app_state` (`key`);"
+    ]
   }
 ];
