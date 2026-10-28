@@ -28,9 +28,13 @@ src/
   db/
     schema.ts     Drizzle schema (single source of truth for tables)
     client.ts     Opens the database and runs migrations at app start
+    driver.ts     Bridge between Drizzle (sqlite-proxy) and the SQLite plugin
+    seed.ts       Seeds the exercise library on first start
+    settings.ts   Queries for the local user and settings
     workouts.ts   Queries for workouts, workout exercises and sets
     exercises.ts  Queries for exercises, muscle groups and images
     export.ts     Queries that build export rows
+  hooks/          React hooks, such as useSettings() and useFeatures()
   lib/            Pure helpers (unit conversion, formatting, CSV building)
   native/         Wrappers around Capacitor plugins
 drizzle/          Generated migration files (do not edit by hand)

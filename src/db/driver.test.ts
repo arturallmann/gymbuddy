@@ -79,6 +79,20 @@ describe('driver', () => {
     expect(await db.select().from(users)).toHaveLength(1);
   });
 
+  test('run transactions that start at the same time one after the other', async () => {
+    const { db } = await seedWorkout();
+    await Promise.all(
+      [1, 2, 3].map(() =>
+        db.transaction(async (tx) => {
+          await tx.insert(users).values({});
+          await tx.insert(users).values({});
+        }),
+      ),
+    );
+
+    expect(await db.select().from(users)).toHaveLength(7);
+  });
+
   test('run a batch in one transaction', async () => {
     const { db } = await seedWorkout();
     const [inserted, all] = await db.batch([
