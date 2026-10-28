@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { runMigrations } from './migrate';
 import { migrations } from './migrations';
 import { exercises, sets, users, workoutExercises, workouts } from './schema';
-import { createTestDatabase } from './testing';
+import { createTestDatabase } from '@/testing/database';
 
 async function seedWorkout() {
   const { conn, db } = await createTestDatabase();

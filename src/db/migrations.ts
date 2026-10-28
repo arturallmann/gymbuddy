@@ -49,5 +49,16 @@ export const migrations: Migration[] = [
       "DROP INDEX `exercise_images_exercise_idx`;",
       "CREATE UNIQUE INDEX `exercise_images_exercise_position_idx` ON `exercise_images` (`exerciseId`,`position`);"
     ]
+  },
+  {
+    "tag": "0002_outgoing_felicia_hardy",
+    "when": 1793203733636,
+    "hash": "d72fd08bd6ec52213431e2a5d417473c1eea95c9be632fc498cfc4eb641215fd",
+    "statements": [
+      "DROP INDEX `user_settings_userId_unique`;",
+      "CREATE UNIQUE INDEX `user_settings_user_idx` ON `user_settings` (`userId`) WHERE \"deletedAt\" IS NULL;",
+      "DROP INDEX `exercise_preferences_user_exercise_idx`;",
+      "CREATE UNIQUE INDEX `exercise_preferences_user_exercise_idx` ON `exercise_preferences` (`userId`,`exerciseId`) WHERE \"deletedAt\" IS NULL;"
+    ]
   }
 ];

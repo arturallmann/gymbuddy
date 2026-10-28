@@ -1,8 +1,8 @@
 // Test helpers: an in-memory database that behaves like the SQLite plugin.
 import Database from 'better-sqlite3';
-import { createDatabase, type SqlConnection } from './driver';
-import { runMigrations } from './migrate';
-import { migrations } from './migrations';
+import { createDatabase, type SqlConnection } from '@/db/driver';
+import { runMigrations } from '@/db/migrate';
+import { migrations } from '@/db/migrations';
 
 // better-sqlite3 returns rows as objects keyed by column name, like the plugin,
 // so the bridge in driver.ts runs the same code path as on the phone.

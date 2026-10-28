@@ -26,7 +26,7 @@ There is no server. The app must build as static files.
 | `npm run dev` | Start the dev server in the browser at http://localhost:3000 |
 | `npm run typecheck` | Type check |
 | `npm run lint` | Lint |
-| `npm test` | Unit tests (Vitest) |
+| `npm test` | Tests for helpers, database, components and pages (Vitest) |
 | `npm run build` | Static build into `out/` |
 | `npm run db:generate` | Generate a migration after changing `src/db/schema.ts` |
 | `npx cap sync android` | Copy `out/` into the Android project |
@@ -50,3 +50,4 @@ The app loads the bundled files from `out/`, so the phone needs no connection to
 - `docs/DECISIONS.md`: decisions that are already made
 - `docs/GLOSSARY.md`: the names used for things in code and the interface
 - `docs/ROADMAP.md`: phases and tasks
+- `docs/TESTING.md`: how to write and run tests

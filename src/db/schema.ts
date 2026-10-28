@@ -89,23 +89,29 @@ export const users = sqliteTable('users', {
   ...timestamps,
 });
 
-export const userSettings = sqliteTable('user_settings', {
-  id: id(),
-  userId: text('userId')
-    .notNull()
-    .unique()
-    .references(() => users.id),
-  weightUnit: text('weightUnit', { enum: WEIGHT_UNITS }).notNull().default('kg'),
-  distanceUnit: text('distanceUnit', { enum: DISTANCE_UNITS }).notNull().default('metric'),
-  preset: text('preset', { enum: PRESETS }).notNull().default('standard'),
-  // Only the toggles that differ from DEFAULT_FEATURES need to be stored.
-  features: text('features', { mode: 'json' })
-    .$type<Partial<FeatureToggles>>()
-    .notNull()
-    .default(sql`'{}'`),
-  setupCompletedAt: integer('setupCompletedAt', { mode: 'timestamp_ms' }),
-  ...timestamps,
-});
+// Unique among rows that are not deleted, so a soft-deleted row never blocks a new one.
+const notDeleted = sql`"deletedAt" IS NULL`;
+
+export const userSettings = sqliteTable(
+  'user_settings',
+  {
+    id: id(),
+    userId: text('userId')
+      .notNull()
+      .references(() => users.id),
+    weightUnit: text('weightUnit', { enum: WEIGHT_UNITS }).notNull().default('kg'),
+    distanceUnit: text('distanceUnit', { enum: DISTANCE_UNITS }).notNull().default('metric'),
+    preset: text('preset', { enum: PRESETS }).notNull().default('standard'),
+    // Only the toggles that differ from DEFAULT_FEATURES need to be stored.
+    features: text('features', { mode: 'json' })
+      .$type<Partial<FeatureToggles>>()
+      .notNull()
+      .default(sql`'{}'`),
+    setupCompletedAt: integer('setupCompletedAt', { mode: 'timestamp_ms' }),
+    ...timestamps,
+  },
+  (t) => [uniqueIndex('user_settings_user_idx').on(t.userId).where(notDeleted)],
+);
 
 export const muscleGroups = sqliteTable('muscle_groups', {
   id: id(),
@@ -193,7 +199,9 @@ export const exercisePreferences = sqliteTable(
     distanceUnit: text('distanceUnit', { enum: DISTANCE_UNITS }),
     ...timestamps,
   },
-  (t) => [uniqueIndex('exercise_preferences_user_exercise_idx').on(t.userId, t.exerciseId)],
+  (t) => [
+    uniqueIndex('exercise_preferences_user_exercise_idx').on(t.userId, t.exerciseId).where(notDeleted),
+  ],
 );
 
 export const templates = sqliteTable('templates', {
