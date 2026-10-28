@@ -64,7 +64,7 @@ Pages that use `next/navigation` mock it with `vi.mock('next/navigation', ...)`
 
 The test connection runs the same bridge (`src/db/driver.ts`) as the app, but on better-sqlite3,
 not on the plugin. It cannot catch plugin bugs. Known plugin limits are guarded in the bridge
-and have tests there:
+(decision 016 in `docs/DECISIONS.md`) and have tests there:
 - RETURNING is rejected, because the plugin fakes it on Android and returns wrong rows.
 - Transactions go through the plugin's transaction API, because its web version ends raw `BEGIN`.
 

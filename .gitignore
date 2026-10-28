@@ -40,3 +40,6 @@ next-env.d.ts
 
 # SQLite WebAssembly for the dev server (scripts/copy-sql-wasm.mjs)
 /public/assets/
+
+# Knowledge graph of the repo (graphify, see docs/GRAPHIFY.md)
+/graphify-out/

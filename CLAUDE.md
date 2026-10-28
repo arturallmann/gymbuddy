@@ -10,6 +10,8 @@ Read these files before larger changes:
 - @docs/GLOSSARY.md — the only allowed names for things
 - @docs/TESTING.md — how to write and run tests
 - `docs/ROADMAP.md` — current phase and task list (read when picking a task)
+- `docs/GRAPHIFY.md` — knowledge graph of the repo (read when you need an overview)
+- @AGENTS.md — Next.js version notice, written by `next dev`
 
 ## Commands
 
@@ -21,6 +23,7 @@ Read these files before larger changes:
 - Run on a phone: `npm run android`
 - Static build for the phone: `npm run build` (writes `out/`)
 - Copy build to native projects: `npx cap sync`
+- Knowledge graph of the repo: `graphify update .` after code changes (see `docs/GRAPHIFY.md`)
 - Generate a migration after a schema change: `npm run db:generate` (runs `drizzle-kit generate` and bundles the result into `src/db/migrations.ts`)
 
 Run `npm run typecheck`, `npm run lint` and `npm test` before you call a task done.
@@ -65,13 +68,16 @@ If a needed term is missing, stop and ask before inventing one.
 ## Workflow
 
 - Work on a branch. Never commit to `master` directly.
-- One task from `docs/ROADMAP.md` per branch.
+- One task from `docs/ROADMAP.md` per branch, or one `chore/` change.
 - If a task needs a decision that `docs/DECISIONS.md` does not cover, stop and ask.
 - When a task changes a rule in this file or in `docs/`, update that file in the same commit.
+- If `graphify-out/graph.json` exists, use `/graphify query` to find related code and docs before reading many files.
+  Check what it finds in the files: the graph can be out of date, and inferred edges are guesses.
 
 ## Git
 
 - Branch name: `task/<roadmap number>-<short-name>`, for example `task/0.2-remove-server-code`.
+- Work that is not a roadmap task (cleanup, tooling, docs only): `chore/<short-name>`, for example `chore/remove-old-pages-add-graphify`.
 - Commit messages: short imperative summary, for example "Remove Prisma and API routes".
 - Commit after the checks pass. Do not commit failing code.
 - Push the branch and open a pull request with `gh pr create`. Never merge the pull request.
