@@ -34,6 +34,7 @@ src/
   lib/            Pure helpers (unit conversion, formatting, CSV building)
   native/         Wrappers around Capacitor plugins
 drizzle/          Generated migration files (do not edit by hand)
+scripts/          Build helpers, such as bundling migrations into src/db/migrations.ts
 data/             Seed data (exercise library from free-exercise-db)
 docs/             Project documentation
 ```
