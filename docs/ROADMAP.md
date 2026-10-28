@@ -2,19 +2,19 @@
 
 Each task is small enough for one branch. Each task lists how to check that it is done.
 
-## Phase 0 — Clean the base (current)
+## Phase 0 — Clean the base (done)
 
-- [ ] **0.1 Upgrade dependencies.** Next.js, React, Capacitor and TypeScript to current versions.
+- [x] **0.1 Upgrade dependencies.** Next.js, React, Capacitor and TypeScript to current versions.
   Done when: `npm run build` succeeds with `output: 'export'`.
-- [ ] **0.2 Remove server code.** Delete `app/api/`, `lib/prisma.ts`, `prisma/` and Prisma packages.
+- [x] **0.2 Remove server code.** Delete `app/api/`, `lib/prisma.ts`, `prisma/` and Prisma packages.
   Done when: no file imports `@prisma/client` and the static build succeeds.
-- [ ] **0.3 Fix Capacitor config.** Remove the LAN `server` block. Change `appId` to `com.gymbuddy.app`. Delete the duplicate `com/example/app/MainActivity.java`.
+- [x] **0.3 Fix Capacitor config.** Remove the LAN `server` block. Change `appId` to `com.gymbuddy.app`. Delete the duplicate `com/example/app/MainActivity.java`.
   Done when: `npx cap sync android` succeeds and the app opens on a phone from bundled files.
-- [ ] **0.4 Add checks.** Add `typecheck` and `test` scripts with Vitest. Turn on TypeScript strict mode.
+- [x] **0.4 Add checks.** Add `typecheck` and `test` scripts with Vitest. Turn on TypeScript strict mode.
   Done when: all three checks pass.
-- [ ] **0.5 Replace the boilerplate home page and README.**
+- [x] **0.5 Replace the boilerplate home page and README.**
 
-## Phase 1 — Database on the phone
+## Phase 1 — Database on the phone (current)
 
 - [ ] **1.1** Add Drizzle, Drizzle Kit and the chosen SQLite plugin.
 - [ ] **1.2** Add `src/db/schema.ts` and generate the first migration.
