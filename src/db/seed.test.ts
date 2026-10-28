@@ -1,11 +1,13 @@
 import { count, eq } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 import library from '../../data/free-exercise-db/exercises.json';
+import { readAppState, writeAppState } from './appState';
 import { exerciseImages, exerciseMuscleGroups, exercises, muscleGroups } from './schema';
 import {
   muscleGroupName,
   seedLibrary,
-  seedLibraryIfEmpty,
+  libraryVersion,
+  seedLibraryIfChanged,
   toLibraryExercise,
   type SourceExercise,
 } from './seed';
@@ -87,7 +89,7 @@ describe('seedLibrary', () => {
 
   test('seed every exercise, muscle group and image', async () => {
     const { db } = await createTestDatabase();
-    await seedLibraryIfEmpty(db);
+    await seedLibraryIfChanged(db);
     const result = await counts(db);
 
     expect(result.exercises).toBe(source.length);
@@ -105,7 +107,7 @@ describe('seedLibrary', () => {
     const before = await counts(db);
 
     await seedLibrary(db, source);
-    await seedLibraryIfEmpty(db);
+    await seedLibraryIfChanged(db);
 
     expect(await counts(db)).toEqual(before);
     const custom = await db.select().from(exercises).where(eq(exercises.source, 'custom'));
@@ -122,5 +124,67 @@ describe('seedLibrary', () => {
 
     expect(after.id).toBe(before.id);
     expect(after.name).toBe('Renamed');
+  });
+});
+
+describe('seedLibraryIfChanged', () => {
+  async function nameOf(db: Awaited<ReturnType<typeof createTestDatabase>>['db'], sourceId: string) {
+    const [row] = await db.select({ name: exercises.name }).from(exercises).where(eq(exercises.sourceId, sourceId));
+    return row.name;
+  }
+
+  test('build the version from the commit and the seed version', () => {
+    expect(libraryVersion('abc')).toBe('abc:1');
+  });
+
+  test('write the library version after the first seed', async () => {
+    const { db } = await createTestDatabase();
+    await seedLibraryIfChanged(db, 'a:1');
+
+    expect(await readAppState(db, 'libraryVersion')).toBe('a:1');
+  });
+
+  test('skip the seed when the library version is the same', async () => {
+    const { db } = await createTestDatabase();
+    await seedLibraryIfChanged(db, 'a:1');
+    await db.update(exercises).set({ name: 'Renamed' }).where(eq(exercises.sourceId, source[0].id));
+
+    await seedLibraryIfChanged(db, 'a:1');
+
+    expect(await nameOf(db, source[0].id)).toBe('Renamed');
+  });
+
+  test('seed again after an app update with a new library version', async () => {
+    const { db } = await createTestDatabase();
+    await seedLibraryIfChanged(db, 'a:1');
+    await db.update(exercises).set({ name: 'Renamed' }).where(eq(exercises.sourceId, source[0].id));
+
+    await seedLibraryIfChanged(db, 'b:1');
+
+    expect(await nameOf(db, source[0].id)).toBe(source[0].name);
+    expect(await readAppState(db, 'libraryVersion')).toBe('b:1');
+  });
+
+  test('seed a phone that has the library but no library version yet', async () => {
+    const { db } = await createTestDatabase();
+    await seedLibrary(db, source);
+    await db.update(exercises).set({ name: 'Renamed' }).where(eq(exercises.sourceId, source[0].id));
+
+    await seedLibraryIfChanged(db, 'a:1');
+
+    expect(await nameOf(db, source[0].id)).toBe(source[0].name);
+  });
+
+  test('keep custom exercises when it seeds again', async () => {
+    const { db } = await createTestDatabase();
+    await writeAppState(db, 'libraryVersion', 'old:1');
+    await db
+      .insert(exercises)
+      .values({ source: 'custom', name: 'My exercise', category: 'strength', loadType: 'external' });
+
+    await seedLibraryIfChanged(db, 'new:1');
+
+    const custom = await db.select().from(exercises).where(eq(exercises.source, 'custom'));
+    expect(custom.map((row) => row.name)).toEqual(['My exercise']);
   });
 });
