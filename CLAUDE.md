@@ -8,6 +8,7 @@ Read these files before larger changes:
 - @docs/DATA_MODEL.md — tables, units and weight rules
 - @docs/DECISIONS.md — decisions that are already made
 - @docs/GLOSSARY.md — the only allowed names for things
+- @docs/TESTING.md — how to write and run tests
 - `docs/ROADMAP.md` — current phase and task list (read when picking a task)
 
 ## Commands
@@ -16,19 +17,28 @@ Read these files before larger changes:
 - Dev server (browser): `npm run dev`
 - Type check: `npm run typecheck`
 - Lint: `npm run lint`
-- Unit tests: `npm test`
+- Tests: `npm test` (helpers, database, components and pages; see `docs/TESTING.md`)
+- Run on a phone: `npm run android`
 - Static build for the phone: `npm run build` (writes `out/`)
 - Copy build to native projects: `npx cap sync`
-- Generate a migration after a schema change: `npx drizzle-kit generate`
+- Generate a migration after a schema change: `npm run db:generate` (runs `drizzle-kit generate` and bundles the result into `src/db/migrations.ts`)
 
 Run `npm run typecheck`, `npm run lint` and `npm test` before you call a task done.
+
+## Tests
+
+- Every change comes with tests in the same commit: new code, changed behavior and bug fixes.
+- A test file sits next to the file it tests: `units.ts` → `units.test.ts`, `page.tsx` → `page.test.tsx`.
+- Use the helpers in `src/testing/`: `createTestDatabase()` for queries, `renderWithDatabase()` for components and pages.
+- A bug fix gets a test that fails without the fix.
+- Changes to `src/db/` or app startup also need a check in the browser and on a phone, because the test database is not the plugin.
 
 ## Hard rules
 
 - No server code. Do not add API routes, server actions or server-side data fetching.
   The app must build with `output: 'export'`.
 - All database access goes through `src/db/` (Drizzle). Components never import the SQLite plugin directly.
-- Never edit files in `drizzle/` (generated migrations) by hand. Change `src/db/schema.ts` and regenerate.
+- Never edit files in `drizzle/` (generated migrations) or `src/db/migrations.ts` by hand. Change `src/db/schema.ts` and regenerate.
 - Never delete rows from user tables. Write the current time to `deletedAt` instead. Every query filters out rows with `deletedAt`.
 - New IDs are UUIDs from `crypto.randomUUID()`. Never use auto-increment IDs.
 - Store weight in grams, durations in seconds, distance in meters. Convert only in the interface.
@@ -50,7 +60,7 @@ If a needed term is missing, stop and ask before inventing one.
 - Function components and hooks only.
 - Tailwind for styling.
 - One component per file. File name matches the component name.
-- Small pure functions for unit conversion and formatting live in `src/lib/` and have tests.
+- Small pure functions for unit conversion and formatting live in `src/lib/`.
 
 ## Workflow
 

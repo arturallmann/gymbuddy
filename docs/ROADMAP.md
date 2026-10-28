@@ -14,19 +14,20 @@ Each task is small enough for one branch. Each task lists how to check that it i
   Done when: all three checks pass.
 - [x] **0.5 Replace the boilerplate home page and README.**
 
-## Phase 1 — Database on the phone (current)
+## Phase 1 — Database on the phone (done)
 
-- [ ] **1.1** Add Drizzle, Drizzle Kit and the chosen SQLite plugin.
-- [ ] **1.2** Add `src/db/schema.ts` and generate the first migration.
-- [ ] **1.3** Open the database and run migrations at app start (`src/db/client.ts`).
-- [ ] **1.4** Seed muscle groups and the free-exercise-db library on first start.
-- [ ] **1.5** Unit conversion and display helpers in `src/lib/units.ts` (kg/lb, metric/imperial) with round-trip tests.
-- [ ] **1.6** Settings: `user_settings` row, `useFeatures()` hook, settings page with units and toggles.
+- [x] **1.1** Add Drizzle, Drizzle Kit and the chosen SQLite plugin.
+- [x] **1.2** Add `src/db/schema.ts` and generate the first migration.
+- [x] **1.3** Open the database and run migrations at app start (`src/db/client.ts`).
+- [x] **1.4** Seed muscle groups and the free-exercise-db library on first start.
+- [x] **1.5** Unit conversion and display helpers in `src/lib/units.ts` (kg/lb, metric/imperial) with round-trip tests.
+- [x] **1.6** Settings: `user_settings` row, `useFeatures()` hook, settings page with units and toggles.
   Done when: every toggle in `docs/DATA_MODEL.md` hides its interface part, and stored data still shows in history.
-- [ ] **1.7** First-time setup: units (suggested from phone region), preset choice, optional fine-tuning.
+  Note: the toggles exist, but the interface parts they hide come in later tasks. Each of those tasks checks its toggle.
+- [x] **1.7** First-time setup: units (suggested from phone region), preset choice, optional fine-tuning.
   Done when: a fresh install shows setup once, and all choices can change later in settings.
 
-## Phase 2 — Log workouts
+## Phase 2 — Log workouts (current)
 
 - [ ] **2.1** Start and end a workout.
 - [ ] **2.2** Add exercises to a workout; reorder them.

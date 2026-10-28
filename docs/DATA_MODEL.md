@@ -162,6 +162,7 @@ Stretches normally go in `cooldown`. The timer uses `exercises.defaultDurationSe
 - Filter out rows where `deletedAt` is set.
 - Order sets by `position`. Order workout exercises by `position`.
 - Soft delete: write the current time to `deletedAt`. Do the same for child rows (sets of a deleted workout exercise).
+- Unique indexes on user tables apply only to rows where `deletedAt` is NULL, so a deleted row never blocks a new one.
 
 ## Exercise library
 
