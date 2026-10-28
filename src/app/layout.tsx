@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import DatabaseProvider from '@/components/DatabaseProvider'
 import SettingsProvider from '@/components/SettingsProvider'
+import SetupGate from '@/components/SetupGate'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,7 +21,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <DatabaseProvider>
-          <SettingsProvider>{children}</SettingsProvider>
+          <SettingsProvider>
+            <SetupGate>{children}</SetupGate>
+          </SettingsProvider>
         </DatabaseProvider>
       </body>
     </html>

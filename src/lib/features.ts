@@ -72,6 +72,12 @@ export const PRESET_LABELS: Record<Preset, string> = {
   custom: 'Custom',
 };
 
+export const PRESET_DESCRIPTIONS: Record<Exclude<Preset, 'custom'>, string> = {
+  simple: 'Only what you need to log exercises and sets.',
+  standard: 'Adds the rest timer, supersets, routines and notes on sets.',
+  advanced: 'Everything, including RPE, set types and workout phases.',
+};
+
 // Stored toggles merged over the defaults, so a new toggle needs no migration.
 export function resolveFeatures(stored: Partial<FeatureToggles>): FeatureToggles {
   return { ...DEFAULT_FEATURES, ...stored };
