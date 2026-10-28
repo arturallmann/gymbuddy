@@ -35,4 +35,24 @@ describe('migrations', () => {
     });
     expect(settings?.createdAt).toBeInstanceOf(Date);
   });
+
+  test('allow a new exercise preferences row after the old one is deleted', () => {
+    const sqlite = new Database(':memory:');
+    for (const statement of migrations.flatMap((migration) => migration.statements)) {
+      sqlite.exec(statement);
+    }
+    const db = drizzle(sqlite, { schema });
+    const userId = crypto.randomUUID();
+    const exerciseId = crypto.randomUUID();
+    db.insert(schema.users).values({ id: userId }).run();
+    db.insert(schema.exercises)
+      .values({ id: exerciseId, source: 'custom', name: 'Curl', category: 'strength', loadType: 'external' })
+      .run();
+    const preferences = { userId, exerciseId, notes: 'Seat at 4' };
+
+    db.insert(schema.exercisePreferences).values({ ...preferences, deletedAt: new Date() }).run();
+    db.insert(schema.exercisePreferences).values(preferences).run();
+
+    expect(() => db.insert(schema.exercisePreferences).values(preferences).run()).toThrow('UNIQUE');
+  });
 });

@@ -15,6 +15,13 @@
       "when": 1793201871443,
       "tag": "0001_fuzzy_blue_marvel",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793203733636,
+      "tag": "0002_outgoing_felicia_hardy",
+      "breakpoints": true
     }
   ]
 }

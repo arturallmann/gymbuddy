@@ -8,8 +8,23 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['**/*.test.{ts,tsx}'],
-    exclude: ['node_modules/**', '.next/**', 'out/**', 'android/**', 'ios/**'],
     passWithNoTests: true,
+    projects: [
+      {
+        // Pure helpers and database queries.
+        extends: true,
+        test: { name: 'unit', environment: 'node', include: ['src/**/*.test.ts'] },
+      },
+      {
+        // React components and pages, in a simulated browser.
+        extends: true,
+        test: {
+          name: 'components',
+          environment: 'jsdom',
+          include: ['src/**/*.test.tsx'],
+          setupFiles: ['./vitest.setup.ts'],
+        },
+      },
+    ],
   },
 });

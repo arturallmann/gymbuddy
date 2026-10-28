@@ -9,7 +9,7 @@ import {
   toLibraryExercise,
   type SourceExercise,
 } from './seed';
-import { createTestDatabase } from './testing';
+import { createTestDatabase } from '@/testing/database';
 
 const source = library as SourceExercise[];
 

@@ -36,6 +36,7 @@ src/
     export.ts     Queries that build export rows
   hooks/          React hooks, such as useSettings() and useFeatures()
   lib/            Pure helpers (unit conversion, formatting, CSV building)
+  testing/        Test helpers: test database, render with providers, fake plugin
   native/         Wrappers around Capacitor plugins
 drizzle/          Generated migration files (do not edit by hand)
 scripts/          Build helpers, such as bundling migrations into src/db/migrations.ts
