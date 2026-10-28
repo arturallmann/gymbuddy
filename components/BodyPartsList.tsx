@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import BodyPartListItem from './BodyPartListItem';
 export default function BodyPartsList() {
-  const [bodyParts, setBodyParts] = useState<any[]>([]);
+  const [bodyParts, setBodyParts] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
