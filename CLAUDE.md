@@ -68,7 +68,7 @@ If a needed term is missing, stop and ask before inventing one.
 ## Workflow
 
 - Work on a branch. Never commit to `master` directly.
-- One task from `docs/ROADMAP.md` per branch.
+- One task from `docs/ROADMAP.md` per branch, or one `chore/` change.
 - If a task needs a decision that `docs/DECISIONS.md` does not cover, stop and ask.
 - When a task changes a rule in this file or in `docs/`, update that file in the same commit.
 - If `graphify-out/graph.json` exists, use `/graphify query` to find related code and docs before reading many files.
@@ -77,6 +77,7 @@ If a needed term is missing, stop and ask before inventing one.
 ## Git
 
 - Branch name: `task/<roadmap number>-<short-name>`, for example `task/0.2-remove-server-code`.
+- Work that is not a roadmap task (cleanup, tooling, docs only): `chore/<short-name>`, for example `chore/remove-old-pages-add-graphify`.
 - Commit messages: short imperative summary, for example "Remove Prisma and API routes".
 - Commit after the checks pass. Do not commit failing code.
 - Push the branch and open a pull request with `gh pr create`. Never merge the pull request.
