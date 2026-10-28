@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import DatabaseProvider from '@/components/DatabaseProvider'
+import SettingsProvider from '@/components/SettingsProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <DatabaseProvider>{children}</DatabaseProvider>
+        <DatabaseProvider>
+          <SettingsProvider>{children}</SettingsProvider>
+        </DatabaseProvider>
       </body>
     </html>
   )

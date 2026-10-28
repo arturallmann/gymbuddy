@@ -57,25 +57,45 @@ async function execute(conn: SqlConnection, sql: string, params: unknown[], meth
   return { rows: method === 'get' ? arrays[0] : arrays };
 }
 
+// Runs tasks one after the other, in the order they were queued.
+function createQueue() {
+  let last: Promise<unknown> = Promise.resolve();
+  return <T>(task: () => Promise<T>): Promise<T> => {
+    const result = last.then(task, task);
+    last = result.catch(() => undefined);
+    return result;
+  };
+}
+
 export function createDatabase(conn: SqlConnection) {
-  return drizzle(
+  // The app has one connection. Two transactions on it at the same time would
+  // nest BEGIN statements, so transactions and batches wait for each other.
+  // Inside a transaction, use `tx` (not `db`) for nested transactions.
+  const queue = createQueue();
+
+  const db = drizzle(
     (sql, params, method) => execute(conn, sql, params, method),
-    async (queries) => {
-      await conn.beginTransaction();
-      try {
-        const results = [];
-        for (const query of queries) {
-          results.push(await execute(conn, query.sql, query.params, query.method));
+    (queries) =>
+      queue(async () => {
+        await conn.beginTransaction();
+        try {
+          const results = [];
+          for (const query of queries) {
+            results.push(await execute(conn, query.sql, query.params, query.method));
+          }
+          await conn.commitTransaction();
+          return results;
+        } catch (error) {
+          await conn.rollbackTransaction();
+          throw error;
         }
-        await conn.commitTransaction();
-        return results;
-      } catch (error) {
-        await conn.rollbackTransaction();
-        throw error;
-      }
-    },
+      }),
     { schema },
   );
+
+  const transaction = db.transaction.bind(db);
+  db.transaction = ((run, config) => queue(() => transaction(run, config))) as typeof db.transaction;
+  return db;
 }
 
 export type AppDatabase = ReturnType<typeof createDatabase>;
