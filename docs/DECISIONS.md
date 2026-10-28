@@ -72,6 +72,20 @@ The plugin is free and open source. The Capawesome plugin needs a paid license a
 Drizzle talks to the plugin through its `sqlite-proxy` driver and a small bridge in `src/db/driver.ts`.
 The browser dev server uses the plugin's web version (`jeep-sqlite`, stored in IndexedDB).
 
+## 016 — Plugin limits are guarded in the bridge
+Date: 2026-10-28
+The SQLite plugin fakes RETURNING on Android and returns wrong rows. Its web version ends a raw `BEGIN`.
+So queries never use `.returning()`: they write rows with an id from `crypto.randomUUID()`, then select them by id.
+Several writes go through the plugin's transaction API in one transaction.
+`src/db/driver.ts` rejects both mistakes, so tests on better-sqlite3 catch them too.
+Rules: `.claude/rules/database.md`. Test limits: `docs/TESTING.md`.
+
+## 017 — Graphify as a developer tool
+Date: 2026-10-28
+A knowledge graph gives a quick overview of how code and docs connect, and shows rules written twice.
+Graphify runs on the developer's machine only. It is not an app dependency, and `graphify-out/` is not committed.
+See `docs/GRAPHIFY.md`.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
