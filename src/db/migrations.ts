@@ -40,5 +40,14 @@ export const migrations: Migration[] = [
       "CREATE TABLE `workouts` (\n\t`id` text PRIMARY KEY NOT NULL,\n\t`userId` text NOT NULL,\n\t`startedAt` integer NOT NULL,\n\t`endedAt` integer,\n\t`notes` text,\n\t`templateId` text,\n\t`createdAt` integer NOT NULL,\n\t`updatedAt` integer NOT NULL,\n\t`deletedAt` integer,\n\tFOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,\n\tFOREIGN KEY (`templateId`) REFERENCES `templates`(`id`) ON UPDATE no action ON DELETE no action\n);",
       "CREATE INDEX `workouts_user_started_idx` ON `workouts` (`userId`,`startedAt`);"
     ]
+  },
+  {
+    "tag": "0001_fuzzy_blue_marvel",
+    "when": 1793201871443,
+    "hash": "59c41858c3f8da1c6be532799c409d8da11a4330a1947ae282368b49cce7b72d",
+    "statements": [
+      "DROP INDEX `exercise_images_exercise_idx`;",
+      "CREATE UNIQUE INDEX `exercise_images_exercise_position_idx` ON `exercise_images` (`exerciseId`,`position`);"
+    ]
   }
 ];

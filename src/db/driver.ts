@@ -13,11 +13,18 @@ export type SqlConnection = {
     transaction?: boolean,
     returnMode?: string,
   ): Promise<{ changes?: { values?: Row[] } }>;
+  beginTransaction(): Promise<unknown>;
+  commitTransaction(): Promise<unknown>;
+  rollbackTransaction(): Promise<unknown>;
 };
 
 type Method = 'run' | 'all' | 'values' | 'get';
 
 const SELECT = /^\s*(select|with)\b/i;
+// Drizzle's transaction statements. Savepoints run as plain statements.
+const BEGIN = /^\s*begin\b/i;
+const COMMIT = /^\s*commit\s*$/i;
+const ROLLBACK = /^\s*rollback\s*$/i;
 
 // The plugin returns rows as objects keyed by column name, but Drizzle needs
 // arrays in column order. Two columns with the same name (such as the ids of
@@ -25,8 +32,18 @@ const SELECT = /^\s*(select|with)\b/i;
 // subquery: SQLite then names duplicate columns "id", "id:1" and so on.
 async function execute(conn: SqlConnection, sql: string, params: unknown[], method: Method) {
   if (method === 'run') {
-    // transaction = false: Drizzle sends its own BEGIN and COMMIT.
-    await conn.run(sql, params, false);
+    // The plugin must know about transactions: its web version saves to
+    // IndexedDB after each write outside a transaction, which ends a raw BEGIN.
+    if (BEGIN.test(sql)) {
+      await conn.beginTransaction();
+    } else if (COMMIT.test(sql)) {
+      await conn.commitTransaction();
+    } else if (ROLLBACK.test(sql)) {
+      await conn.rollbackTransaction();
+    } else {
+      // transaction = false: the plugin must not wrap each statement in its own transaction.
+      await conn.run(sql, params, false);
+    }
     return { rows: [] };
   }
   let rows: Row[];
@@ -44,16 +61,16 @@ export function createDatabase(conn: SqlConnection) {
   return drizzle(
     (sql, params, method) => execute(conn, sql, params, method),
     async (queries) => {
-      await conn.run('BEGIN', [], false);
+      await conn.beginTransaction();
       try {
         const results = [];
         for (const query of queries) {
           results.push(await execute(conn, query.sql, query.params, query.method));
         }
-        await conn.run('COMMIT', [], false);
+        await conn.commitTransaction();
         return results;
       } catch (error) {
-        await conn.run('ROLLBACK', [], false);
+        await conn.rollbackTransaction();
         throw error;
       }
     },
