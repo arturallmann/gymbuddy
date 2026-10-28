@@ -4,12 +4,27 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./', import.meta.url)),
+      '@': fileURLToPath(new URL('./src/', import.meta.url)),
     },
   },
   test: {
-    include: ['**/*.test.{ts,tsx}'],
-    exclude: ['node_modules/**', '.next/**', 'out/**', 'android/**', 'ios/**'],
     passWithNoTests: true,
+    projects: [
+      {
+        // Pure helpers and database queries.
+        extends: true,
+        test: { name: 'unit', environment: 'node', include: ['src/**/*.test.ts'] },
+      },
+      {
+        // React components and pages, in a simulated browser.
+        extends: true,
+        test: {
+          name: 'components',
+          environment: 'jsdom',
+          include: ['src/**/*.test.tsx'],
+          setupFiles: ['./vitest.setup.ts'],
+        },
+      },
+    ],
   },
 });

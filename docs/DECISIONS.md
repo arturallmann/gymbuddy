@@ -66,9 +66,14 @@ Date: 2026-10-28
 Gyms mix equipment marked in kg and lb. A user can choose a unit for one exercise.
 The override lives in `exercise_preferences` (renamed from `exercise_notes`) and only changes the display.
 
+## 015 — SQLite plugin: @capacitor-community/sqlite
+Date: 2026-10-28
+The plugin is free and open source. The Capawesome plugin needs a paid license and a private registry.
+Drizzle talks to the plugin through its `sqlite-proxy` driver and a small bridge in `src/db/driver.ts`.
+The browser dev server uses the plugin's web version (`jeep-sqlite`, stored in IndexedDB).
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
-- SQLite plugin: `@capawesome-team/capacitor-sqlite` (ready Drizzle adapter) or `@capacitor-community/sqlite` (free, own bridge)?
 - Keep Next.js, or move to Vite + React?
 - Excel library: SheetJS or ExcelJS?
