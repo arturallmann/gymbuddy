@@ -1,34 +1,48 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Gymbuddy
 
-## Getting Started
+Gymbuddy is a gym tracker for phones that works offline.
+You log workouts, exercises and sets, and all data stays in SQLite on the phone.
 
-First, run the development server:
+The app is in early development. See `docs/ROADMAP.md` for the current phase.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+## Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Next.js with static export (`output: 'export'`), React, TypeScript, Tailwind
+- Capacitor wraps the static build as an Android and iOS app
+- SQLite on the phone through Drizzle (planned, Phase 1)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+There is no server. The app must build as static files.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Requirements
 
-## Learn More
+- Node.js 22 or newer
+- For Android: Android Studio and JDK 21
 
-To learn more about Next.js, take a look at the following resources:
+## Commands
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Command | What it does |
+|---|---|
+| `npm ci` | Install dependencies |
+| `npm run dev` | Start the dev server in the browser at http://localhost:3000 |
+| `npm run typecheck` | Type check |
+| `npm run lint` | Lint |
+| `npm test` | Unit tests (Vitest) |
+| `npm run build` | Static build into `out/` |
+| `npx cap sync android` | Copy `out/` into the Android project |
+| `npx cap open android` | Open the Android project in Android Studio |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Run on an Android phone
 
-## Deploy on Vercel
+1. `npm run build`
+2. `npx cap sync android`
+3. `npx cap open android`, then run the app from Android Studio on a connected phone or emulator.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The app loads the bundled files from `out/`, so the phone needs no connection to your computer.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Docs
+
+- `docs/ARCHITECTURE.md`: layers and data flow
+- `docs/DATA_MODEL.md`: tables, units and weight rules
+- `docs/DECISIONS.md`: decisions that are already made
+- `docs/GLOSSARY.md`: the names used for things in code and the interface
+- `docs/ROADMAP.md`: phases and tasks
