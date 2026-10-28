@@ -54,7 +54,7 @@ If a needed term is missing, stop and ask before inventing one.
 
 ## Workflow
 
-- Work on a branch. Never commit to `main` directly.
+- Work on a branch. Never commit to `master` directly.
 - One task from `docs/ROADMAP.md` per branch.
 - If a task needs a decision that `docs/DECISIONS.md` does not cover, stop and ask.
 - When a task changes a rule in this file or in `docs/`, update that file in the same commit.
@@ -65,5 +65,5 @@ If a needed term is missing, stop and ask before inventing one.
 - Commit messages: short imperative summary, for example "Remove Prisma and API routes".
 - Commit after the checks pass. Do not commit failing code.
 - Push the branch and open a pull request with `gh pr create`. Never merge the pull request.
-- Never push to `main`. Never force-push.
+- Never push to `master`. Never force-push.
 - Create tags only when I ask for a tag.
