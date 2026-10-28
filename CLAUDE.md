@@ -19,7 +19,7 @@ Read these files before larger changes:
 - Unit tests: `npm test`
 - Static build for the phone: `npm run build` (writes `out/`)
 - Copy build to native projects: `npx cap sync`
-- Generate a migration after a schema change: `npx drizzle-kit generate`
+- Generate a migration after a schema change: `npm run db:generate` (runs `drizzle-kit generate` and bundles the result into `src/db/migrations.ts`)
 
 Run `npm run typecheck`, `npm run lint` and `npm test` before you call a task done.
 
@@ -28,7 +28,7 @@ Run `npm run typecheck`, `npm run lint` and `npm test` before you call a task do
 - No server code. Do not add API routes, server actions or server-side data fetching.
   The app must build with `output: 'export'`.
 - All database access goes through `src/db/` (Drizzle). Components never import the SQLite plugin directly.
-- Never edit files in `drizzle/` (generated migrations) by hand. Change `src/db/schema.ts` and regenerate.
+- Never edit files in `drizzle/` (generated migrations) or `src/db/migrations.ts` by hand. Change `src/db/schema.ts` and regenerate.
 - Never delete rows from user tables. Write the current time to `deletedAt` instead. Every query filters out rows with `deletedAt`.
 - New IDs are UUIDs from `crypto.randomUUID()`. Never use auto-increment IDs.
 - Store weight in grams, durations in seconds, distance in meters. Convert only in the interface.
