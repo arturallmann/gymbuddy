@@ -42,8 +42,7 @@ async function openDatabase(): Promise<AppDatabase> {
   const connection: SqlConnection = isWeb
     ? {
         query: (statement, values) => conn.query(statement, values),
-        run: (statement, values, transaction, returnMode) =>
-          conn.run(statement, values, transaction, returnMode),
+        run: (statement, values, transaction) => conn.run(statement, values, transaction),
         beginTransaction: () => conn.beginTransaction(),
         rollbackTransaction: () => conn.rollbackTransaction(),
         commitTransaction: async () => {

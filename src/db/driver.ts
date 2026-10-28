@@ -7,12 +7,7 @@ type Row = Record<string, unknown>;
 // Tests replace it with a better-sqlite3 version (see testing.ts).
 export type SqlConnection = {
   query(statement: string, values?: unknown[]): Promise<{ values?: Row[] }>;
-  run(
-    statement: string,
-    values?: unknown[],
-    transaction?: boolean,
-    returnMode?: string,
-  ): Promise<{ changes?: { values?: Row[] } }>;
+  run(statement: string, values?: unknown[], transaction?: boolean): Promise<unknown>;
   beginTransaction(): Promise<unknown>;
   commitTransaction(): Promise<unknown>;
   rollbackTransaction(): Promise<unknown>;
@@ -21,6 +16,7 @@ export type SqlConnection = {
 type Method = 'run' | 'all' | 'values' | 'get';
 
 const SELECT = /^\s*(select|with)\b/i;
+const RETURNING = /^\s*(insert|update|delete|replace)\b[\s\S]*\breturning\b/i;
 // Drizzle's transaction statements. Savepoints run as plain statements.
 const BEGIN = /^\s*begin\b/i;
 const COMMIT = /^\s*commit\s*$/i;
@@ -46,13 +42,15 @@ async function execute(conn: SqlConnection, sql: string, params: unknown[], meth
     }
     return { rows: [] };
   }
-  let rows: Row[];
-  if (SELECT.test(sql)) {
-    rows = (await conn.query(`select * from (${sql})`, params)).values ?? [];
-  } else {
-    // INSERT, UPDATE or DELETE with RETURNING.
-    rows = (await conn.run(sql, params, false, 'all')).changes?.values ?? [];
+  if (RETURNING.test(sql)) {
+    // The plugin's Android version fakes RETURNING and returns wrong or no rows.
+    throw new Error(
+      'RETURNING is not supported by the SQLite plugin. Write the row with an id from crypto.randomUUID(), then select it by id.',
+    );
   }
+  // SELECT runs as a subquery; other statements, such as PRAGMA, run as they are.
+  const statement = SELECT.test(sql) ? `select * from (${sql})` : sql;
+  const rows: Row[] = (await conn.query(statement, params)).values ?? [];
   const arrays = rows.map((row) => Object.values(row));
   return { rows: method === 'get' ? arrays[0] : arrays };
 }

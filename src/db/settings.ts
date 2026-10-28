@@ -12,16 +12,23 @@ export type SettingsChange = Partial<
 export async function getLocalSettings(db: AppDatabase): Promise<UserSettings> {
   return db.transaction(async (tx) => {
     const [user] = await tx.select().from(users).where(isNull(users.deletedAt)).limit(1);
-    const userId = user ? user.id : (await tx.insert(users).values({}).returning())[0].id;
+    let userId = user?.id;
+    if (!userId) {
+      userId = crypto.randomUUID();
+      await tx.insert(users).values({ id: userId });
+    }
 
-    const [settings] = await tx
-      .select()
-      .from(userSettings)
-      .where(and(eq(userSettings.userId, userId), isNull(userSettings.deletedAt)));
+    const findSettings = () =>
+      tx
+        .select()
+        .from(userSettings)
+        .where(and(eq(userSettings.userId, userId), isNull(userSettings.deletedAt)));
+    const [settings] = await findSettings();
     if (settings) {
       return settings;
     }
-    const [created] = await tx.insert(userSettings).values({ userId }).returning();
+    await tx.insert(userSettings).values({ userId });
+    const [created] = await findSettings();
     return created;
   });
 }
@@ -31,11 +38,9 @@ export async function updateSettings(
   id: string,
   change: SettingsChange,
 ): Promise<UserSettings> {
-  const [settings] = await db
-    .update(userSettings)
-    .set(change)
-    .where(and(eq(userSettings.id, id), isNull(userSettings.deletedAt)))
-    .returning();
+  const where = and(eq(userSettings.id, id), isNull(userSettings.deletedAt));
+  await db.update(userSettings).set(change).where(where);
+  const [settings] = await db.select().from(userSettings).where(where);
   if (!settings) {
     throw new Error(`Settings ${id} not found`);
   }
