@@ -1,6 +1,6 @@
 // Downloads the exercise library from free-exercise-db (public domain) into
 // data/free-exercise-db/. Usage: node scripts/update-exercise-library.mjs <commit>
-// Then update the commit in data/free-exercise-db/README.md.
+// Also writes the commit to version.json, so phones seed the new library after an app update.
 import { writeFileSync } from 'node:fs';
 
 const commit = process.argv[2];
@@ -15,4 +15,5 @@ if (!response.ok) {
 }
 const exercises = await response.json();
 writeFileSync('data/free-exercise-db/exercises.json', JSON.stringify(exercises, null, 2) + '\n');
+writeFileSync('data/free-exercise-db/version.json', JSON.stringify({ commit }, null, 2) + '\n');
 console.log(`Wrote ${exercises.length} exercises from ${commit}`);

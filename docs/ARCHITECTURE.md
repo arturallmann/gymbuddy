@@ -34,6 +34,7 @@ src/
     DatabaseContext.ts  React context and useDatabase() for the open database
     seed.ts       Seeds the exercise library on first start
     settings.ts   Queries for the local user and settings
+    appState.ts   Queries for app state, such as the library version
     workouts.ts   Queries for workouts, workout exercises and sets
     exercises.ts  Queries for exercises, muscle groups and images
     export.ts     Queries that build export rows
@@ -52,19 +53,20 @@ docs/             Project documentation
 
 1. The app starts and `src/db/client.ts` opens the database.
 2. The client runs pending Drizzle migrations.
-3. On first start, the client seeds the exercise library and creates one local user.
+3. On first start, and when the library version changes, the client seeds the exercise library.
+   On first start it also creates one local user.
 4. Pages call functions in `src/db/`. These functions return typed objects.
 5. The interface converts grams and seconds into display values.
 
 ## Exercise library updates
 
-1. `scripts/update-exercise-library.mjs <commit>` downloads free-exercise-db into `data/free-exercise-db/`.
-2. The app bundles that file. At start, `seedLibraryIfEmpty()` in `src/db/seed.ts` seeds the library
-   only when no library exercise exists yet.
+1. `scripts/update-exercise-library.mjs <commit>` downloads free-exercise-db into `data/free-exercise-db/`
+   and writes the commit to `version.json`.
+2. At start, `seedLibraryIfChanged()` in `src/db/seed.ts` compares the library version
+   (commit plus `SEED_VERSION`) with `app_state.libraryVersion`. Only when they differ does it
+   load `exercises.json` and seed, so a normal start reads one row.
 3. `seedLibrary()` inserts new library exercises and updates changed ones. It never changes rows with
-   `source = 'custom'` or any `exercise_preferences`.
-
-Not built yet: a phone that already has the library does not get a newer version after an app update.
+   `source = 'custom'` or any `exercise_preferences`. Then the client writes the new library version.
 
 ## Export
 

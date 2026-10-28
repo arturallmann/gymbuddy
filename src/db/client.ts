@@ -3,7 +3,7 @@ import { CapacitorSQLite, SQLiteConnection } from '@capacitor-community/sqlite';
 import { createDatabase, type AppDatabase, type SqlConnection } from './driver';
 import { runMigrations } from './migrate';
 import { migrations } from './migrations';
-import { seedLibraryIfEmpty } from './seed';
+import { seedLibraryIfChanged } from './seed';
 
 const DATABASE_NAME = 'gymbuddy';
 
@@ -54,7 +54,7 @@ async function openDatabase(): Promise<AppDatabase> {
 
   await runMigrations(connection, migrations);
   const db = createDatabase(connection);
-  await seedLibraryIfEmpty(db);
+  await seedLibraryIfChanged(db);
   return db;
 }
 

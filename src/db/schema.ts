@@ -113,6 +113,14 @@ export const userSettings = sqliteTable(
   (t) => [uniqueIndex('user_settings_user_idx').on(t.userId).where(notDeleted)],
 );
 
+// Values the app keeps for itself, such as the library version. Not choices of the user.
+export const appState = sqliteTable('app_state', {
+  id: id(),
+  key: text('key').notNull().unique(),
+  value: text('value').notNull(),
+  ...timestamps,
+});
+
 export const muscleGroups = sqliteTable('muscle_groups', {
   id: id(),
   // Stable name from the exercise library, such as "lower back".
@@ -322,6 +330,7 @@ export const sets = sqliteTable(
 );
 
 export type User = typeof users.$inferSelect;
+export type AppState = typeof appState.$inferSelect;
 export type UserSettings = typeof userSettings.$inferSelect;
 export type MuscleGroup = typeof muscleGroups.$inferSelect;
 export type Exercise = typeof exercises.$inferSelect;

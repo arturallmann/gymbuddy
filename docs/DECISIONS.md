@@ -86,6 +86,14 @@ A knowledge graph gives a quick overview of how code and docs connect, and shows
 Graphify runs on the developer's machine only. It is not an app dependency, and `graphify-out/` is not committed.
 See `docs/GRAPHIFY.md`.
 
+## 018 — Library version decides when to seed again
+Date: 2026-10-28
+Phones that already had the library never got a newer one after an app update.
+The library version is the free-exercise-db commit plus `SEED_VERSION` in `src/db/seed.ts`.
+The phone stores the version it seeded last in a new `app_state` table, not in `user_settings`,
+because it is not a choice of the user. The app loads the large library file only when the version changes.
+Seeding every start was rejected: about 870 upserts through native code on each start.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
