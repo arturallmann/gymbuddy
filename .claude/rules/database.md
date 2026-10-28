@@ -12,4 +12,5 @@ paths:
 - Every read filters `deletedAt IS NULL`.
 - Group several writes in one transaction. Each call to the SQLite plugin crosses into native code.
 - Query functions return typed objects. They never return raw plugin rows.
+- Never use `.returning()`. The plugin fakes RETURNING on Android and returns wrong rows. Write rows with an id from `crypto.randomUUID()`, then select them by id.
 - Each query file has tests that run against an in-memory SQLite database.

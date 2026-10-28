@@ -10,9 +10,15 @@ import { SettingsContext } from '@/hooks/useSettings';
 export default function SettingsProvider({ children }: { children: ReactNode }) {
   const db = useDatabase();
   const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getLocalSettings(db).then(setSettings);
+    getLocalSettings(db)
+      .then((loaded) => (loaded ? setSettings(loaded) : setError('No settings row was found.')))
+      .catch((reason: unknown) => {
+        console.error(reason);
+        setError(reason instanceof Error ? reason.message : String(reason));
+      });
   }, [db]);
 
   const update = useCallback(
@@ -28,6 +34,14 @@ export default function SettingsProvider({ children }: { children: ReactNode }) 
     [settings, update],
   );
 
+  if (error) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center gap-2 p-6 text-center">
+        <p className="font-bold">The settings could not load.</p>
+        <p className="text-sm text-gray-500">{error}</p>
+      </main>
+    );
+  }
   if (!value) {
     return null;
   }

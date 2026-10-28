@@ -13,13 +13,8 @@ export function createTestConnection(): SqlConnection {
     async query(statement, values = []) {
       return { values: sqlite.prepare(statement).all(...values) as Record<string, unknown>[] };
     },
-    async run(statement, values = [], _transaction, returnMode) {
-      const prepared = sqlite.prepare(statement);
-      if (returnMode === 'all') {
-        return { changes: { values: prepared.all(...values) as Record<string, unknown>[] } };
-      }
-      prepared.run(...values);
-      return { changes: {} };
+    async run(statement, values = []) {
+      sqlite.prepare(statement).run(...values);
     },
     async beginTransaction() {
       sqlite.exec('BEGIN');

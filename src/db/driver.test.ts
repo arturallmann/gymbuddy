@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 import { runMigrations } from './migrate';
 import { migrations } from './migrations';
@@ -7,19 +7,18 @@ import { createTestDatabase } from './testing';
 
 async function seedWorkout() {
   const { conn, db } = await createTestDatabase();
-  const [user] = await db.insert(users).values({}).returning();
-  const [exercise] = await db
+  const user = { id: crypto.randomUUID() };
+  const exercise = { id: crypto.randomUUID() };
+  const workout = { id: crypto.randomUUID() };
+  const workoutExercise = { id: crypto.randomUUID() };
+  await db.insert(users).values(user);
+  await db
     .insert(exercises)
-    .values({ source: 'custom', name: 'Bench Press', category: 'strength', loadType: 'external' })
-    .returning();
-  const [workout] = await db
-    .insert(workouts)
-    .values({ userId: user.id, startedAt: new Date(1_000) })
-    .returning();
-  const [workoutExercise] = await db
+    .values({ ...exercise, source: 'custom', name: 'Bench Press', category: 'strength', loadType: 'external' });
+  await db.insert(workouts).values({ ...workout, userId: user.id, startedAt: new Date(1_000) });
+  await db
     .insert(workoutExercises)
-    .values({ workoutId: workout.id, exerciseId: exercise.id, position: 1 })
-    .returning();
+    .values({ ...workoutExercise, workoutId: workout.id, exerciseId: exercise.id, position: 1 });
   return { conn, db, user, exercise, workout, workoutExercise };
 }
 
@@ -56,15 +55,22 @@ describe('driver', () => {
     expect(await db.select().from(users).where(eq(users.id, 'missing')).get()).toBeUndefined();
   });
 
-  test('return rows from UPDATE with RETURNING', async () => {
+  test('reject RETURNING, which the plugin does not support on Android', async () => {
     const { db, workout } = await seedWorkout();
-    const [updated] = await db
-      .update(workouts)
-      .set({ notes: 'Felt strong' })
-      .where(eq(workouts.id, workout.id))
-      .returning();
 
-    expect(updated.notes).toBe('Felt strong');
+    // Drizzle wraps the error as "Failed query: …" with the original as `cause`.
+    const notSupported = { cause: expect.objectContaining({ message: expect.stringContaining('RETURNING') }) };
+    await expect(db.insert(users).values({}).returning()).rejects.toMatchObject(notSupported);
+    await expect(
+      db.update(workouts).set({ notes: 'Felt strong' }).where(eq(workouts.id, workout.id)).returning(),
+    ).rejects.toMatchObject(notSupported);
+  });
+
+  test('run PRAGMA statements', async () => {
+    const { db } = await seedWorkout();
+    const rows = await db.all<{ foreign_keys: number }>(sql`PRAGMA foreign_keys`);
+
+    expect(rows).toEqual([[1]]);
   });
 
   test('roll back a failed transaction', async () => {
@@ -95,12 +101,8 @@ describe('driver', () => {
 
   test('run a batch in one transaction', async () => {
     const { db } = await seedWorkout();
-    const [inserted, all] = await db.batch([
-      db.insert(users).values({}).returning(),
-      db.select().from(users),
-    ]);
+    const [, all] = await db.batch([db.insert(users).values({}), db.select().from(users)]);
 
-    expect(inserted).toHaveLength(1);
     expect(all).toHaveLength(2);
   });
 });
