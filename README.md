@@ -43,6 +43,12 @@ You can also run `npm run build`, `npx cap sync android` and `npx cap open andro
 
 The app loads the bundled files from `out/`, so the phone needs no connection to your computer.
 
+## Knowledge graph (optional)
+
+[Graphify](https://github.com/safishamsi/graphify) builds a graph of the code and docs into `graphify-out/` (not committed).
+Install it with `pipx install "graphifyy[sql]"`, then run `/graphify .` in Claude Code or `graphify update .` in a terminal.
+See `docs/GRAPHIFY.md`.
+
 ## Docs
 
 - `docs/ARCHITECTURE.md`: layers and data flow
@@ -51,3 +57,4 @@ The app loads the bundled files from `out/`, so the phone needs no connection to
 - `docs/GLOSSARY.md`: the names used for things in code and the interface
 - `docs/ROADMAP.md`: phases and tasks
 - `docs/TESTING.md`: how to write and run tests
+- `docs/GRAPHIFY.md`: knowledge graph of the repo (developer tool)

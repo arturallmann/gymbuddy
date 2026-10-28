@@ -13,5 +13,5 @@ paths:
 - A unique index on a user table covers only rows that are not deleted: `uniqueIndex(...).on(...).where(notDeleted)`.
 - Group several writes in one transaction. Each call to the SQLite plugin crosses into native code.
 - Query functions return typed objects. They never return raw plugin rows.
-- Never use `.returning()`. The plugin fakes RETURNING on Android and returns wrong rows. Write rows with an id from `crypto.randomUUID()`, then select them by id.
+- Never use `.returning()`. The plugin fakes RETURNING on Android and returns wrong rows. Write rows with an id from `crypto.randomUUID()`, then select them by id. See decision 016 in `docs/DECISIONS.md`.
 - Each query file has tests that run against an in-memory SQLite database (`createTestDatabase()` in `src/testing/database.ts`). See `docs/TESTING.md`.
