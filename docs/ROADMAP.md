@@ -1,0 +1,69 @@
+# Roadmap
+
+Each task is small enough for one branch. Each task lists how to check that it is done.
+
+## Phase 0 — Clean the base (current)
+
+- [ ] **0.1 Upgrade dependencies.** Next.js, React, Capacitor and TypeScript to current versions.
+  Done when: `npm run build` succeeds with `output: 'export'`.
+- [ ] **0.2 Remove server code.** Delete `app/api/`, `lib/prisma.ts`, `prisma/` and Prisma packages.
+  Done when: no file imports `@prisma/client` and the static build succeeds.
+- [ ] **0.3 Fix Capacitor config.** Remove the LAN `server` block. Change `appId` to `com.gymbuddy.app`. Delete the duplicate `com/example/app/MainActivity.java`.
+  Done when: `npx cap sync android` succeeds and the app opens on a phone from bundled files.
+- [ ] **0.4 Add checks.** Add `typecheck` and `test` scripts with Vitest. Turn on TypeScript strict mode.
+  Done when: all three checks pass.
+- [ ] **0.5 Replace the boilerplate home page and README.**
+
+## Phase 1 — Database on the phone
+
+- [ ] **1.1** Add Drizzle, Drizzle Kit and the chosen SQLite plugin.
+- [ ] **1.2** Add `src/db/schema.ts` and generate the first migration.
+- [ ] **1.3** Open the database and run migrations at app start (`src/db/client.ts`).
+- [ ] **1.4** Seed muscle groups and the free-exercise-db library on first start.
+- [ ] **1.5** Unit conversion and display helpers in `src/lib/units.ts` (kg/lb, metric/imperial) with round-trip tests.
+- [ ] **1.6** Settings: `user_settings` row, `useFeatures()` hook, settings page with units and toggles.
+  Done when: every toggle in `docs/DATA_MODEL.md` hides its interface part, and stored data still shows in history.
+- [ ] **1.7** First-time setup: units (suggested from phone region), preset choice, optional fine-tuning.
+  Done when: a fresh install shows setup once, and all choices can change later in settings.
+
+## Phase 2 — Log workouts
+
+- [ ] **2.1** Start and end a workout.
+- [ ] **2.2** Add exercises to a workout; reorder them.
+- [ ] **2.3** Log sets; the form follows the exercise's load type and tracked fields.
+- [ ] **2.4** Workout history list and workout detail page.
+- [ ] **2.5** Exercise browser with muscle group filter, images and instructions.
+- [ ] **2.6** Custom exercises.
+- [ ] **2.7** Exercise preferences: standing notes and unit override per exercise.
+  Done when: an exercise with a lb override shows lb in its set form, history and chart, while other exercises keep the global unit.
+
+## Phase 3 — Export and cool-down phase
+
+- [ ] **3.1** CSV export of all sets.
+- [ ] **3.2** Excel export.
+- [ ] **3.3** Cool-down phase with stretch timer.
+
+## Phase 3b — Supersets and templates
+
+- [ ] **3b.1** Group exercises in a workout into a superset ("Make superset" action).
+  Done when: the superset card shows one row per round and the rest timer starts after the last member.
+- [ ] **3b.2** Save a superset from a workout as a template.
+- [ ] **3b.3** Add a saved superset to a workout in one tap.
+  Done when: editing the template afterwards does not change the earlier workout.
+- [ ] **3b.4** Routines: save a full workout as a template and start a workout from it.
+- [ ] **3b.5** Export adds a "Group" column (for example "Superset 1").
+
+## Phase 4 — Progress views
+
+- [ ] **4.1** History view per exercise: every set in order, with notes.
+- [ ] **4.2** Chart view per exercise for weight, reps, duration and distance only.
+  Done when: note-only exercises show the history view and no chart.
+
+## Phase 5 — Online (later)
+
+- [ ] Backups to a server.
+- [ ] Friends can view each other's history.
+
+## Ideas (not planned)
+
+See `docs/IDEAS.md`: smart watch support.
