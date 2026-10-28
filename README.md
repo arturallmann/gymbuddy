@@ -30,12 +30,15 @@ There is no server. The app must build as static files.
 | `npm run build` | Static build into `out/` |
 | `npx cap sync android` | Copy `out/` into the Android project |
 | `npx cap open android` | Open the Android project in Android Studio |
+| `npm run android` | Build, sync and install the app on a connected Android phone |
 
 ## Run on an Android phone
 
-1. `npm run build`
-2. `npx cap sync android`
-3. `npx cap open android`, then run the app from Android Studio on a connected phone or emulator.
+1. On the phone, turn on developer options and USB debugging, then connect it by USB.
+2. Run `npm run android` and pick the phone from the list.
+
+This needs the Android SDK and JDK 21 (both come with Android Studio).
+You can also run `npm run build`, `npx cap sync android` and `npx cap open android`, then start the app from Android Studio.
 
 The app loads the bundled files from `out/`, so the phone needs no connection to your computer.
 
