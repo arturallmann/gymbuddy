@@ -10,7 +10,10 @@ import { buildExportTable } from '@/lib/exportTable';
 import { saveFile } from '@/native/files';
 import { shareFile } from '@/native/share';
 
-const FORMATS: { format: ExportFormat; label: string }[] = [{ format: 'csv', label: 'Export CSV' }];
+const FORMATS: { format: ExportFormat; label: string }[] = [
+  { format: 'csv', label: 'Export CSV' },
+  { format: 'xlsx', label: 'Export Excel' },
+];
 
 // Exports every set as a file and opens the share menu (on the phone) or downloads it (in the browser).
 export default function ExportData() {

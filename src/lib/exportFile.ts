@@ -1,5 +1,6 @@
-// Builds the export file from the table. CSV is plain text; Excel comes in exportFile for 'xlsx'.
+// Builds the export file from the table: CSV text or an Excel workbook.
 import { toCsv } from './csv';
+import { toXlsx } from './excel';
 import { exportFileName, type ExportTable } from './exportTable';
 
 export type ExportFormat = 'csv' | 'xlsx';
@@ -10,5 +11,9 @@ export async function buildExportFile(table: ExportTable, format: ExportFormat, 
   if (format === 'csv') {
     return { name: exportFileName(now, 'csv'), data: toCsv(table), mimeType: 'text/csv' };
   }
-  throw new Error(`Export format ${format} is not built yet`);
+  return {
+    name: exportFileName(now, 'xlsx'),
+    data: await toXlsx(table),
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  };
 }
