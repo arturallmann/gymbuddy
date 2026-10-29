@@ -17,7 +17,8 @@ SQLite database file on the phone
 ```
 
 Native features (file save, share menu, timers in the background) go through Capacitor plugins.
-Wrap each plugin in a small module in `src/native/`, so the interface never calls plugins directly.
+Wrap each plugin in a small module in `src/native/`, so the interface never calls plugins directly:
+`files.ts` (Filesystem), `share.ts` (Share) and `alert.ts` (Haptics, plus a tone for the stretch timer).
 
 ## Folder layout (target)
 

@@ -126,6 +126,14 @@ The `.xlsx` file comes from ExcelJS (MIT, on npm). It loads only when the user e
 not slow the app start. SheetJS was rejected: its npm package is old, and newer versions install
 only from its own server.
 
+## 023 — The stretch timer signals inside the app
+Date: 2026-10-29
+At zero the stretch timer vibrates through the Haptics plugin and plays a short tone through the
+Web Audio API, so the app needs no sound file. It counts from an end time, so it stays right when
+the phone pauses the app; the signal then comes when the app is back in front.
+A notification while the app is in the background needs the Local Notifications plugin and a
+permission prompt; it comes with the rest timer later (see `docs/IDEAS.md`).
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

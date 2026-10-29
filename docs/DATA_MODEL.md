@@ -158,6 +158,14 @@ Sets without a value for the charted field are left out of the chart, but stay i
 `workout_exercises.phase` is `warmup`, `main` or `cooldown`.
 Stretches normally go in `cooldown`. The timer uses `exercises.defaultDurationSeconds`.
 
+- With the `phases` feature toggle on, a new stretch goes in `cooldown` and everything else in `main`;
+  the workout page shows one section per phase, and the workout exercise page has a phase choice.
+- Moving a workout exercise up or down swaps it only with a neighbour in the same phase.
+  Changing its phase keeps its `position`, so it keeps its order among the exercises of the new phase.
+- With the toggle off, new workout exercises go in `main`; a stored phase still shows as a label.
+- The stretch timer shows for exercises that track duration and are stretches or have a
+  `defaultDurationSeconds`. At zero the phone vibrates and plays a tone; the user then logs the set.
+
 ## Rules for every query
 
 - Filter out rows where `deletedAt` is set.

@@ -44,13 +44,13 @@ Each task is small enough for one branch. Each task lists how to check that it i
   Done when: an exercise with a lb override shows lb in its set form, history and chart, while other exercises keep the global unit.
   (The chart comes in 4.2 and uses the same `getUnits()`.)
 
-## Phase 3 — Export and cool-down phase (current)
+## Phase 3 — Export and cool-down phase (done)
 
 - [x] **3.1** CSV export of all sets, from the settings page (decision 022).
 - [x] **3.2** Excel export (`.xlsx` through ExcelJS, decision 022).
-- [ ] **3.3** Cool-down phase with stretch timer.
+- [x] **3.3** Cool-down phase with stretch timer, behind the `phases` feature toggle (decision 023).
 
-## Phase 3b — Supersets and templates
+## Phase 3b — Supersets and templates (current)
 
 - [ ] **3b.1** Group exercises in a workout into a superset ("Make superset" action).
   Done when: the superset card shows one row per round and the rest timer starts after the last member.
