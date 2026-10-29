@@ -9,7 +9,10 @@ export default function Home() {
       <div className="mt-6">
         <StartWorkout />
       </div>
-      <Link href="/settings" className="mt-6 text-sky-600">
+      <Link href="/history" className="mt-6 text-sky-600">
+        Workout history
+      </Link>
+      <Link href="/settings" className="text-sky-600">
         Settings
       </Link>
     </main>

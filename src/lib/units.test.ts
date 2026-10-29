@@ -5,6 +5,7 @@ import {
   formatDuration,
   formatLoad,
   formatWeight,
+  formatWorkoutDuration,
   getUnits,
   gramsToWeight,
   metersToDistance,
@@ -161,5 +162,14 @@ describe('parseDecimal', () => {
     expect(parseDecimal('1.2.3')).toBeNull();
     expect(parseDecimal('1,2,3')).toBeNull();
     expect(parseDecimal('-')).toBeNull();
+  });
+});
+
+describe('formatWorkoutDuration', () => {
+  test('show minutes, then hours and minutes', () => {
+    expect(formatWorkoutDuration(30)).toBe('< 1 min');
+    expect(formatWorkoutDuration(45 * 60 + 59)).toBe('45 min');
+    expect(formatWorkoutDuration(65 * 60)).toBe('1 h 5 min');
+    expect(formatWorkoutDuration(120 * 60)).toBe('2 h 0 min');
   });
 });

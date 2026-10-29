@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import DiscardWorkout from '@/components/DiscardWorkout';
+import ConfirmAction from '@/components/ConfirmAction';
 import ElapsedTime from '@/components/ElapsedTime';
 import WorkoutExercises from '@/components/WorkoutExercises';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
@@ -42,8 +42,12 @@ export default function WorkoutPage() {
           >
             End workout
           </button>
-          <DiscardWorkout
-            onDiscard={async () => {
+          <ConfirmAction
+            label="Discard workout"
+            question="Discard this workout? Its exercises and sets are deleted."
+            confirmLabel="Discard"
+            keepLabel="Keep workout"
+            onConfirm={async () => {
               await discard();
               router.push('/');
             }}

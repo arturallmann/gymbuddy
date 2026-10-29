@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNull, max, ne } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, isNotNull, isNull, max, ne } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
 import { exercises, sets, workoutExercises, workoutGroups, workouts, type Exercise, type Workout, type WorkoutSet } from './schema';
 import type { SetValues } from '@/lib/sets';
@@ -42,7 +42,8 @@ export async function endWorkout(db: AppDatabase, id: string, endedAt: Date = ne
 }
 
 // Deletes the workout with its workout exercises, sets and exercise groups, in one transaction.
-export async function discardWorkout(db: AppDatabase, id: string, deletedAt: Date = new Date()) {
+// "Discard workout" uses it for the active workout, "Delete workout" for a past one.
+export async function deleteWorkout(db: AppDatabase, id: string, deletedAt: Date = new Date()) {
   await db.transaction(async (tx) => {
     const exerciseIds = tx
       .select({ id: workoutExercises.id })
@@ -235,4 +236,50 @@ export async function getLastSets(db: AppDatabase, exerciseId: string, workoutId
     .where(and(found, eq(workouts.id, last.id)))
     .orderBy(asc(workoutExercises.position), asc(sets.position));
   return rows.map((row) => row.set);
+}
+
+// A workout as the workout history lists it.
+export type WorkoutHistoryItem = Pick<Workout, 'id' | 'startedAt' | 'endedAt'> & {
+  exerciseNames: string[];
+  setCount: number;
+};
+
+// Ended workouts of the user, newest first, with their exercise names and number of sets.
+export async function listWorkoutHistory(db: AppDatabase, userId: string): Promise<WorkoutHistoryItem[]> {
+  const ended = await db
+    .select({ id: workouts.id, startedAt: workouts.startedAt, endedAt: workouts.endedAt })
+    .from(workouts)
+    .where(and(eq(workouts.userId, userId), isNotNull(workouts.endedAt), isNull(workouts.deletedAt)))
+    .orderBy(desc(workouts.startedAt));
+  if (ended.length === 0) {
+    return [];
+  }
+  const ids = ended.map((workout) => workout.id);
+  const names = await db
+    .select({ workoutId: workoutExercises.workoutId, name: exercises.name })
+    .from(workoutExercises)
+    .innerJoin(exercises, eq(exercises.id, workoutExercises.exerciseId))
+    .where(and(inArray(workoutExercises.workoutId, ids), isNull(workoutExercises.deletedAt)))
+    .orderBy(asc(workoutExercises.position));
+  const counts = await db
+    .select({ workoutId: workoutExercises.workoutId, sets: count(sets.id) })
+    .from(sets)
+    .innerJoin(workoutExercises, eq(workoutExercises.id, sets.workoutExerciseId))
+    .where(and(inArray(workoutExercises.workoutId, ids), isNull(workoutExercises.deletedAt), isNull(sets.deletedAt)))
+    .groupBy(workoutExercises.workoutId);
+  const setCounts = new Map(counts.map((row) => [row.workoutId, row.sets]));
+  return ended.map((workout) => ({
+    ...workout,
+    exerciseNames: names.filter((row) => row.workoutId === workout.id).map((row) => row.name),
+    setCount: setCounts.get(workout.id) ?? 0,
+  }));
+}
+
+// One workout, or null when it does not exist or was deleted.
+export async function getWorkout(db: AppDatabase, id: string): Promise<Workout | null> {
+  const [workout] = await db
+    .select()
+    .from(workouts)
+    .where(and(eq(workouts.id, id), isNull(workouts.deletedAt)));
+  return workout ?? null;
 }

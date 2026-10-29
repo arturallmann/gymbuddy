@@ -141,3 +141,11 @@ export function parseDecimal(text: string): number | null {
   }
   return Number(normalized);
 }
+
+// How long a workout took: "45 min", "1 h 5 min", "< 1 min".
+export function formatWorkoutDuration(seconds: number): string {
+  const minutes = Math.floor(Math.max(0, seconds) / 60);
+  if (minutes === 0) return '< 1 min';
+  const hours = Math.floor(minutes / 60);
+  return hours > 0 ? `${hours} h ${minutes % 60} min` : `${minutes} min`;
+}
