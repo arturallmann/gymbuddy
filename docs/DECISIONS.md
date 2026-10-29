@@ -109,6 +109,13 @@ treats it as table and column and the query fails, while the test database works
 So every computed column gets a name with `.as()`, and `src/db/driver.ts` rejects one that
 has a dot and no name, so tests catch it. This adds to decision 016.
 
+## 021 — Exercise images ship inside the app
+Date: 2026-10-29
+The exercise browser must show images without internet (decision 002). The app bundles the
+free-exercise-db images of the pinned commit (about 100 MB). They are not in git:
+`scripts/download-exercise-images.mjs` fetches them before `npm run dev` and `npm run build`.
+Updating images when the phone is online, and images for custom exercises, come later (Phase 4b).
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
