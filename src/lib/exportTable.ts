@@ -9,7 +9,7 @@ import { getUnits, gramsToWeight, metersToDistance } from './units';
 export type Cell = string | number | null;
 export type ExportTable = { header: string[]; rows: Cell[][] };
 
-const LOAD_TYPE_EXPORT_LABELS = {
+export const LOAD_TYPE_EXPORT_LABELS = {
   external: 'Weight',
   bodyweight: 'Bodyweight + added weight',
   none: 'No weight',
@@ -18,6 +18,7 @@ const LOAD_TYPE_EXPORT_LABELS = {
 export const EXPORT_HEADER = [
   'Date',
   'Start time',
+  'End time',
   'Exercise',
   'Phase',
   'Set',
@@ -62,6 +63,7 @@ export function buildExportTable(
       return [
         exportDate(row.workoutStartedAt),
         exportTime(row.workoutStartedAt),
+        row.workoutEndedAt ? exportTime(row.workoutEndedAt) : null,
         row.exerciseName,
         PHASE_LABELS[row.phase],
         row.setPosition,

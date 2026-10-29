@@ -79,6 +79,15 @@ docs/             Project documentation
 5. `src/native/share.ts` opens the phone's share menu.
 The Export section on the settings page (`src/components/ExportData.tsx`) runs these steps.
 
+## Import
+
+1. The user picks a `.csv` or `.xlsx` file (a plain file input; Capacitor's web view opens the phone's file picker).
+2. `src/lib/importFile.ts` reads it into a table: `parseCsv()` or `fromXlsx()`.
+3. `src/lib/importTable.ts` checks every row and turns the table into workouts in storage units,
+   or returns the problems with row numbers (decision 024).
+4. `src/db/import.ts` adds the workouts in one transaction, skips those that already exist and
+   creates custom exercises for unknown names.
+
 ## Future sync (not built yet)
 
 Every user table has `id` (UUID), `createdAt`, `updatedAt` and `deletedAt`.

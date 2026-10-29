@@ -134,6 +134,18 @@ the phone pauses the app; the signal then comes when the app is back in front.
 A notification while the app is in the background needs the Local Notifications plugin and a
 permission prompt; it comes with the rest timer later (see `docs/IDEAS.md`).
 
+## 024 — Import reads the export format, checks everything first, skips what exists
+Date: 2026-10-29
+The app imports the CSV and `.xlsx` files it exports, so a user can move their data or edit it in a
+spreadsheet. Columns are found by their header. The whole file is checked first: if any row cannot be
+read, the app lists the rows and reasons and imports nothing, so a file is never half imported.
+The import itself runs in one transaction for the same reason.
+A workout whose date and start time (to the minute) already exist is skipped, so importing the same
+file twice changes nothing. Exercise names match library and custom exercises without regard to case;
+an unknown name becomes a custom exercise, with its load type from the file and its tracked fields from
+the columns that have values. The export gained an "End time" column; without it, an imported workout
+ends at its start time.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

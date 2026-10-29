@@ -49,6 +49,8 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **3.1** CSV export of all sets, from the settings page (decision 022).
 - [x] **3.2** Excel export (`.xlsx` through ExcelJS, decision 022).
 - [x] **3.3** Cool-down phase with stretch timer, behind the `phases` feature toggle (decision 023).
+- [x] **3.4** Import CSV and Excel files in the export format (decision 024).
+  Done when: exporting, then importing the file into an empty app, gives the same export again.
 
 ## Phase 3b — Supersets and templates (current)
 

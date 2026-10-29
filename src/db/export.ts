@@ -5,6 +5,7 @@ import { exercises, sets, workoutExercises, workouts, type Exercise, type Workou
 // One set with its workout and exercise, as the export lists it.
 export type ExportRow = {
   workoutStartedAt: Workout['startedAt'];
+  workoutEndedAt: Workout['endedAt'];
   workoutNotes: Workout['notes'];
   exerciseId: Exercise['id'];
   exerciseName: Exercise['name'];
@@ -27,6 +28,7 @@ export async function listExportRows(db: AppDatabase, userId: string): Promise<E
   return db
     .select({
       workoutStartedAt: workouts.startedAt,
+      workoutEndedAt: workouts.endedAt,
       workoutNotes: workouts.notes,
       exerciseId: exercises.id,
       exerciseName: exercises.name,

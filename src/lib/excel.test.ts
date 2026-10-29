@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 import { expect, test } from 'vitest';
-import { toXlsx } from './excel';
+import { fromXlsx, toXlsx } from './excel';
 
 test('write the header in bold and every value with its type', async () => {
   const bytes = await toXlsx({
@@ -23,4 +23,23 @@ test('write the header in bold and every value with its type', async () => {
   expect(sheet.getCell('C3').value).toBeNull();
   expect(sheet.views[0]).toMatchObject({ state: 'frozen', ySplit: 1 });
   expect(sheet.getColumn(5).width).toBe(23);
+});
+
+test('read back what toXlsx writes', async () => {
+  const table = { header: ['Date', 'Weight', 'Notes'], rows: [['2026-10-29', 22.5, 'Seat 4, "old"'], ['2026-10-30', null, null]] };
+  expect(await fromXlsx(await toXlsx(table))).toEqual([
+    ['Date', 'Weight', 'Notes'],
+    ['2026-10-29', 22.5, 'Seat 4, "old"'],
+    ['2026-10-30', null, null],
+  ]);
+});
+
+test('turn Excel dates and times back into text', async () => {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('Sets');
+  sheet.addRow(['Date', 'Start time']);
+  sheet.addRow([new Date(Date.UTC(2026, 9, 29)), new Date(Date.UTC(1899, 11, 30, 9, 47))]);
+  const bytes = new Uint8Array(await workbook.xlsx.writeBuffer());
+
+  expect((await fromXlsx(bytes))[1]).toEqual(['2026-10-29', '09:47']);
 });
