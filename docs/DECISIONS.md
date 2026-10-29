@@ -101,6 +101,14 @@ when it exists. A partial unique index on `workouts.userId` (where `endedAt` and
 makes two taps at once still create one workout. "End workout" always keeps the workout;
 "Discard workout" deletes it after a confirm step.
 
+## 020 — Computed columns get a plain name
+Date: 2026-10-29
+The plugin's Android version reads each result column by name. SQLite names a computed column
+after its text, and in a join that text has a dot, such as `count("sets"."id")`. Android then
+treats it as table and column and the query fails, while the test database works.
+So every computed column gets a name with `.as()`, and `src/db/driver.ts` rejects one that
+has a dot and no name, so tests catch it. This adds to decision 016.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

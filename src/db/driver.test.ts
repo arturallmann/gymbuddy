@@ -1,4 +1,4 @@
-import { desc, eq, sql } from 'drizzle-orm';
+import { count, desc, eq, max, sql } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 import { runMigrations } from './migrate';
 import { migrations } from './migrations';
@@ -64,6 +64,39 @@ describe('driver', () => {
     await expect(
       db.update(workouts).set({ notes: 'Felt strong' }).where(eq(workouts.id, workout.id)).returning(),
     ).rejects.toMatchObject(notSupported);
+  });
+
+  test('reject a computed column with a dot and without a name, which the plugin cannot read on Android', async () => {
+    const { db } = await seedWorkout();
+
+    const unnamed = { cause: expect.objectContaining({ message: expect.stringContaining(".as('name')") }) };
+    // Drizzle adds the table name, and so the dot, only when the query joins tables.
+    await expect(
+      db.select({ n: count(sets.id) }).from(sets).innerJoin(workoutExercises, sql`1`),
+    ).rejects.toMatchObject(unnamed);
+    await expect(db.select({ id: workouts.id, last: max(sets.position) }).from(sets).innerJoin(workouts, sql`1`)).rejects.toMatchObject(unnamed);
+    expect(await db.select({ n: count() }).from(users)).toEqual([{ n: 1 }]);
+  });
+
+  test('read named computed columns and plain columns of joined tables', async () => {
+    const { db, workout } = await seedWorkout();
+
+    const [row] = await db
+      .select({ id: workouts.id, n: count(sets.id).as('setCount'), last: max(sets.position).as('last') })
+      .from(workouts)
+      .leftJoin(sets, sql`1 = 0`)
+      .groupBy(workouts.id);
+    expect(row).toEqual({ id: workout.id, n: 0, last: null });
+  });
+
+  test('allow functions inside WHERE and subqueries in WHERE', async () => {
+    const { db, workout } = await seedWorkout();
+
+    const rows = await db
+      .select({ id: workouts.id })
+      .from(workouts)
+      .where(sql`lower(${workouts.id}) = lower(${workout.id}) and ${workouts.id} in (select "id" from "workouts")`);
+    expect(rows).toEqual([{ id: workout.id }]);
   });
 
   test('run PRAGMA statements', async () => {
