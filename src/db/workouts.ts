@@ -120,7 +120,7 @@ export async function addWorkoutExercise(db: AppDatabase, workoutId: string, exe
   const id = crypto.randomUUID();
   await db.transaction(async (tx) => {
     const [{ last }] = await tx
-      .select({ last: max(workoutExercises.position) })
+      .select({ last: max(workoutExercises.position).as('last') })
       .from(workoutExercises)
       .where(notDeletedIn(workoutId));
     await tx.insert(workoutExercises).values({ id, workoutId, exerciseId, position: (last ?? 0) + 1 });
@@ -186,7 +186,7 @@ export async function addSet(
 ): Promise<string> {
   const id = crypto.randomUUID();
   await db.transaction(async (tx) => {
-    const [{ last }] = await tx.select({ last: max(sets.position) }).from(sets).where(setsOf(workoutExerciseId));
+    const [{ last }] = await tx.select({ last: max(sets.position).as('last') }).from(sets).where(setsOf(workoutExerciseId));
     await tx.insert(sets).values({ ...values, id, workoutExerciseId, position: (last ?? 0) + 1, completedAt });
   });
   return id;
@@ -262,7 +262,7 @@ export async function listWorkoutHistory(db: AppDatabase, userId: string): Promi
     .where(and(inArray(workoutExercises.workoutId, ids), isNull(workoutExercises.deletedAt)))
     .orderBy(asc(workoutExercises.position));
   const counts = await db
-    .select({ workoutId: workoutExercises.workoutId, sets: count(sets.id) })
+    .select({ workoutId: workoutExercises.workoutId, sets: count(sets.id).as('setCount') })
     .from(sets)
     .innerJoin(workoutExercises, eq(workoutExercises.id, sets.workoutExerciseId))
     .where(and(inArray(workoutExercises.workoutId, ids), isNull(workoutExercises.deletedAt), isNull(sets.deletedAt)))

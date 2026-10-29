@@ -22,6 +22,40 @@ const BEGIN = /^\s*begin\b/i;
 const COMMIT = /^\s*commit\s*$/i;
 const ROLLBACK = /^\s*rollback\s*$/i;
 
+// The columns of a SELECT, split at top-level commas and cut at the first top-level FROM:
+// 'select a, count(b) as "n" from …' → ['a', 'count(b) as "n"'].
+function selectColumns(sql: string): string[] {
+  const body = sql.replace(/^\s*select\s+(distinct\s+)?/i, '');
+  const columns: string[] = [];
+  let depth = 0;
+  let start = 0;
+  let stop = body.length;
+  for (let i = 0; i < body.length; i++) {
+    const char = body[i];
+    if (char === '(') depth++;
+    else if (char === ')') depth--;
+    else if (depth === 0 && char === ',') {
+      columns.push(body.slice(start, i));
+      start = i + 1;
+    } else if (depth === 0 && /^\sfrom\s/i.test(body.slice(i, i + 6))) {
+      stop = i;
+      break;
+    }
+  }
+  columns.push(body.slice(start, stop));
+  return columns.map((column) => column.trim());
+}
+
+// A computed column, such as count("sets"."id"), is named after its own text. The plugin's
+// Android version looks columns up by name and fails on a name with a dot, so such a
+// column needs a plain name: count(sets.id).as('setCount'). count(*) has no dot and works.
+function unnamedComputedColumn(sql: string): string | undefined {
+  if (!/^\s*select\b/i.test(sql)) return undefined;
+  return selectColumns(sql).find(
+    (column) => column.includes('(') && column.includes('.') && !/\)\s+as\s+"[^"]+"$/i.test(column),
+  );
+}
+
 // The plugin returns rows as objects keyed by column name, but Drizzle needs
 // arrays in column order. Two columns with the same name (such as the ids of
 // joined tables) would overwrite each other, so SELECT statements run as a
@@ -46,6 +80,12 @@ async function execute(conn: SqlConnection, sql: string, params: unknown[], meth
     // The plugin's Android version fakes RETURNING and returns wrong or no rows.
     throw new Error(
       'RETURNING is not supported by the SQLite plugin. Write the row with an id from crypto.randomUUID(), then select it by id.',
+    );
+  }
+  const unnamed = unnamedComputedColumn(sql);
+  if (unnamed) {
+    throw new Error(
+      `Name the computed column ${unnamed} with .as('name'). The SQLite plugin on Android cannot read a column named after an expression.`,
     );
   }
   // SELECT runs as a subquery; other statements, such as PRAGMA, run as they are.

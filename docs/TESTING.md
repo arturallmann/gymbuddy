@@ -67,6 +67,8 @@ not on the plugin. It cannot catch plugin bugs. Known plugin limits are guarded 
 (decision 016 in `docs/DECISIONS.md`) and have tests there:
 - RETURNING is rejected, because the plugin fakes it on Android and returns wrong rows.
 - Transactions go through the plugin's transaction API, because its web version ends raw `BEGIN`.
+- A computed column with a dot in its name, such as `count("sets"."id")`, is rejected,
+  because the plugin on Android cannot read it (decision 020).
 
 So a change to `src/db/` or startup also needs a check in the real app:
 1. `npm run dev` and try the change in the browser.
