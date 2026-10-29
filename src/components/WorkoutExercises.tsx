@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useWorkoutExercises } from '@/hooks/useWorkoutExercises';
 import ExercisePicker from './ExercisePicker';
-import SetLog from './SetLog';
+import SetSummary from './SetSummary';
 import WorkoutExerciseList from './WorkoutExerciseList';
 
-// The exercises of one workout: list, reorder, remove and add.
+// The exercises of one workout: list with set summaries, reorder, remove and add.
 export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
   const { items, add, move, remove } = useWorkoutExercises(workoutId);
   const [picking, setPicking] = useState(false);
@@ -23,7 +23,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
           items={items}
           onMove={move}
           onRemove={remove}
-          renderBody={(item) => <SetLog item={item} workoutId={workoutId} />}
+          renderBody={(item) => <SetSummary workoutExerciseId={item.id} loadType={item.loadType} />}
         />
       )}
       {picking ? (

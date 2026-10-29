@@ -52,6 +52,17 @@ describe('WorkoutExercises', () => {
     expect(screen.getByRole('button', { name: 'Move Row up' })).toBeDisabled();
   });
 
+  test('show a summary of the sets on the workout page, and log sets on the exercise page', async () => {
+    const { user } = await setup();
+    await addExercise(user, 'Squat');
+
+    expect(await screen.findByRole('link', { name: /Squat\s*No sets yet/ })).toHaveAttribute(
+      'href',
+      expect.stringMatching(/^\/workout\/exercise\?id=/),
+    );
+    expect(screen.queryByRole('button', { name: 'Log set' })).not.toBeInTheDocument();
+  });
+
   test('remove a workout exercise', async () => {
     const { db, user, names } = await setup();
     await addExercise(user, 'Squat');

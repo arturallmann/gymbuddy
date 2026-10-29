@@ -32,6 +32,8 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **2.1** Start and end a workout. One active workout at a time; it can also be discarded.
 - [x] **2.2** Add exercises to a workout; reorder them. Search by name; move up or down; remove.
 - [x] **2.3** Log sets; the form follows the exercise's load type and tracked fields. Prefill and "Last time" from the last workout with the exercise.
+  Each workout exercise has its own page (`/workout/exercise?id=…`) for logging and editing sets;
+  the workout page shows a summary of the sets. Tapping a logged set edits it in the same form.
 - [ ] **2.4** Workout history list and workout detail page.
 - [ ] **2.5** Exercise browser with muscle group filter, images and instructions.
 - [ ] **2.6** Custom exercises.

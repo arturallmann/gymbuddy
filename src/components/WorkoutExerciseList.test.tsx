@@ -39,3 +39,10 @@ test('report moves and removals', async () => {
   expect(onMove).toHaveBeenCalledWith('b', 'up');
   expect(onRemove).toHaveBeenCalledWith('a');
 });
+
+test('link each workout exercise to its own page', () => {
+  render(<WorkoutExerciseList items={items} onMove={vi.fn()} onRemove={vi.fn()} />);
+
+  expect(screen.getByRole('link', { name: /Squat/ })).toHaveAttribute('href', '/workout/exercise?id=a');
+  expect(screen.getByRole('link', { name: /Row/ })).toHaveAttribute('href', '/workout/exercise?id=b');
+});

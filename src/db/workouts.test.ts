@@ -7,6 +7,7 @@ import {
   addWorkoutExercise,
   deleteSet,
   getLastSets,
+  getWorkoutExercise,
   listSets,
   deleteWorkoutExercise,
   discardWorkout,
@@ -15,6 +16,7 @@ import {
   listWorkoutExercises,
   moveWorkoutExercise,
   startWorkout,
+  updateSet,
 } from './workouts';
 import { createTestDatabase } from '@/testing/database';
 
@@ -333,5 +335,82 @@ describe('sets', () => {
   test('return no last sets for a new exercise', async () => {
     const { db, exerciseId, workout } = await withWorkoutExercise();
     expect(await getLastSets(db, exerciseId, workout.id)).toEqual([]);
+  });
+});
+
+describe('getWorkoutExercise', () => {
+  test('return the workout exercise with its exercise and workout', async () => {
+    const { db, userId } = await setup();
+    const exerciseId = crypto.randomUUID();
+    await db
+      .insert(exercises)
+      .values({ id: exerciseId, source: 'custom', name: 'Plank', category: 'strength', loadType: 'bodyweight', tracksDuration: true });
+    const workout = await startWorkout(db, userId);
+    const id = await addWorkoutExercise(db, workout.id, exerciseId);
+
+    expect(await getWorkoutExercise(db, id)).toMatchObject({
+      id,
+      workoutId: workout.id,
+      exerciseId,
+      name: 'Plank',
+      loadType: 'bodyweight',
+      tracksDuration: true,
+      tracksReps: false,
+    });
+  });
+
+  test('return null for a deleted workout exercise, a discarded workout or an unknown id', async () => {
+    const { db, userId } = await setup();
+    const exerciseId = crypto.randomUUID();
+    await db
+      .insert(exercises)
+      .values({ id: exerciseId, source: 'custom', name: 'Squat', category: 'strength', loadType: 'external' });
+    const workout = await startWorkout(db, userId);
+    const deleted = await addWorkoutExercise(db, workout.id, exerciseId);
+    await deleteWorkoutExercise(db, deleted);
+    const kept = await addWorkoutExercise(db, workout.id, exerciseId);
+
+    expect(await getWorkoutExercise(db, deleted)).toBeNull();
+    expect(await getWorkoutExercise(db, 'unknown')).toBeNull();
+    await discardWorkout(db, workout.id);
+    expect(await getWorkoutExercise(db, kept)).toBeNull();
+  });
+});
+
+describe('updateSet', () => {
+  test('change the values and keep position and completion time', async () => {
+    const { db, userId } = await setup();
+    const exerciseId = crypto.randomUUID();
+    await db
+      .insert(exercises)
+      .values({ id: exerciseId, source: 'custom', name: 'Squat', category: 'strength', loadType: 'external' });
+    const workout = await startWorkout(db, userId);
+    const workoutExerciseId = await addWorkoutExercise(db, workout.id, exerciseId);
+    const values = { setType: 'normal' as const, weightGrams: 60000, reps: 8, durationSeconds: null, distanceMeters: null, rpe: null, notes: null };
+    const completedAt = new Date('2026-10-29T10:00:00Z');
+    const id = await addSet(db, workoutExerciseId, values, completedAt);
+
+    await updateSet(db, id, { ...values, reps: 6, notes: 'grip slipped' });
+
+    const [set] = await listSets(db, workoutExerciseId);
+    expect(set).toMatchObject({ id, position: 1, completedAt, reps: 6, notes: 'grip slipped', weightGrams: 60000 });
+  });
+
+  test('not change a deleted set', async () => {
+    const { db, userId } = await setup();
+    const exerciseId = crypto.randomUUID();
+    await db
+      .insert(exercises)
+      .values({ id: exerciseId, source: 'custom', name: 'Squat', category: 'strength', loadType: 'external' });
+    const workout = await startWorkout(db, userId);
+    const workoutExerciseId = await addWorkoutExercise(db, workout.id, exerciseId);
+    const values = { setType: 'normal' as const, weightGrams: 60000, reps: 8, durationSeconds: null, distanceMeters: null, rpe: null, notes: null };
+    const id = await addSet(db, workoutExerciseId, values);
+    await deleteSet(db, id);
+
+    await updateSet(db, id, { ...values, reps: 1 });
+
+    const [row] = await db.select().from(sets).where(eq(sets.id, id));
+    expect(row.reps).toBe(8);
   });
 });
