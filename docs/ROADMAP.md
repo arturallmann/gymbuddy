@@ -35,7 +35,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
   Each workout exercise has its own page (`/workout/exercise?id=…`) for logging and editing sets;
   the workout page shows a summary of the sets. Tapping a logged set edits it in the same form.
 - [x] **2.4** Workout history list and workout detail page. The detail page is read-only, with "Delete workout".
-- [ ] **2.5** Exercise browser with muscle group filter, images and instructions.
+- [x] **2.5** Exercise browser with muscle group filter, images and instructions. Images ship in the app (decision 021).
 - [ ] **2.6** Custom exercises.
 - [ ] **2.7** Exercise preferences: standing notes and unit override per exercise.
   Done when: an exercise with a lb override shows lb in its set form, history and chart, while other exercises keep the global unit.
