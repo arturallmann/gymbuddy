@@ -1,6 +1,6 @@
 // Display helpers for exercises. Pure functions: no database, no React.
 import type { CustomExerciseInput } from '@/db/exercises';
-import type { Category, LoadType } from '@/db/schema';
+import type { Category, Exercise, LoadType } from '@/db/schema';
 
 // Where the bundled image lives in the app: "3_4_Sit-Up/0.jpg" → "/exercise-images/3_4_Sit-Up/0.jpg".
 export function exerciseImageUrl(path: string): string {
@@ -46,3 +46,21 @@ export const EMPTY_CUSTOM_EXERCISE: CustomExerciseInput = {
   primaryMuscleGroupIds: [],
   secondaryMuscleGroupIds: [],
 };
+
+// One line about an exercise: its own description when it has one, otherwise
+// category, equipment and primary muscle groups, such as "Strength · Barbell · Biceps".
+export function shortDescription(
+  exercise: Pick<Exercise, 'description' | 'category' | 'equipment'>,
+  primaryMuscleGroups: string[],
+): string {
+  if (exercise.description?.trim()) {
+    return exercise.description.trim();
+  }
+  return [
+    CATEGORY_LABELS[exercise.category],
+    exercise.equipment ? equipmentLabel(exercise.equipment) : null,
+    primaryMuscleGroups.length > 0 ? primaryMuscleGroups.join(', ') : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}

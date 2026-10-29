@@ -2,19 +2,24 @@
 
 import { useState } from 'react';
 import type { WorkoutExerciseItem } from '@/db/workouts';
-import { useFeatures, useSettings } from '@/hooks/useSettings';
+import { useFeatures } from '@/hooks/useSettings';
 import { useSets } from '@/hooks/useSets';
 import { formatSet, setFormValues } from '@/lib/sets';
-import { getUnits } from '@/lib/units';
+import type { Units } from '@/lib/units';
 import SetForm from './SetForm';
 import SetList from './SetList';
 
+type Props = {
+  item: WorkoutExerciseItem;
+  workoutId: string;
+  // The units for this exercise: its unit override, otherwise the settings (getUnits).
+  units: Units;
+};
+
 // The sets of one workout exercise: last time's sets, the set form, then what was logged.
 // Tapping a logged set opens it for editing in the same form.
-export default function SetLog({ item, workoutId }: { item: WorkoutExerciseItem; workoutId: string }) {
-  const { settings } = useSettings();
+export default function SetLog({ item, workoutId, units }: Props) {
   const features = useFeatures();
-  const units = getUnits(settings);
   const { sets, lastSets, add, update, remove } = useSets(item.id, item.exerciseId, workoutId);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -36,7 +41,7 @@ export default function SetLog({ item, workoutId }: { item: WorkoutExerciseItem;
       )}
       {editing ? (
         <SetForm
-          key={`edit-${editing.id}`}
+          key={`edit-${editing.id}-${units.weightUnit}-${units.distanceUnit}`}
           exercise={item}
           units={units}
           features={features}
@@ -51,7 +56,7 @@ export default function SetLog({ item, workoutId }: { item: WorkoutExerciseItem;
         />
       ) : (
         <SetForm
-          key={`new-${sets.length}`}
+          key={`new-${sets.length}-${units.weightUnit}-${units.distanceUnit}`}
           exercise={item}
           units={units}
           features={features}

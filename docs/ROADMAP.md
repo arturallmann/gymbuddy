@@ -27,7 +27,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **1.7** First-time setup: units (suggested from phone region), preset choice, optional fine-tuning.
   Done when: a fresh install shows setup once, and all choices can change later in settings.
 
-## Phase 2 — Log workouts (current)
+## Phase 2 — Log workouts (done)
 
 - [x] **2.1** Start and end a workout. One active workout at a time; it can also be discarded.
 - [x] **2.2** Add exercises to a workout; reorder them. Search by name; move up or down; remove.
@@ -37,13 +37,14 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **2.4** Workout history list and workout detail page. The detail page is read-only, with "Delete workout".
 - [x] **2.5** Exercise browser with muscle group filter, images and instructions. Images ship in the app (decision 021).
 - [x] **2.6** Custom exercises: create, change and delete, from the exercise browser.
-- [ ] **2.7** Exercise preferences: standing notes and unit override per exercise.
+- [x] **2.7** Exercise preferences: standing notes and unit override per exercise.
   The workout exercise page also shows the exercise's first image (behind the `exerciseImages` toggle),
   a short description (category, equipment and primary muscle groups, or `exercises.description` when set)
   and a link to the exercise's page in the exercise browser.
   Done when: an exercise with a lb override shows lb in its set form, history and chart, while other exercises keep the global unit.
+  (The chart comes in 4.2 and uses the same `getUnits()`.)
 
-## Phase 3 — Export and cool-down phase
+## Phase 3 — Export and cool-down phase (current)
 
 - [ ] **3.1** CSV export of all sets.
 - [ ] **3.2** Excel export.

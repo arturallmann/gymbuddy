@@ -4,14 +4,13 @@ import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import type { WorkoutSet } from '@/db/schema';
 import { listSets, type WorkoutExerciseItem } from '@/db/workouts';
-import { useSettings } from '@/hooks/useSettings';
-import { getUnits } from '@/lib/units';
+import { useExercisePreferences } from '@/hooks/useExercisePreferences';
 import SetList from './SetList';
 
 // One workout exercise of a past workout: its name and its sets, read-only.
 export default function WorkoutExerciseSets({ item }: { item: WorkoutExerciseItem }) {
   const db = useDatabase();
-  const units = getUnits(useSettings().settings);
+  const { units } = useExercisePreferences(item.exerciseId);
   const [sets, setSets] = useState<WorkoutSet[] | undefined>(undefined);
 
   useEffect(() => {

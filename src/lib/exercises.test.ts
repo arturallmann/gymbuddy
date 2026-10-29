@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { equipmentLabel, exerciseImageUrl, instructionSteps } from './exercises';
+import { equipmentLabel, exerciseImageUrl, instructionSteps, shortDescription } from './exercises';
 
 test('build the address of a bundled image, with each part encoded', () => {
   expect(exerciseImageUrl('3_4_Sit-Up/0.jpg')).toBe('/exercise-images/3_4_Sit-Up/0.jpg');
@@ -14,4 +14,11 @@ test('start equipment with a capital letter', () => {
 test('split instructions into steps and drop empty lines', () => {
   expect(instructionSteps('Stand up.\n\n  Curl the bar. \nLower it.')).toEqual(['Stand up.', 'Curl the bar.', 'Lower it.']);
   expect(instructionSteps(null)).toEqual([]);
+});
+
+test('describe an exercise by its description, or by category, equipment and primary muscle groups', () => {
+  const curl = { description: null, category: 'strength', equipment: 'barbell' } as const;
+  expect(shortDescription(curl, ['Biceps'])).toBe('Strength · Barbell · Biceps');
+  expect(shortDescription({ ...curl, equipment: null }, [])).toBe('Strength');
+  expect(shortDescription({ ...curl, description: ' Curl with a barbell. ' }, ['Biceps'])).toBe('Curl with a barbell.');
 });

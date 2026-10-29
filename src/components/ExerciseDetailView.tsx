@@ -6,19 +6,24 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { deleteCustomExercise, getExerciseDetail, type ExerciseDetail } from '@/db/exercises';
+import { useExercisePreferences } from '@/hooks/useExercisePreferences';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
 import { CATEGORY_LABELS, equipmentLabel, exerciseImageUrl, instructionSteps } from '@/lib/exercises';
+import { getUnits } from '@/lib/units';
 import ConfirmAction from './ConfirmAction';
+import ExercisePreferencesForm from './ExercisePreferencesForm';
 
 // One exercise: images, category, equipment, muscle groups, description and instructions.
 // The exercise id comes from the address: /exercises/detail?id=…
 export default function ExerciseDetailView() {
   const db = useDatabase();
   const router = useRouter();
-  const { userId } = useSettings().settings;
+  const { settings } = useSettings();
+  const { userId } = settings;
   const features = useFeatures();
   const id = useSearchParams().get('id');
   const [detail, setDetail] = useState<ExerciseDetail | null | undefined>(undefined);
+  const { preferences, save } = useExercisePreferences(detail?.exercise.id ?? null);
 
   useEffect(() => {
     let current = true;
@@ -83,6 +88,12 @@ export default function ExerciseDetailView() {
             </p>
           )}
           {exercise.description && <p className="break-words">{exercise.description}</p>}
+          {preferences !== undefined && (
+            <section className="flex flex-col gap-2">
+              <h2 className="text-lg font-semibold">Exercise preferences</h2>
+              <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
+            </section>
+          )}
           {exercise.source === 'custom' && (
             <div className="flex flex-col items-start gap-4">
               <Link href={`/exercises/edit?id=${exercise.id}`} className="rounded-lg border px-4 py-2 font-semibold">
