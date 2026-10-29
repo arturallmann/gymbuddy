@@ -1,15 +1,24 @@
 import { screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { eq } from 'drizzle-orm';
+import { createCustomExercise } from '@/db/exercises';
+import { exercises } from '@/db/schema';
+import { getLocalSettings } from '@/db/settings';
+import { EMPTY_CUSTOM_EXERCISE } from '@/lib/exercises';
 import { createTestDatabase } from '@/testing/database';
 import { addTestLibrary } from '@/testing/exercises';
 import { renderWithDatabase } from '@/testing/render';
 import ExerciseDetailView from './ExerciseDetailView';
 
-const navigation = vi.hoisted(() => ({ params: new URLSearchParams() }));
-vi.mock('next/navigation', () => ({ useSearchParams: () => navigation.params }));
+const navigation = vi.hoisted(() => ({ params: new URLSearchParams(), push: vi.fn() }));
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => navigation.params,
+  useRouter: () => ({ push: navigation.push }),
+}));
 
 beforeEach(() => {
   navigation.params = new URLSearchParams();
+  navigation.push.mockReset();
 });
 
 async function setup(name: 'curl' | 'press', exerciseImages = true) {
@@ -49,6 +58,31 @@ describe('ExerciseDetailView', () => {
     expect(await screen.findByRole('heading', { name: 'Barbell Curl' })).toBeInTheDocument();
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Instructions' })).toBeInTheDocument();
+  });
+
+  test('offer no Edit or Delete for a library exercise', async () => {
+    await setup('curl');
+
+    await screen.findByRole('heading', { name: 'Barbell Curl' });
+    expect(screen.queryByRole('link', { name: 'Edit' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Delete exercise' })).not.toBeInTheDocument();
+  });
+
+  test('edit and delete a custom exercise', async () => {
+    const { db } = await createTestDatabase();
+    const { userId } = await getLocalSettings(db);
+    const id = await createCustomExercise(db, userId, { ...EMPTY_CUSTOM_EXERCISE, name: 'Band Curl' });
+    navigation.params = new URLSearchParams({ id });
+    const { user } = await renderWithDatabase(<ExerciseDetailView />, { db });
+
+    expect(await screen.findByText(/Custom exercise · Strength/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Edit' })).toHaveAttribute('href', `/exercises/edit?id=${id}`);
+    await user.click(screen.getByRole('button', { name: 'Delete exercise' }));
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+
+    const [row] = await db.select().from(exercises).where(eq(exercises.id, id));
+    expect(row.deletedAt).not.toBeNull();
+    expect(navigation.push).toHaveBeenCalledWith('/exercises');
   });
 
   test('say so when the exercise does not exist', async () => {

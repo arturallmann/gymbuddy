@@ -176,3 +176,10 @@ the commit in `data/free-exercise-db/version.json` or `SEED_VERSION` in `src/db/
 `app_state.libraryVersion` holds the version the phone seeded last.
 Raise `SEED_VERSION` when `toLibraryExercise()` maps exercises differently.
 Exercises that free-exercise-db removes stay on the phone, because workouts and exercise preferences use them.
+
+### Custom exercises
+
+A custom exercise has `source = 'custom'`, `userId` set and `sourceId` NULL.
+The user chooses name, category, equipment, load type, tracked fields and muscle groups.
+Only custom exercises can change; library exercises change only through library updates.
+Deleting a custom exercise writes `deletedAt`: search no longer finds it, but workouts that used it still show it.

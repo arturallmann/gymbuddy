@@ -36,7 +36,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
   the workout page shows a summary of the sets. Tapping a logged set edits it in the same form.
 - [x] **2.4** Workout history list and workout detail page. The detail page is read-only, with "Delete workout".
 - [x] **2.5** Exercise browser with muscle group filter, images and instructions. Images ship in the app (decision 021).
-- [ ] **2.6** Custom exercises.
+- [x] **2.6** Custom exercises: create, change and delete, from the exercise browser.
 - [ ] **2.7** Exercise preferences: standing notes and unit override per exercise.
   The workout exercise page also shows the exercise's first image (behind the `exerciseImages` toggle),
   a short description (category, equipment and primary muscle groups, or `exercises.description` when set)
