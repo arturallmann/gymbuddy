@@ -78,6 +78,12 @@ Starts when the basic features above work, so the details can be tuned in one go
   Done when: Back from a workout exercise page opens the workout, and Back from the workout opens home.
 - [ ] **4b.3** Make "Remove" for a workout exercise and "Remove" for a set look different,
   so a tap meant for a set never removes the whole workout exercise (for example an icon, or a confirm step).
+- [ ] **4b.4** Update exercise images when the phone is online.
+  The app ships the images of one free-exercise-db commit (decision 021). When the phone has internet,
+  the app checks for a newer library version and downloads only changed or new images.
+  Offline, the bundled images stay. Logging never waits for the check.
+- [ ] **4b.5** Images for custom exercises: take a photo or pick one from the phone.
+  Needs the Camera plugin, wrapped in `src/native/`, and images stored on the phone.
 
 ## Phase 5 — Online (later)
 
