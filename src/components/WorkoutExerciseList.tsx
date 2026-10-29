@@ -14,7 +14,7 @@ export default function WorkoutExerciseList({ items, onMove, onRemove }: Props) 
     <ol className="flex flex-col gap-2">
       {items.map((item, index) => (
         <li key={item.id} className="flex items-center gap-2 rounded-lg border p-3">
-          <span className="flex-1 font-semibold">{item.name}</span>
+          <span className="min-w-0 flex-1 break-words font-semibold">{item.name}</span>
           <button
             type="button"
             aria-label={`Move ${item.name} up`}
