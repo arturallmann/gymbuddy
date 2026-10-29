@@ -3,9 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { expect, test, vi } from 'vitest';
 import WorkoutExerciseList from './WorkoutExerciseList';
 
+const exercise = { loadType: 'external', tracksReps: true, tracksDuration: false, tracksDistance: false } as const;
 const items = [
-  { id: 'a', exerciseId: 'x', name: 'Squat', position: 1 },
-  { id: 'b', exerciseId: 'y', name: 'Row', position: 2 },
+  { id: 'a', exerciseId: 'x', name: 'Squat', position: 1, ...exercise },
+  { id: 'b', exerciseId: 'y', name: 'Row', position: 2, ...exercise },
 ];
 
 test('show the workout exercises in order', () => {

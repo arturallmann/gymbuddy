@@ -8,6 +8,7 @@ import {
   getUnits,
   gramsToWeight,
   metersToDistance,
+  parseDecimal,
   parseDuration,
   weightToGrams,
 } from './units';
@@ -139,5 +140,26 @@ describe('getUnits', () => {
       weightUnit: 'lb',
       distanceUnit: 'metric',
     });
+  });
+});
+
+describe('parseDecimal', () => {
+  test('read a point or a comma as the decimal mark', () => {
+    expect(parseDecimal('12.5')).toBe(12.5);
+    expect(parseDecimal(' 12,5 ')).toBe(12.5);
+    expect(parseDecimal('.5')).toBe(0.5);
+    expect(parseDecimal('20')).toBe(20);
+  });
+
+  test('read negative numbers', () => {
+    expect(parseDecimal('-20')).toBe(-20);
+  });
+
+  test('return null for empty or invalid input', () => {
+    expect(parseDecimal('')).toBeNull();
+    expect(parseDecimal('abc')).toBeNull();
+    expect(parseDecimal('1.2.3')).toBeNull();
+    expect(parseDecimal('1,2,3')).toBeNull();
+    expect(parseDecimal('-')).toBeNull();
   });
 });
