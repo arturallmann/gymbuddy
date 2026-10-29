@@ -2,7 +2,16 @@ import { eq } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 import { exercises, sets, workoutExercises, workoutGroups, workouts } from './schema';
 import { getLocalSettings } from './settings';
-import { discardWorkout, endWorkout, getActiveWorkout, startWorkout } from './workouts';
+import {
+  addWorkoutExercise,
+  deleteWorkoutExercise,
+  discardWorkout,
+  endWorkout,
+  getActiveWorkout,
+  listWorkoutExercises,
+  moveWorkoutExercise,
+  startWorkout,
+} from './workouts';
 import { createTestDatabase } from '@/testing/database';
 
 async function setup() {
@@ -135,5 +144,98 @@ describe('discardWorkout', () => {
 
     const [row] = await db.select().from(workouts).where(eq(workouts.id, kept.id));
     expect(row.deletedAt).toBeNull();
+  });
+});
+
+describe('workout exercises', () => {
+  async function withExercises(...names: string[]) {
+    const { db, userId } = await setup();
+    const workout = await startWorkout(db, userId);
+    const ids: Record<string, string> = {};
+    for (const name of names) {
+      ids[name] = crypto.randomUUID();
+      await db
+        .insert(exercises)
+        .values({ id: ids[name], source: 'custom', name, category: 'strength', loadType: 'external' });
+    }
+    const names_ = async () => (await listWorkoutExercises(db, workout.id)).map((item) => item.name);
+    return { db, workout, ids, names: names_ };
+  }
+
+  test('add exercises at the end, in the order they were added', async () => {
+    const { db, workout, ids, names } = await withExercises('Squat', 'Bench Press');
+    await addWorkoutExercise(db, workout.id, ids['Squat']);
+    await addWorkoutExercise(db, workout.id, ids['Bench Press']);
+
+    expect(await names()).toEqual(['Squat', 'Bench Press']);
+    expect((await listWorkoutExercises(db, workout.id)).map((item) => item.position)).toEqual([1, 2]);
+  });
+
+  test('allow the same exercise twice', async () => {
+    const { db, workout, ids, names } = await withExercises('Squat');
+    await addWorkoutExercise(db, workout.id, ids['Squat']);
+    await addWorkoutExercise(db, workout.id, ids['Squat']);
+
+    expect(await names()).toEqual(['Squat', 'Squat']);
+  });
+
+  test('give two adds at once different positions', async () => {
+    const { db, workout, ids } = await withExercises('Squat', 'Bench Press');
+    await Promise.all([
+      addWorkoutExercise(db, workout.id, ids['Squat']),
+      addWorkoutExercise(db, workout.id, ids['Bench Press']),
+    ]);
+
+    const positions = (await listWorkoutExercises(db, workout.id)).map((item) => item.position);
+    expect(positions).toEqual([1, 2]);
+  });
+
+  test('move a workout exercise up and down', async () => {
+    const { db, workout, ids, names } = await withExercises('Squat', 'Bench Press', 'Row');
+    for (const name of ['Squat', 'Bench Press', 'Row']) await addWorkoutExercise(db, workout.id, ids[name]);
+    const [squat, , row] = await listWorkoutExercises(db, workout.id);
+
+    await moveWorkoutExercise(db, row.id, 'up');
+    expect(await names()).toEqual(['Squat', 'Row', 'Bench Press']);
+
+    await moveWorkoutExercise(db, squat.id, 'down');
+    expect(await names()).toEqual(['Row', 'Squat', 'Bench Press']);
+  });
+
+  test('keep the order when the first moves up or the last moves down', async () => {
+    const { db, workout, ids, names } = await withExercises('Squat', 'Row');
+    await addWorkoutExercise(db, workout.id, ids['Squat']);
+    await addWorkoutExercise(db, workout.id, ids['Row']);
+    const [squat, row] = await listWorkoutExercises(db, workout.id);
+
+    await moveWorkoutExercise(db, squat.id, 'up');
+    await moveWorkoutExercise(db, row.id, 'down');
+
+    expect(await names()).toEqual(['Squat', 'Row']);
+  });
+
+  test('delete a workout exercise with its sets, and skip it when moving', async () => {
+    const { db, workout, ids, names } = await withExercises('Squat', 'Bench Press', 'Row');
+    for (const name of ['Squat', 'Bench Press', 'Row']) await addWorkoutExercise(db, workout.id, ids[name]);
+    const [, bench, row] = await listWorkoutExercises(db, workout.id);
+    await db.insert(sets).values({ workoutExerciseId: bench.id, position: 1, reps: 5 });
+
+    await deleteWorkoutExercise(db, bench.id);
+    expect(await names()).toEqual(['Squat', 'Row']);
+    const [set] = await db.select().from(sets);
+    expect(set.deletedAt).not.toBeNull();
+
+    await moveWorkoutExercise(db, row.id, 'up');
+    expect(await names()).toEqual(['Row', 'Squat']);
+    await expect(moveWorkoutExercise(db, bench.id, 'up')).rejects.toThrow('not found');
+  });
+
+  test('add after a deleted last exercise without a gap problem', async () => {
+    const { db, workout, ids, names } = await withExercises('Squat', 'Row');
+    const squatId = await addWorkoutExercise(db, workout.id, ids['Squat']);
+    await deleteWorkoutExercise(db, squatId);
+    await addWorkoutExercise(db, workout.id, ids['Row']);
+
+    expect(await names()).toEqual(['Row']);
   });
 });
