@@ -22,25 +22,24 @@ const values: SetValues = {
 
 type Options = {
   settings?: SettingsChange;
+  // A stretch held for time, with a default duration of 45 seconds.
+  stretch?: boolean;
   // Sets of this exercise in an earlier, ended workout.
   lastTime?: SetValues[];
   // Sets already logged in the active workout.
   logged?: SetValues[];
 };
 
-async function setup({ settings = {}, lastTime = [], logged = [] }: Options = {}) {
+async function setup({ settings = {}, lastTime = [], logged = [], stretch = false }: Options = {}) {
   const { db } = await createTestDatabase();
   let local = await getLocalSettings(db);
   if (Object.keys(settings).length > 0) local = await updateSettings(db, local.id, settings);
   const exerciseId = crypto.randomUUID();
-  await db.insert(exercises).values({
-    id: exerciseId,
-    source: 'custom',
-    name: 'Squat',
-    category: 'strength',
-    loadType: 'external',
-    tracksReps: true,
-  });
+  await db.insert(exercises).values(
+    stretch
+      ? { id: exerciseId, source: 'custom', name: 'Hamstring Stretch', category: 'stretch', loadType: 'none', tracksDuration: true, defaultDurationSeconds: 45 }
+      : { id: exerciseId, source: 'custom', name: 'Squat', category: 'strength', loadType: 'external', tracksReps: true },
+  );
   const logAll = async (workoutExerciseId: string, list: SetValues[]) => {
     for (const set of list) await addSet(db, workoutExerciseId, set);
   };
@@ -172,5 +171,28 @@ describe('SetLog', () => {
     expect(screen.queryByRole('list', { name: 'Sets' })).not.toBeInTheDocument();
     const [row] = await savedSets(db);
     expect(row.deletedAt).not.toBeNull();
+  });
+});
+
+describe('stretch timer', () => {
+  test('show the stretch timer with the default duration when phases are on', async () => {
+    await setup({ stretch: true, settings: { features: { phases: true } } });
+
+    expect(await screen.findByRole('region', { name: 'Stretch timer' })).toBeInTheDocument();
+    expect(screen.getByRole('timer')).toHaveTextContent('0:45');
+  });
+
+  test('hide the stretch timer when phases are off, and keep the set form', async () => {
+    await setup({ stretch: true, settings: { features: { phases: false } } });
+
+    expect(await screen.findByRole('textbox', { name: 'Duration' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Stretch timer' })).not.toBeInTheDocument();
+  });
+
+  test('show no stretch timer for an exercise that is not held for time', async () => {
+    await setup({ settings: { features: { phases: true } } });
+
+    expect(await screen.findByRole('button', { name: 'Log set' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Stretch timer' })).not.toBeInTheDocument();
   });
 });

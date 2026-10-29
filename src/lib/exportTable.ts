@@ -1,18 +1,13 @@
 // Turns export rows into a table in display units, for CSV and Excel.
 // Pure functions: no database, no React.
 import type { ExportRow } from '@/db/export';
-import type { ExercisePreferences, Phase, UserSettings } from '@/db/schema';
+import type { ExercisePreferences, UserSettings } from '@/db/schema';
+import { PHASE_LABELS } from './phases';
 import { SET_TYPE_LABELS } from './sets';
 import { getUnits, gramsToWeight, metersToDistance } from './units';
 
 export type Cell = string | number | null;
 export type ExportTable = { header: string[]; rows: Cell[][] };
-
-export const PHASE_LABELS: Record<Phase, string> = {
-  warmup: 'Warm-up phase',
-  main: 'Main phase',
-  cooldown: 'Cool-down phase',
-};
 
 const LOAD_TYPE_EXPORT_LABELS = {
   external: 'Weight',

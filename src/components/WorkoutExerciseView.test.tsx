@@ -1,9 +1,9 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { saveExercisePreferences } from '@/db/preferences';
 import { exercises } from '@/db/schema';
 import { getLocalSettings, updateSettings } from '@/db/settings';
-import { addWorkoutExercise, startWorkout } from '@/db/workouts';
+import { addWorkoutExercise, listWorkoutExercises, startWorkout } from '@/db/workouts';
 import { createTestDatabase } from '@/testing/database';
 import { addTestLibrary } from '@/testing/exercises';
 import { renderWithDatabase } from '@/testing/render';
@@ -110,5 +110,35 @@ describe('exercise info and preferences', () => {
     navigation.params = new URLSearchParams({ id: pressId });
     await renderWithDatabase(<WorkoutExerciseView />, { db });
     expect(await screen.findByRole('textbox', { name: 'Weight (kg)' })).toBeInTheDocument();
+  });
+});
+
+describe('phase', () => {
+  async function withItem(phases: boolean) {
+    const { db } = await createTestDatabase();
+    const local = await getLocalSettings(db);
+    await updateSettings(db, local.id, { features: { phases } });
+    const library = await addTestLibrary(db);
+    const workout = await startWorkout(db, local.userId);
+    const id = await addWorkoutExercise(db, workout.id, library.curl);
+    navigation.params = new URLSearchParams({ id });
+    const rendered = await renderWithDatabase(<WorkoutExerciseView />, { db });
+    return { ...rendered, workout };
+  }
+
+  test('move the workout exercise to another phase', async () => {
+    const { db, user, workout } = await withItem(true);
+
+    await user.selectOptions(await screen.findByRole('combobox', { name: 'Phase' }), 'Warm-up phase');
+
+    await waitFor(async () => expect((await listWorkoutExercises(db, workout.id))[0].phase).toBe('warmup'));
+    expect(screen.getByRole('combobox', { name: 'Phase' })).toHaveValue('warmup');
+  });
+
+  test('hide the phase choice when phases are off', async () => {
+    await withItem(false);
+
+    expect(await screen.findByRole('button', { name: 'Log set' })).toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: 'Phase' })).not.toBeInTheDocument();
   });
 });
