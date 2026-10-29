@@ -130,3 +130,14 @@ export function parseDuration(text: string): number | null {
   }
   return parts.reduce((total, part) => total * 60 + Number(part), 0);
 }
+
+// --- Input ---
+
+// "12.5" or "12,5" → 12.5, "-5" → -5. Returns null for empty or invalid input.
+export function parseDecimal(text: string): number | null {
+  const normalized = text.trim().replace(',', '.');
+  if (!/^-?(\d+\.?\d*|\.\d+)$/.test(normalized)) {
+    return null;
+  }
+  return Number(normalized);
+}

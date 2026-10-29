@@ -1,6 +1,7 @@
-import { and, asc, eq, inArray, isNull, max } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, max, ne } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
-import { exercises, sets, workoutExercises, workoutGroups, workouts, type Workout } from './schema';
+import { exercises, sets, workoutExercises, workoutGroups, workouts, type Exercise, type Workout, type WorkoutSet } from './schema';
+import type { SetValues } from '@/lib/sets';
 
 const active = (userId: string) =>
   and(eq(workouts.userId, userId), isNull(workouts.endedAt), isNull(workouts.deletedAt));
@@ -72,7 +73,7 @@ export type WorkoutExerciseItem = {
   exerciseId: string;
   name: string;
   position: number;
-};
+} & Pick<Exercise, 'loadType' | 'tracksReps' | 'tracksDuration' | 'tracksDistance'>;
 
 const notDeletedIn = (workoutId: string) =>
   and(eq(workoutExercises.workoutId, workoutId), isNull(workoutExercises.deletedAt));
@@ -85,6 +86,10 @@ export async function listWorkoutExercises(db: AppDatabase, workoutId: string): 
       exerciseId: workoutExercises.exerciseId,
       name: exercises.name,
       position: workoutExercises.position,
+      loadType: exercises.loadType,
+      tracksReps: exercises.tracksReps,
+      tracksDuration: exercises.tracksDuration,
+      tracksDistance: exercises.tracksDistance,
     })
     .from(workoutExercises)
     .innerJoin(exercises, eq(exercises.id, workoutExercises.exerciseId))
@@ -145,4 +150,65 @@ export async function deleteWorkoutExercise(db: AppDatabase, id: string, deleted
       .set({ deletedAt })
       .where(and(eq(workoutExercises.id, id), isNull(workoutExercises.deletedAt)));
   });
+}
+
+const setsOf = (workoutExerciseId: string) =>
+  and(eq(sets.workoutExerciseId, workoutExerciseId), isNull(sets.deletedAt));
+
+// The sets of a workout exercise, in position order.
+export async function listSets(db: AppDatabase, workoutExerciseId: string): Promise<WorkoutSet[]> {
+  return db.select().from(sets).where(setsOf(workoutExerciseId)).orderBy(asc(sets.position));
+}
+
+// Logs a set after the last one. One transaction, so two sets at once get different positions.
+export async function addSet(
+  db: AppDatabase,
+  workoutExerciseId: string,
+  values: SetValues,
+  completedAt: Date = new Date(),
+): Promise<string> {
+  const id = crypto.randomUUID();
+  await db.transaction(async (tx) => {
+    const [{ last }] = await tx.select({ last: max(sets.position) }).from(sets).where(setsOf(workoutExerciseId));
+    await tx.insert(sets).values({ ...values, id, workoutExerciseId, position: (last ?? 0) + 1, completedAt });
+  });
+  return id;
+}
+
+export async function deleteSet(db: AppDatabase, id: string, deletedAt: Date = new Date()) {
+  await db
+    .update(sets)
+    .set({ deletedAt })
+    .where(and(eq(sets.id, id), isNull(sets.deletedAt)));
+}
+
+// The sets of this exercise in the newest other workout that has any, in order.
+// The set form prefills from them and shows them as "Last time".
+export async function getLastSets(db: AppDatabase, exerciseId: string, workoutId: string): Promise<WorkoutSet[]> {
+  const found = and(
+    eq(workoutExercises.exerciseId, exerciseId),
+    ne(workouts.id, workoutId),
+    isNull(workouts.deletedAt),
+    isNull(workoutExercises.deletedAt),
+    isNull(sets.deletedAt),
+  );
+  const [last] = await db
+    .select({ id: workouts.id })
+    .from(sets)
+    .innerJoin(workoutExercises, eq(workoutExercises.id, sets.workoutExerciseId))
+    .innerJoin(workouts, eq(workouts.id, workoutExercises.workoutId))
+    .where(found)
+    .orderBy(desc(workouts.startedAt))
+    .limit(1);
+  if (!last) {
+    return [];
+  }
+  const rows = await db
+    .select({ set: sets })
+    .from(sets)
+    .innerJoin(workoutExercises, eq(workoutExercises.id, sets.workoutExerciseId))
+    .innerJoin(workouts, eq(workouts.id, workoutExercises.workoutId))
+    .where(and(found, eq(workouts.id, last.id)))
+    .orderBy(asc(workoutExercises.position), asc(sets.position));
+  return rows.map((row) => row.set);
 }
