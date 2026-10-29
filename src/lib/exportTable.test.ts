@@ -4,6 +4,7 @@ import { EXPORT_HEADER, buildExportTable, exportDate, exportFileName, exportTime
 
 const row: ExportRow = {
   workoutStartedAt: new Date(2026, 9, 29, 9, 7),
+  workoutEndedAt: new Date(2026, 9, 29, 10, 2),
   workoutNotes: 'Short sleep',
   exerciseId: 'squat',
   exerciseName: 'Squat',
@@ -28,7 +29,7 @@ describe('buildExportTable', () => {
 
     expect(header).toBe(EXPORT_HEADER);
     expect(rows[0]).toEqual([
-      '2026-10-29', '09:07', 'Squat', 'Main phase', 1, 'Normal set', 'Weight', 60, 'kg', 8, null, null, null, 8.5, 'belt', null, 'Short sleep',
+      '2026-10-29', '09:07', '10:02', 'Squat', 'Main phase', 1, 'Normal set', 'Weight', 60, 'kg', 8, null, null, null, 8.5, 'belt', null, 'Short sleep',
     ]);
   });
 

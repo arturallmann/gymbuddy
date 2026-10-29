@@ -44,7 +44,7 @@ describe('ExportData', () => {
     expect(mimeType).toBe('text/csv');
     const lines = (data as string).trim().split('\r\n');
     expect(lines).toHaveLength(3);
-    expect(lines[1]).toContain('Barbell Curl,Main phase,1,Normal set,Weight,45,lb,5');
+    expect(lines[1]).toMatch(/^\uFEFF?\d{4}-\d{2}-\d{2},\d{2}:\d{2},\d{2}:\d{2},Barbell Curl,Main phase,1,Normal set,Weight,45,lb,5/);
     expect(lines[2]).toContain('Bench Press,Main phase,1,Normal set,Weight,20.4,kg,5');
     expect(native.shareFile).toHaveBeenCalledWith('file:///cache/export', 'Gymbuddy export');
   });
