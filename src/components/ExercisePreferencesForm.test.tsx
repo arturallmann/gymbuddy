@@ -33,7 +33,7 @@ test('show the saved values and clear the override with "Same as settings"', asy
   const { user, onSave } = renderForm({ notes: 'Old machine', weightUnit: 'lb', distanceUnit: 'imperial' });
 
   expect(screen.getByRole('textbox', { name: 'Notes' })).toHaveValue('Old machine');
-  await user.selectOptions(screen.getByRole('combobox', { name: 'Weight unit' }), 'Same as settings (kg)');
+  await user.selectOptions(screen.getByRole('combobox', { name: 'Weight unit' }), 'Same as settings: kg');
   await user.click(screen.getByRole('button', { name: 'Save' }));
 
   expect(onSave).toHaveBeenCalledWith({ notes: 'Old machine', weightUnit: null, distanceUnit: 'imperial' });

@@ -53,7 +53,7 @@ export default function ExercisePreferencesForm({ preferences, settingsUnits, on
           className={inputClass}
         />
       </label>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="flex flex-col gap-3">
         <label className="flex min-w-0 flex-col gap-1 text-sm">
           <span>Weight unit</span>
           <select
@@ -61,7 +61,7 @@ export default function ExercisePreferencesForm({ preferences, settingsUnits, on
             onChange={(event) => setWeightUnit(event.target.value as WeightUnit | '')}
             className={inputClass}
           >
-            <option value="">Same as settings ({settingsUnits.weightUnit})</option>
+            <option value="">Same as settings: {settingsUnits.weightUnit}</option>
             <option value="kg">kg</option>
             <option value="lb">lb</option>
           </select>
@@ -73,7 +73,7 @@ export default function ExercisePreferencesForm({ preferences, settingsUnits, on
             onChange={(event) => setDistanceUnit(event.target.value as DistanceUnit | '')}
             className={inputClass}
           >
-            <option value="">Same as settings ({DISTANCE_LABELS[settingsUnits.distanceUnit]})</option>
+            <option value="">Same as settings: {DISTANCE_LABELS[settingsUnits.distanceUnit]}</option>
             <option value="metric">{DISTANCE_LABELS.metric}</option>
             <option value="imperial">{DISTANCE_LABELS.imperial}</option>
           </select>
