@@ -5,6 +5,7 @@ import { exercises, sets } from '@/db/schema';
 import { getLocalSettings, updateSettings, type SettingsChange } from '@/db/settings';
 import { addSet, addWorkoutExercise, endWorkout, listWorkoutExercises, startWorkout } from '@/db/workouts';
 import type { SetValues } from '@/lib/sets';
+import { getUnits } from '@/lib/units';
 import { createTestDatabase } from '@/testing/database';
 import { renderWithDatabase } from '@/testing/render';
 import SetLog from './SetLog';
@@ -29,8 +30,8 @@ type Options = {
 
 async function setup({ settings = {}, lastTime = [], logged = [] }: Options = {}) {
   const { db } = await createTestDatabase();
-  const local = await getLocalSettings(db);
-  if (Object.keys(settings).length > 0) await updateSettings(db, local.id, settings);
+  let local = await getLocalSettings(db);
+  if (Object.keys(settings).length > 0) local = await updateSettings(db, local.id, settings);
   const exerciseId = crypto.randomUUID();
   await db.insert(exercises).values({
     id: exerciseId,
@@ -51,7 +52,7 @@ async function setup({ settings = {}, lastTime = [], logged = [] }: Options = {}
   const workout = await startWorkout(db, local.userId);
   await logAll(await addWorkoutExercise(db, workout.id, exerciseId), logged);
   const [item] = await listWorkoutExercises(db, workout.id);
-  return renderWithDatabase(<SetLog item={item} workoutId={workout.id} />, { db });
+  return renderWithDatabase(<SetLog item={item} workoutId={workout.id} units={getUnits(local)} />, { db });
 }
 
 async function savedSets(db: AppDatabase) {
@@ -96,7 +97,7 @@ describe('SetLog', () => {
     expect(screen.getByRole('textbox', { name: 'Reps' })).toHaveValue('3');
   });
 
-  test('use the weight unit from the settings', async () => {
+  test('use the units it is given', async () => {
     await setup({ settings: { weightUnit: 'lb' }, logged: [{ ...values, weightGrams: 20412, reps: 5 }] });
 
     expect(await screen.findByRole('list', { name: 'Sets' })).toHaveTextContent('45 lb × 5');

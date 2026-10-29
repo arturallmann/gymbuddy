@@ -23,7 +23,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
           items={items}
           onMove={move}
           onRemove={remove}
-          renderBody={(item) => <SetSummary workoutExerciseId={item.id} loadType={item.loadType} />}
+          renderBody={(item) => <SetSummary workoutExerciseId={item.id} exerciseId={item.exerciseId} loadType={item.loadType} />}
         />
       )}
       {picking ? (
