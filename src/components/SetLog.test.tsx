@@ -117,6 +117,51 @@ describe('SetLog', () => {
     expect(screen.queryByRole('textbox', { name: 'Notes' })).not.toBeInTheDocument();
   });
 
+  test('edit a logged set in the same form', async () => {
+    const { db, user } = await setup({ logged: [values, { ...values, reps: 6 }] });
+
+    await user.click(await screen.findByRole('button', { name: 'Edit set 1' }));
+    const reps = screen.getByRole('textbox', { name: 'Reps' });
+    expect(reps).toHaveValue('8');
+    await user.clear(reps);
+    await user.type(reps, '7');
+    await user.click(screen.getByRole('button', { name: 'Save set' }));
+
+    expect(await screen.findByRole('button', { name: 'Log set' })).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Sets' })).toHaveTextContent('60 kg × 7');
+    const saved = (await savedSets(db)).sort((a, b) => a.position - b.position);
+    expect(saved.map((set) => set.reps)).toEqual([7, 6]);
+  });
+
+  test('keep stored notes and RPE when a set is edited with their toggles off', async () => {
+    const { db, user } = await setup({
+      settings: { features: { rpe: false, setNotes: false } },
+      logged: [{ ...values, rpe: 9, notes: 'green band' }],
+    });
+
+    await user.click(await screen.findByRole('button', { name: 'Edit set 1' }));
+    const reps = screen.getByRole('textbox', { name: 'Reps' });
+    await user.clear(reps);
+    await user.type(reps, '5');
+    await user.click(screen.getByRole('button', { name: 'Save set' }));
+
+    await screen.findByRole('button', { name: 'Log set' });
+    const [set] = await savedSets(db);
+    expect(set).toMatchObject({ reps: 5, rpe: 9, notes: 'green band' });
+  });
+
+  test('cancel editing without changes', async () => {
+    const { db, user } = await setup({ logged: [values] });
+
+    await user.click(await screen.findByRole('button', { name: 'Edit set 1' }));
+    await user.clear(screen.getByRole('textbox', { name: 'Reps' }));
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(await screen.findByRole('button', { name: 'Log set' })).toBeInTheDocument();
+    const [set] = await savedSets(db);
+    expect(set.reps).toBe(8);
+  });
+
   test('remove a set', async () => {
     const { db, user } = await setup({ logged: [values] });
 

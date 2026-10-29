@@ -9,10 +9,13 @@ type Props = {
   loadType: LoadType;
   units: Units;
   onRemove: (id: string) => void;
+  // Tapping a set opens it for editing.
+  onEdit?: (id: string) => void;
+  editingId?: string | null;
 };
 
 // The logged sets of one workout exercise, with every stored value and notes.
-export default function SetList({ sets, loadType, units, onRemove }: Props) {
+export default function SetList({ sets, loadType, units, onRemove, onEdit, editingId }: Props) {
   if (sets.length === 0) {
     return null;
   }
@@ -21,10 +24,17 @@ export default function SetList({ sets, loadType, units, onRemove }: Props) {
       {sets.map((set, index) => (
         <li key={set.id} className="flex items-start gap-3">
           <span className="w-6 shrink-0 text-gray-500">{index + 1}</span>
-          <span className="min-w-0 flex-1 break-words">
+          <button
+            type="button"
+            aria-label={`Edit set ${index + 1}`}
+            aria-pressed={editingId === set.id}
+            disabled={!onEdit}
+            onClick={() => onEdit?.(set.id)}
+            className={`min-w-0 flex-1 break-words rounded text-left ${editingId === set.id ? 'text-sky-400' : ''}`}
+          >
             {formatSet(set, loadType, units)}
             {set.notes && <span className="block text-sm text-gray-500">{set.notes}</span>}
-          </span>
+          </button>
           <button
             type="button"
             aria-label={`Remove set ${index + 1}`}

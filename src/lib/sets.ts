@@ -56,8 +56,14 @@ export function setFormFields(exercise: SetFormExercise, features: FeatureToggle
   };
 }
 
-// Prefills the form from an earlier set. Notes and RPE start empty.
-export function setFormValues(source: SetValues | null, units: Units): SetFormValues {
+// Prefills the form from an earlier set. Notes and RPE start empty, unless
+// `mode` is 'edit': then the form shows every value of the set being edited.
+export function setFormValues(
+  source: SetValues | null,
+  units: Units,
+  mode: 'prefill' | 'edit' = 'prefill',
+): SetFormValues {
+  const editing = mode === 'edit';
   const distance = source?.distanceMeters != null ? metersToDistance(source.distanceMeters, units.distanceUnit) : null;
   return {
     weight: source?.weightGrams != null ? String(gramsToWeight(source.weightGrams, units.weightUnit)) : '',
@@ -65,31 +71,35 @@ export function setFormValues(source: SetValues | null, units: Units): SetFormVa
     duration: source?.durationSeconds != null ? formatDuration(source.durationSeconds) : '',
     distance: distance ? String(distance.value) : '',
     distanceUnit: distance?.unit ?? DISTANCE_INPUT_UNITS[units.distanceUnit][1],
-    rpe: '',
+    rpe: editing && source?.rpe != null ? String(source.rpe) : '',
     setType: source?.setType ?? 'normal',
-    notes: '',
+    notes: editing ? (source?.notes ?? '') : '',
   };
 }
 
 export type ParsedSet = { ok: true; values: SetValues } | { ok: false; error: string };
 
 // Turns the form into stored values: grams, seconds and meters.
-// Inputs the form does not show are ignored.
+// Inputs the form does not show keep the value of `base`, the set being edited,
+// so a feature toggle that is off never deletes data.
 export function parseSetForm(
   form: SetFormValues,
   exercise: SetFormExercise,
   features: FeatureToggles,
   units: Units,
+  base?: SetValues,
 ): ParsedSet {
   const fields = setFormFields(exercise, features);
+  const keep = <K extends keyof SetValues>(key: K, shown: boolean, empty: SetValues[K]): SetValues[K] =>
+    shown ? empty : (base?.[key] ?? empty);
   const values: SetValues = {
-    setType: fields.setType ? form.setType : 'normal',
-    weightGrams: null,
-    reps: null,
-    durationSeconds: null,
-    distanceMeters: null,
-    rpe: null,
-    notes: null,
+    setType: fields.setType ? form.setType : keep('setType', false, 'normal'),
+    weightGrams: keep('weightGrams', fields.weight, null),
+    reps: keep('reps', fields.reps, null),
+    durationSeconds: keep('durationSeconds', fields.duration, null),
+    distanceMeters: keep('distanceMeters', fields.distance, null),
+    rpe: keep('rpe', fields.rpe, null),
+    notes: keep('notes', fields.notes, null),
   };
 
   if (fields.weight && form.weight.trim()) {

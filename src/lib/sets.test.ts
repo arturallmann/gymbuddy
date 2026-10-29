@@ -95,6 +95,30 @@ describe('parseSetForm', () => {
   });
 });
 
+describe('editing a set', () => {
+  const stored = set({ weightGrams: 60000, reps: 8, rpe: 9, notes: 'belt', setType: 'failure' });
+
+  test('show every value of the set, also notes and RPE', () => {
+    expect(setFormValues(stored, kg, 'edit')).toMatchObject({
+      weight: '60',
+      reps: '8',
+      rpe: '9',
+      notes: 'belt',
+      setType: 'failure',
+    });
+  });
+
+  test('keep the values of hidden inputs, so a toggle that is off deletes nothing', () => {
+    const form = { ...setFormValues(stored, kg, 'edit'), reps: '6' };
+    expect(parseSetForm(form, curl, none, kg, stored)).toEqual({ ok: true, values: { ...stored, reps: 6 } });
+  });
+
+  test('clear a shown value when the user empties its input', () => {
+    const form = { ...setFormValues(stored, kg, 'edit'), notes: '' };
+    expect(parseSetForm(form, curl, all, kg, stored)).toEqual({ ok: true, values: { ...stored, notes: null } });
+  });
+});
+
 describe('setFormValues', () => {
   test('start empty without an earlier set', () => {
     expect(empty).toMatchObject({ weight: '', reps: '', duration: '', distance: '', distanceUnit: 'km', setType: 'normal' });

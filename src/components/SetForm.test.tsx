@@ -85,3 +85,24 @@ describe('SetForm', () => {
     expect(onLog).not.toHaveBeenCalled();
   });
 });
+
+test('use another button label and offer Cancel', async () => {
+  const user = userEvent.setup();
+  const onCancel = vi.fn();
+  render(
+    <SetForm
+      exercise={curl}
+      units={kg}
+      features={off}
+      initial={setFormValues(null, kg)}
+      onLog={vi.fn()}
+      submitLabel="Save set"
+      onCancel={onCancel}
+    />,
+  );
+
+  expect(screen.getByRole('button', { name: 'Save set' })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Log set' })).not.toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: 'Cancel' }));
+  expect(onCancel).toHaveBeenCalledOnce();
+});

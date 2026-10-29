@@ -18,6 +18,10 @@ type Props = {
   features: FeatureToggles;
   initial: SetFormValues;
   onLog: (values: SetValues) => Promise<void>;
+  // The set being edited. Hidden inputs keep its values.
+  base?: SetValues;
+  submitLabel?: string;
+  onCancel?: () => void;
 };
 
 const inputClass = 'w-full min-w-0 rounded-lg border px-3 py-2 text-black';
@@ -34,7 +38,16 @@ function Field({ label, children, hint }: { label: string; children: ReactNode; 
 
 // Inputs for one set. Which inputs show depends on the exercise's load type,
 // its tracked fields and the feature toggles.
-export default function SetForm({ exercise, units, features, initial, onLog }: Props) {
+export default function SetForm({
+  exercise,
+  units,
+  features,
+  initial,
+  onLog,
+  base,
+  submitLabel = 'Log set',
+  onCancel,
+}: Props) {
   const [form, setForm] = useState(initial);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -43,11 +56,11 @@ export default function SetForm({ exercise, units, features, initial, onLog }: P
 
   return (
     <form
-      aria-label="Log set"
+      aria-label={submitLabel}
       className="flex flex-col gap-3"
       onSubmit={async (event) => {
         event.preventDefault();
-        const parsed = parseSetForm(form, exercise, features, units);
+        const parsed = parseSetForm(form, exercise, features, units, base);
         if (!parsed.ok) {
           setError(parsed.error);
           return;
@@ -154,13 +167,20 @@ export default function SetForm({ exercise, units, features, initial, onLog }: P
           {error}
         </p>
       )}
-      <button
-        type="submit"
-        disabled={saving}
-        className="rounded-lg bg-sky-600 px-4 py-2 font-semibold text-white disabled:opacity-50"
-      >
-        Log set
-      </button>
+      <div className="flex gap-3">
+        <button
+          type="submit"
+          disabled={saving}
+          className="flex-1 rounded-lg bg-sky-600 px-4 py-2 font-semibold text-white disabled:opacity-50"
+        >
+          {submitLabel}
+        </button>
+        {onCancel && (
+          <button type="button" onClick={onCancel} className="rounded-lg border px-4 py-2">
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 }

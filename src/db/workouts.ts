@@ -78,23 +78,39 @@ export type WorkoutExerciseItem = {
 const notDeletedIn = (workoutId: string) =>
   and(eq(workoutExercises.workoutId, workoutId), isNull(workoutExercises.deletedAt));
 
+const itemColumns = {
+  id: workoutExercises.id,
+  exerciseId: workoutExercises.exerciseId,
+  name: exercises.name,
+  position: workoutExercises.position,
+  loadType: exercises.loadType,
+  tracksReps: exercises.tracksReps,
+  tracksDuration: exercises.tracksDuration,
+  tracksDistance: exercises.tracksDistance,
+};
+
 // The workout exercises of a workout, in position order.
 export async function listWorkoutExercises(db: AppDatabase, workoutId: string): Promise<WorkoutExerciseItem[]> {
   return db
-    .select({
-      id: workoutExercises.id,
-      exerciseId: workoutExercises.exerciseId,
-      name: exercises.name,
-      position: workoutExercises.position,
-      loadType: exercises.loadType,
-      tracksReps: exercises.tracksReps,
-      tracksDuration: exercises.tracksDuration,
-      tracksDistance: exercises.tracksDistance,
-    })
+    .select(itemColumns)
     .from(workoutExercises)
     .innerJoin(exercises, eq(exercises.id, workoutExercises.exerciseId))
     .where(notDeletedIn(workoutId))
     .orderBy(asc(workoutExercises.position));
+}
+
+// One workout exercise with its workout id, or null when it does not exist or was deleted.
+export async function getWorkoutExercise(
+  db: AppDatabase,
+  id: string,
+): Promise<(WorkoutExerciseItem & { workoutId: string }) | null> {
+  const [item] = await db
+    .select({ ...itemColumns, workoutId: workoutExercises.workoutId })
+    .from(workoutExercises)
+    .innerJoin(exercises, eq(exercises.id, workoutExercises.exerciseId))
+    .innerJoin(workouts, eq(workouts.id, workoutExercises.workoutId))
+    .where(and(eq(workoutExercises.id, id), isNull(workoutExercises.deletedAt), isNull(workouts.deletedAt)));
+  return item ?? null;
 }
 
 // Adds an exercise at the end of the workout. One transaction, so two adds at
@@ -173,6 +189,14 @@ export async function addSet(
     await tx.insert(sets).values({ ...values, id, workoutExerciseId, position: (last ?? 0) + 1, completedAt });
   });
   return id;
+}
+
+// Writes changed values to a logged set. Position and completion time stay.
+export async function updateSet(db: AppDatabase, id: string, values: SetValues) {
+  await db
+    .update(sets)
+    .set(values)
+    .where(and(eq(sets.id, id), isNull(sets.deletedAt)));
 }
 
 export async function deleteSet(db: AppDatabase, id: string, deletedAt: Date = new Date()) {

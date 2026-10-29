@@ -47,3 +47,16 @@ test('remove a set', async () => {
 
   expect(onRemove).toHaveBeenCalledWith('a');
 });
+
+test('open a set for editing and mark it', async () => {
+  const user = userEvent.setup();
+  const onEdit = vi.fn();
+  const units = { weightUnit: 'kg', distanceUnit: 'metric' } as const;
+  const { rerender } = render(<SetList sets={[base]} loadType="external" units={units} onRemove={vi.fn()} onEdit={onEdit} />);
+
+  await user.click(screen.getByRole('button', { name: 'Edit set 1' }));
+  expect(onEdit).toHaveBeenCalledWith('a');
+
+  rerender(<SetList sets={[base]} loadType="external" units={units} onRemove={vi.fn()} onEdit={onEdit} editingId="a" />);
+  expect(screen.getByRole('button', { name: 'Edit set 1' })).toHaveAttribute('aria-pressed', 'true');
+});
