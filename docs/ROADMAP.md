@@ -38,6 +38,9 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **2.5** Exercise browser with muscle group filter, images and instructions. Images ship in the app (decision 021).
 - [ ] **2.6** Custom exercises.
 - [ ] **2.7** Exercise preferences: standing notes and unit override per exercise.
+  The workout exercise page also shows the exercise's first image (behind the `exerciseImages` toggle),
+  a short description (category, equipment and primary muscle groups, or `exercises.description` when set)
+  and a link to the exercise's page in the exercise browser.
   Done when: an exercise with a lb override shows lb in its set form, history and chart, while other exercises keep the global unit.
 
 ## Phase 3 — Export and cool-down phase
@@ -72,10 +75,12 @@ Starts when the basic features above work, so the details can be tuned in one go
   The ↑ and ↓ buttons from 2.2 go away, or stay only for screen readers.
   Probably needs a drag library (for example dnd-kit); say why in the task summary.
   Done when: reordering by drag works on a phone, and scrolling the page does not start a drag.
-- [ ] **4b.2** The phone's Back button goes back one page instead of closing the app.
-  On the home page it closes the app as before. Needs the Capacitor App plugin (`backButton` event),
-  wrapped in `src/native/`.
-  Done when: Back from a workout exercise page opens the workout, and Back from the workout opens home.
+- [ ] **4b.2** Fix every Android Back action: today the Back button and the Back gesture close the app on every page.
+  Back first closes what is open on the page (the exercise picker, a confirm step, a set being edited),
+  then goes back one page. Only on the home page does it close the app.
+  Needs the Capacitor App plugin (`backButton` event), wrapped in `src/native/`.
+  Done when: on a phone, Back never closes the app outside the home page, for example
+  workout exercise page → workout → home, exercise detail → exercises → home, workout detail → workout history → home.
 - [ ] **4b.3** Make "Remove" for a workout exercise and "Remove" for a set look different,
   so a tap meant for a set never removes the whole workout exercise (for example an icon, or a confirm step).
 - [ ] **4b.4** Update exercise images when the phone is online.
