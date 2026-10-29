@@ -60,6 +60,17 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [ ] **4.2** Chart view per exercise for weight, reps, duration and distance only.
   Done when: note-only exercises show the history view and no chart.
 
+## Phase 4b — Interface polish
+
+Starts when the basic features above work, so the details can be tuned in one go.
+
+- [ ] **4b.1** Drag to reorder workout exercises.
+  A drag handle on the right of each workout exercise starts a drag right away.
+  A short hold anywhere on the workout exercise also starts a drag from where the finger is.
+  The ↑ and ↓ buttons from 2.2 go away, or stay only for screen readers.
+  Probably needs a drag library (for example dnd-kit); say why in the task summary.
+  Done when: reordering by drag works on a phone, and scrolling the page does not start a drag.
+
 ## Phase 5 — Online (later)
 
 - [ ] Backups to a server.

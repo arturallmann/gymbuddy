@@ -38,9 +38,9 @@ export default function ExercisePicker({ onPick, onClose }: Props) {
           autoFocus
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          className="flex-1 rounded-lg border px-3 py-2 text-black"
+          className="min-w-0 flex-1 rounded-lg border px-3 py-2 text-black"
         />
-        <button type="button" onClick={onClose} className="text-sky-600">
+        <button type="button" onClick={onClose} className="shrink-0 text-sky-600">
           Cancel
         </button>
       </div>
@@ -51,7 +51,7 @@ export default function ExercisePicker({ onPick, onClose }: Props) {
             <button
               type="button"
               onClick={() => onPick(exercise)}
-              className="w-full border-b py-3 text-left"
+              className="w-full break-words border-b py-3 text-left"
             >
               {exercise.name}
             </button>
