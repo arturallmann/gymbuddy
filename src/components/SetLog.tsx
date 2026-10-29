@@ -9,7 +9,7 @@ import { getUnits } from '@/lib/units';
 import SetForm from './SetForm';
 import SetList from './SetList';
 
-// The sets of one workout exercise: last time's sets, what was logged and the set form.
+// The sets of one workout exercise: last time's sets, the set form, then what was logged.
 // Tapping a logged set opens it for editing in the same form.
 export default function SetLog({ item, workoutId }: { item: WorkoutExerciseItem; workoutId: string }) {
   const { settings } = useSettings();
@@ -34,17 +34,6 @@ export default function SetLog({ item, workoutId }: { item: WorkoutExerciseItem;
             .join(', ')}
         </p>
       )}
-      <SetList
-        sets={sets}
-        loadType={item.loadType}
-        units={units}
-        editingId={editingId}
-        onEdit={(id) => setEditingId(id === editingId ? null : id)}
-        onRemove={async (id) => {
-          if (id === editingId) setEditingId(null);
-          await remove(id);
-        }}
-      />
       {editing ? (
         <SetForm
           key={`edit-${editing.id}`}
@@ -70,6 +59,17 @@ export default function SetLog({ item, workoutId }: { item: WorkoutExerciseItem;
           onLog={add}
         />
       )}
+      <SetList
+        sets={sets}
+        loadType={item.loadType}
+        units={units}
+        editingId={editingId}
+        onEdit={(id) => setEditingId(id === editingId ? null : id)}
+        onRemove={async (id) => {
+          if (id === editingId) setEditingId(null);
+          await remove(id);
+        }}
+      />
     </div>
   );
 }

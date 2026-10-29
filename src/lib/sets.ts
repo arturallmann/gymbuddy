@@ -77,6 +77,17 @@ export function setFormValues(
   };
 }
 
+// The title of the section with the extra inputs: "RPE, set type and notes", "Notes",
+// or null when the feature toggles hide all of them.
+export function extraFieldsLabel(fields: Pick<ReturnType<typeof setFormFields>, 'rpe' | 'setType' | 'notes'>): string | null {
+  const labels = [fields.rpe && 'RPE', fields.setType && 'set type', fields.notes && 'notes'].filter(
+    (label): label is string => Boolean(label),
+  );
+  if (labels.length === 0) return null;
+  const text = labels.length > 1 ? `${labels.slice(0, -1).join(', ')} and ${labels.at(-1)}` : labels[0];
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export type ParsedSet = { ok: true; values: SetValues } | { ok: false; error: string };
 
 // Turns the form into stored values: grams, seconds and meters.

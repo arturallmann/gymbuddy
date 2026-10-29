@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { DEFAULT_FEATURES, type FeatureToggles } from '@/db/schema';
-import { formatSet, parseSetForm, setFormFields, setFormValues, type SetFormExercise, type SetValues } from './sets';
+import { extraFieldsLabel, formatSet, parseSetForm, setFormFields, setFormValues, type SetFormExercise, type SetValues } from './sets';
 import type { Units } from './units';
 
 const kg: Units = { weightUnit: 'kg', distanceUnit: 'metric' };
@@ -169,5 +169,14 @@ describe('formatSet', () => {
     expect(formatSet(set({ weightGrams: 60000, reps: 8, rpe: 8, setType: 'dropset' }), 'external', kg)).toBe(
       '60 kg × 8 · RPE 8 · Drop set',
     );
+  });
+});
+
+describe('extraFieldsLabel', () => {
+  test('name the extra inputs that the feature toggles show', () => {
+    expect(extraFieldsLabel({ rpe: true, setType: true, notes: true })).toBe('RPE, set type and notes');
+    expect(extraFieldsLabel({ rpe: false, setType: true, notes: true })).toBe('Set type and notes');
+    expect(extraFieldsLabel({ rpe: false, setType: false, notes: true })).toBe('Notes');
+    expect(extraFieldsLabel({ rpe: false, setType: false, notes: false })).toBeNull();
   });
 });
