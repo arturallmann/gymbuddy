@@ -60,3 +60,10 @@ test('open a set for editing and mark it', async () => {
   rerender(<SetList sets={[base]} loadType="external" units={units} onRemove={vi.fn()} onEdit={onEdit} editingId="a" />);
   expect(screen.getByRole('button', { name: 'Edit set 1' })).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('show the sets read-only without onEdit and onRemove', () => {
+  render(<SetList sets={[base]} loadType="external" units={{ weightUnit: 'kg', distanceUnit: 'metric' }} />);
+
+  expect(screen.getByRole('listitem')).toHaveTextContent('60 kg × 8');
+  expect(screen.queryByRole('button')).not.toBeInTheDocument();
+});
