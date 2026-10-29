@@ -56,6 +56,7 @@ Rules:
 | `renderWithDatabase(ui, { settings, db })` | `render.tsx` | Renders inside the database and settings providers. Returns `{ db, user, ... }`; `user` is a `userEvent` instance. Pass `db` to write rows before rendering. |
 | `savedSettings(db)` | `render.tsx` | Reads the saved settings. |
 | `createFakePlugin()` | `plugin.ts` | Fake `SQLiteConnection` for testing `src/db/client.ts`. |
+| `addTestLibrary(db)` | `exercises.ts` | Two library exercises with muscle groups, images and instructions. |
 
 Pages that use `next/navigation` mock it with `vi.mock('next/navigation', ...)`
 (see `src/components/SetupGate.test.tsx`).

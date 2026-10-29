@@ -12,6 +12,9 @@ export default function Home() {
       <Link href="/history" className="mt-6 text-sky-600">
         Workout history
       </Link>
+      <Link href="/exercises" className="text-sky-600">
+        Exercises
+      </Link>
       <Link href="/settings" className="text-sky-600">
         Settings
       </Link>
