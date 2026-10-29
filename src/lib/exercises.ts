@@ -1,5 +1,6 @@
 // Display helpers for exercises. Pure functions: no database, no React.
-import type { Category } from '@/db/schema';
+import type { CustomExerciseInput } from '@/db/exercises';
+import type { Category, LoadType } from '@/db/schema';
 
 // Where the bundled image lives in the app: "3_4_Sit-Up/0.jpg" → "/exercise-images/3_4_Sit-Up/0.jpg".
 export function exerciseImageUrl(path: string): string {
@@ -11,6 +12,13 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   cardio: 'Cardio',
   stretch: 'Stretch',
   mobility: 'Mobility',
+};
+
+// How the set form reads a set's weight (docs/DATA_MODEL.md, load types).
+export const LOAD_TYPE_LABELS: Record<LoadType, string> = {
+  external: 'Weight (barbell, dumbbell, machine)',
+  bodyweight: 'Bodyweight, with optional added weight',
+  none: 'No weight',
 };
 
 // "body only" → "Body only". The library stores equipment in lower case.
@@ -25,3 +33,16 @@ export function instructionSteps(instructions: string | null): string[] {
     .map((step) => step.trim())
     .filter((step) => step.length > 0);
 }
+
+// A new custom exercise starts as a strength exercise with weight and reps.
+export const EMPTY_CUSTOM_EXERCISE: CustomExerciseInput = {
+  name: '',
+  category: 'strength',
+  equipment: null,
+  loadType: 'external',
+  tracksReps: true,
+  tracksDuration: false,
+  tracksDistance: false,
+  primaryMuscleGroupIds: [],
+  secondaryMuscleGroupIds: [],
+};

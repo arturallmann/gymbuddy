@@ -11,7 +11,11 @@ async function setup(exerciseImages = true) {
   return renderWithDatabase(<ExerciseBrowser />, { db, settings: { features: { exerciseImages } } });
 }
 
-const names = () => screen.getAllByRole('link').map((link) => link.querySelector('span span')?.textContent);
+const names = () =>
+  screen
+    .getAllByRole('link')
+    .filter((link) => link.getAttribute('href')?.startsWith('/exercises/detail'))
+    .map((link) => link.querySelector('span span')?.textContent);
 
 describe('ExerciseBrowser', () => {
   test('list every exercise by name', async () => {
@@ -41,6 +45,12 @@ describe('ExerciseBrowser', () => {
     await waitFor(() => expect(names()).toEqual(['Barbell Curl']));
     await user.selectOptions(screen.getByRole('combobox', { name: 'Muscle group' }), 'Chest');
     expect(await screen.findByText('No exercise found.')).toBeInTheDocument();
+  });
+
+  test('link to a new custom exercise', async () => {
+    await setup();
+
+    expect(await screen.findByRole('link', { name: 'New custom exercise' })).toHaveAttribute('href', '/exercises/edit');
   });
 
   test('show images when the exerciseImages toggle is on', async () => {

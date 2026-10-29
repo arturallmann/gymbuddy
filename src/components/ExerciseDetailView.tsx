@@ -2,17 +2,19 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
-import { getExerciseDetail, type ExerciseDetail } from '@/db/exercises';
+import { deleteCustomExercise, getExerciseDetail, type ExerciseDetail } from '@/db/exercises';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
 import { CATEGORY_LABELS, equipmentLabel, exerciseImageUrl, instructionSteps } from '@/lib/exercises';
+import ConfirmAction from './ConfirmAction';
 
 // One exercise: images, category, equipment, muscle groups, description and instructions.
 // The exercise id comes from the address: /exercises/detail?id=…
 export default function ExerciseDetailView() {
   const db = useDatabase();
+  const router = useRouter();
   const { userId } = useSettings().settings;
   const features = useFeatures();
   const id = useSearchParams().get('id');
@@ -49,6 +51,7 @@ export default function ExerciseDetailView() {
           <div>
             <h1 className="break-words text-2xl font-bold">{exercise.name}</h1>
             <p className="text-gray-500">
+              {exercise.source === 'custom' && 'Custom exercise · '}
               {CATEGORY_LABELS[exercise.category]}
               {exercise.equipment && ` · ${equipmentLabel(exercise.equipment)}`}
             </p>
@@ -80,6 +83,23 @@ export default function ExerciseDetailView() {
             </p>
           )}
           {exercise.description && <p className="break-words">{exercise.description}</p>}
+          {exercise.source === 'custom' && (
+            <div className="flex flex-col items-start gap-4">
+              <Link href={`/exercises/edit?id=${exercise.id}`} className="rounded-lg border px-4 py-2 font-semibold">
+                Edit
+              </Link>
+              <ConfirmAction
+                label="Delete exercise"
+                question="Delete this exercise? Workouts that used it keep their sets."
+                confirmLabel="Delete"
+                keepLabel="Keep exercise"
+                onConfirm={async () => {
+                  await deleteCustomExercise(db, userId, exercise.id);
+                  router.push('/exercises');
+                }}
+              />
+            </div>
+          )}
           {steps.length > 0 && (
             <section className="flex flex-col gap-2">
               <h2 className="text-lg font-semibold">Instructions</h2>

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { listMuscleGroups, searchExercises, type ExerciseListItem } from '@/db/exercises';
@@ -38,6 +39,9 @@ export default function ExerciseBrowser() {
 
   return (
     <div className="flex flex-col gap-4">
+      <Link href="/exercises/edit" className="rounded-lg border px-4 py-2 text-center font-semibold">
+        New custom exercise
+      </Link>
       <input
         type="search"
         aria-label="Search exercises"
