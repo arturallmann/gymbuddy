@@ -116,8 +116,17 @@ free-exercise-db images of the pinned commit (about 100 MB). They are not in git
 `scripts/download-exercise-images.mjs` fetches them before `npm run dev` and `npm run build`.
 Updating images when the phone is online, and images for custom exercises, come later (Phase 4b).
 
+## 022 — Export: display units, CSV with commas, Excel through ExcelJS
+Date: 2026-10-29
+The export has one row per set. Weight is in the exercise's unit (its unit override, otherwise the
+settings) with a unit column; duration is in seconds; distance is in m or km (ft or mi) with a unit
+column. People read the file, and the numbers still work in formulas.
+CSV is comma separated, UTF-8 with a byte order mark, so spreadsheet apps read letters such as ä.
+The `.xlsx` file comes from ExcelJS (MIT, on npm). It loads only when the user exports, so it does
+not slow the app start. SheetJS was rejected: its npm package is old, and newer versions install
+only from its own server.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
 - Keep Next.js, or move to Vite + React?
-- Excel library: SheetJS or ExcelJS?
