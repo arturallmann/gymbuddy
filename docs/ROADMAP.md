@@ -47,7 +47,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
 ## Phase 3 — Export and cool-down phase (current)
 
 - [x] **3.1** CSV export of all sets, from the settings page (decision 022).
-- [ ] **3.2** Excel export.
+- [x] **3.2** Excel export (`.xlsx` through ExcelJS, decision 022).
 - [ ] **3.3** Cool-down phase with stretch timer.
 
 ## Phase 3b — Supersets and templates

@@ -49,6 +49,20 @@ describe('ExportData', () => {
     expect(native.shareFile).toHaveBeenCalledWith('file:///cache/export', 'Gymbuddy export');
   });
 
+  test('export every set as an Excel file', async () => {
+    const db = await withSets();
+    const { user } = await renderWithDatabase(<ExportData />, { db });
+
+    await user.click(screen.getByRole('button', { name: 'Export Excel' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/Exported 2 sets to gymbuddy-.*\.xlsx\./);
+    const [name, data, mimeType] = native.saveFile.mock.calls[0];
+    expect(name).toMatch(/\.xlsx$/);
+    expect(data).toBeInstanceOf(Uint8Array);
+    expect(mimeType).toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    expect(native.shareFile).toHaveBeenCalled();
+  });
+
   test('skip the share menu in the browser, where the file downloads', async () => {
     const db = await withSets();
     native.saveFile.mockResolvedValue(null);

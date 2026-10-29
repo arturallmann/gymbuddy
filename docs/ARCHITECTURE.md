@@ -72,9 +72,11 @@ docs/             Project documentation
 ## Export
 
 1. `src/db/export.ts` returns one row per set, in workout and position order.
-2. `src/lib/csv.ts` builds CSV text. An Excel library builds `.xlsx` files.
-3. `src/native/files.ts` saves the file with the Filesystem plugin.
-4. `src/native/share.ts` opens the phone's share menu.
+2. `src/lib/exportTable.ts` turns the rows into a table in display units (decision 022).
+3. `src/lib/csv.ts` builds CSV text; `src/lib/excel.ts` builds `.xlsx` files with ExcelJS, loaded only on export.
+4. `src/native/files.ts` saves the file to the cache folder with the Filesystem plugin (in the browser it downloads).
+5. `src/native/share.ts` opens the phone's share menu.
+The Export section on the settings page (`src/components/ExportData.tsx`) runs these steps.
 
 ## Future sync (not built yet)
 
