@@ -12,12 +12,14 @@ import { createTestDatabase } from './database';
 type Options = {
   // Settings to save before rendering, such as { setupCompletedAt: new Date() }.
   settings?: SettingsChange;
+  // A database from createTestDatabase() with rows written before rendering.
+  db?: AppDatabase;
 };
 
 // Renders `ui` inside DatabaseProvider's context and SettingsProvider, and
 // waits until the settings have loaded.
 export async function renderWithDatabase(ui: ReactNode, options: Options = {}) {
-  const { db } = await createTestDatabase();
+  const db = options.db ?? (await createTestDatabase()).db;
   if (options.settings) {
     const settings = await getLocalSettings(db);
     await updateSettings(db, settings.id, options.settings);

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `workouts_user_active_idx` ON `workouts` (`userId`) WHERE "endedAt" IS NULL AND "deletedAt" IS NULL;
