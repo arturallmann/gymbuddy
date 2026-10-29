@@ -72,6 +72,12 @@ Starts when the basic features above work, so the details can be tuned in one go
   The ↑ and ↓ buttons from 2.2 go away, or stay only for screen readers.
   Probably needs a drag library (for example dnd-kit); say why in the task summary.
   Done when: reordering by drag works on a phone, and scrolling the page does not start a drag.
+- [ ] **4b.2** The phone's Back button goes back one page instead of closing the app.
+  On the home page it closes the app as before. Needs the Capacitor App plugin (`backButton` event),
+  wrapped in `src/native/`.
+  Done when: Back from a workout exercise page opens the workout, and Back from the workout opens home.
+- [ ] **4b.3** Make "Remove" for a workout exercise and "Remove" for a set look different,
+  so a tap meant for a set never removes the whole workout exercise (for example an icon, or a confirm step).
 
 ## Phase 5 — Online (later)
 
