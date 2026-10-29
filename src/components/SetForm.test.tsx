@@ -106,3 +106,36 @@ test('use another button label and offer Cancel', async () => {
   await user.click(screen.getByRole('button', { name: 'Cancel' }));
   expect(onCancel).toHaveBeenCalledOnce();
 });
+
+describe('extra inputs', () => {
+  const section = () => screen.getByText('RPE, set type and notes').closest('details');
+
+  test('start closed for a new set and open on tap', async () => {
+    const { user } = renderForm(curl, on);
+
+    expect(section()).not.toHaveAttribute('open');
+    await user.click(screen.getByText('RPE, set type and notes'));
+    expect(section()).toHaveAttribute('open');
+  });
+
+  test('start open when the set has notes, RPE or a set type', () => {
+    render(
+      <SetForm
+        exercise={curl}
+        units={kg}
+        features={on}
+        initial={{ ...setFormValues(null, kg), notes: 'belt' }}
+        onLog={vi.fn()}
+      />,
+    );
+
+    expect(section()).toHaveAttribute('open');
+  });
+
+  test('leave the section out when the feature toggles hide all extra inputs', () => {
+    renderForm(curl, off);
+
+    expect(screen.queryByText(/set type/i)).not.toBeInTheDocument();
+    expect(document.querySelector('details')).toBeNull();
+  });
+});

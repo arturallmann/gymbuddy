@@ -4,6 +4,7 @@ import { useState, type ReactNode } from 'react';
 import { SET_TYPES, type FeatureToggles, type SetType } from '@/db/schema';
 import {
   SET_TYPE_LABELS,
+  extraFieldsLabel,
   parseSetForm,
   setFormFields,
   type SetFormExercise,
@@ -37,7 +38,8 @@ function Field({ label, children, hint }: { label: string; children: ReactNode; 
 }
 
 // Inputs for one set. Which inputs show depends on the exercise's load type,
-// its tracked fields and the feature toggles.
+// its tracked fields and the feature toggles. RPE, set type and notes sit in a
+// section that opens on tap, so the main inputs stay in view.
 export default function SetForm({
   exercise,
   units,
@@ -52,6 +54,11 @@ export default function SetForm({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const fields = setFormFields(exercise, features);
+  const extras = extraFieldsLabel(fields);
+  // Open when the set already has one of these values, so nothing stored is out of sight.
+  const [showExtras, setShowExtras] = useState(
+    initial.rpe !== '' || initial.notes !== '' || initial.setType !== 'normal',
+  );
   const change = (patch: Partial<SetFormValues>) => setForm((current) => ({ ...current, ...patch }));
 
   return (
@@ -131,36 +138,49 @@ export default function SetForm({
             </div>
           </Field>
         )}
-        {fields.rpe && (
-          <Field label="RPE">
-            <input
-              inputMode="decimal"
-              value={form.rpe}
-              onChange={(event) => change({ rpe: event.target.value })}
-              className={inputClass}
-            />
-          </Field>
-        )}
-        {fields.setType && (
-          <Field label="Set type">
-            <select
-              value={form.setType}
-              onChange={(event) => change({ setType: event.target.value as SetType })}
-              className={inputClass}
-            >
-              {SET_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {SET_TYPE_LABELS[type]}
-                </option>
-              ))}
-            </select>
-          </Field>
-        )}
       </div>
-      {fields.notes && (
-        <Field label="Notes">
-          <input value={form.notes} onChange={(event) => change({ notes: event.target.value })} className={inputClass} />
-        </Field>
+      {extras && (
+        <details
+          open={showExtras}
+          onToggle={(event) => setShowExtras(event.currentTarget.open)}
+          className="rounded-lg border px-3 py-2"
+        >
+          <summary className="cursor-pointer text-sm text-gray-400">{extras}</summary>
+          <div className="mt-3 flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              {fields.rpe && (
+                <Field label="RPE">
+                  <input
+                    inputMode="decimal"
+                    value={form.rpe}
+                    onChange={(event) => change({ rpe: event.target.value })}
+                    className={inputClass}
+                  />
+                </Field>
+              )}
+              {fields.setType && (
+                <Field label="Set type">
+                  <select
+                    value={form.setType}
+                    onChange={(event) => change({ setType: event.target.value as SetType })}
+                    className={inputClass}
+                  >
+                    {SET_TYPES.map((type) => (
+                      <option key={type} value={type}>
+                        {SET_TYPE_LABELS[type]}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              )}
+            </div>
+            {fields.notes && (
+              <Field label="Notes">
+                <input value={form.notes} onChange={(event) => change({ notes: event.target.value })} className={inputClass} />
+              </Field>
+            )}
+          </div>
+        </details>
       )}
       {error && (
         <p role="alert" className="text-sm text-red-600">
