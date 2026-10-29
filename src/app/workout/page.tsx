@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import DiscardWorkout from '@/components/DiscardWorkout';
 import ElapsedTime from '@/components/ElapsedTime';
+import WorkoutExercises from '@/components/WorkoutExercises';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
 
 export default function WorkoutPage() {
@@ -28,7 +29,7 @@ export default function WorkoutPage() {
           <p className="text-4xl">
             <ElapsedTime since={workout.startedAt} />
           </p>
-          <p className="text-gray-500">No exercises yet.</p>
+          <WorkoutExercises workoutId={workout.id} />
           <button
             type="button"
             disabled={ending}

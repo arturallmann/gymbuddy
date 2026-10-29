@@ -30,7 +30,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
 ## Phase 2 — Log workouts (current)
 
 - [x] **2.1** Start and end a workout. One active workout at a time; it can also be discarded.
-- [ ] **2.2** Add exercises to a workout; reorder them.
+- [x] **2.2** Add exercises to a workout; reorder them. Search by name; move up or down; remove.
 - [ ] **2.3** Log sets; the form follows the exercise's load type and tracked fields.
 - [ ] **2.4** Workout history list and workout detail page.
 - [ ] **2.5** Exercise browser with muscle group filter, images and instructions.
