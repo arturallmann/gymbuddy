@@ -38,7 +38,7 @@ src/
     workouts.ts   Queries for workouts, workout exercises and sets
     exercises.ts  Queries for exercises, muscle groups and images
     export.ts     Queries that build export rows
-  hooks/          React hooks, such as useSettings() and useFeatures()
+  hooks/          React hooks, such as useSettings(), useFeatures() and useActiveWorkout()
   lib/            Pure helpers (unit conversion, formatting, CSV building)
   testing/        Test helpers: test database, render with providers, fake plugin
   native/         Wrappers around Capacitor plugins

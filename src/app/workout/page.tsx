@@ -1,0 +1,56 @@
+'use client';
+
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import DiscardWorkout from '@/components/DiscardWorkout';
+import ElapsedTime from '@/components/ElapsedTime';
+import { useActiveWorkout } from '@/hooks/useActiveWorkout';
+
+export default function WorkoutPage() {
+  const { workout, end, discard } = useActiveWorkout();
+  const router = useRouter();
+  const [ending, setEnding] = useState(false);
+
+  if (workout === undefined) {
+    return null;
+  }
+  return (
+    <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-8 p-6">
+      <header className="flex items-center gap-4">
+        <Link href="/" className="text-sky-600">
+          ← Back
+        </Link>
+        <h1 className="text-2xl font-bold">Workout</h1>
+      </header>
+      {workout ? (
+        <>
+          <p className="text-4xl">
+            <ElapsedTime since={workout.startedAt} />
+          </p>
+          <p className="text-gray-500">No exercises yet.</p>
+          <button
+            type="button"
+            disabled={ending}
+            onClick={async () => {
+              setEnding(true);
+              await end();
+              router.push('/');
+            }}
+            className="rounded-lg bg-sky-600 px-6 py-3 font-semibold text-white disabled:opacity-50"
+          >
+            End workout
+          </button>
+          <DiscardWorkout
+            onDiscard={async () => {
+              await discard();
+              router.push('/');
+            }}
+          />
+        </>
+      ) : (
+        <p className="text-gray-500">No active workout.</p>
+      )}
+    </main>
+  );
+}

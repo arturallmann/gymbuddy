@@ -16,7 +16,7 @@ The source of truth is `src/db/schema.ts`. This file explains the meaning behind
 | exercise_preferences | The user's own settings for one exercise: standing notes and unit overrides. |
 | templates | A saved superset or routine. |
 | template_exercises | Exercises in a template, with order, superset key and optional targets. |
-| workouts | One workout, with start and end time. |
+| workouts | One workout, with start and end time. `endedAt` is NULL while it is the active workout (one per user). |
 | workout_groups | A superset, circuit or giant set inside one workout. |
 | workout_exercises | One exercise inside one workout, with order and phase. |
 | sets | One logged effort, with weight, reps, duration or distance. |

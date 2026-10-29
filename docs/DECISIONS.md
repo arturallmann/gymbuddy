@@ -94,6 +94,13 @@ The phone stores the version it seeded last in a new `app_state` table, not in `
 because it is not a choice of the user. The app loads the large library file only when the version changes.
 Seeding every start was rejected: about 870 upserts through native code on each start.
 
+## 019 — One active workout at a time
+Date: 2026-10-29
+A user has at most one active workout (started, not ended, not deleted). "Start workout" opens it
+when it exists. A partial unique index on `workouts.userId` (where `endedAt` and `deletedAt` are NULL)
+makes two taps at once still create one workout. "End workout" always keeps the workout;
+"Discard workout" deletes it after a confirm step.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
