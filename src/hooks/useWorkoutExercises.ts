@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
+import { listGroupRests, makeSuperset, ungroupWorkoutExercises } from '@/db/groups';
 import type { Phase } from '@/db/schema';
 import {
   addWorkoutExercise,
@@ -11,19 +12,33 @@ import {
   type WorkoutExerciseItem,
 } from '@/db/workouts';
 
-// The workout exercises of one workout. `items` is undefined while they load.
+async function loadAll(db: ReturnType<typeof useDatabase>, workoutId: string) {
+  const items = await listWorkoutExercises(db, workoutId);
+  const groupIds = [...new Set(items.flatMap((item) => (item.groupId ? [item.groupId] : [])))];
+  return { items, rests: await listGroupRests(db, groupIds) };
+}
+
+// The workout exercises of one workout, and the rest of each exercise group.
+// `items` is undefined while they load.
 export function useWorkoutExercises(workoutId: string) {
   const db = useDatabase();
   const [items, setItems] = useState<WorkoutExerciseItem[] | undefined>(undefined);
+  const [rests, setRests] = useState<Map<string, number | null>>(new Map());
 
   const reload = useCallback(async () => {
-    setItems(await listWorkoutExercises(db, workoutId));
+    const loaded = await loadAll(db, workoutId);
+    setItems(loaded.items);
+    setRests(loaded.rests);
   }, [db, workoutId]);
 
   useEffect(() => {
     let current = true;
-    listWorkoutExercises(db, workoutId)
-      .then((loaded) => current && setItems(loaded))
+    loadAll(db, workoutId)
+      .then((loaded) => {
+        if (!current) return;
+        setItems(loaded.items);
+        setRests(loaded.rests);
+      })
       .catch((reason: unknown) => console.error(reason));
     return () => {
       current = false;
@@ -54,5 +69,21 @@ export function useWorkoutExercises(workoutId: string) {
     [db, reload],
   );
 
-  return { items, add, move, remove };
+  const group = useCallback(
+    async (ids: string[]) => {
+      await makeSuperset(db, workoutId, ids);
+      await reload();
+    },
+    [db, workoutId, reload],
+  );
+
+  const ungroup = useCallback(
+    async (groupId: string) => {
+      await ungroupWorkoutExercises(db, groupId);
+      await reload();
+    },
+    [db, reload],
+  );
+
+  return { items, rests, add, move, remove, group, ungroup };
 }

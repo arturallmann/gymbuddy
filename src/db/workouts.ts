@@ -11,6 +11,7 @@ import {
   type Workout,
   type WorkoutSet,
 } from './schema';
+import { moveBlock } from '@/lib/blocks';
 import type { SetValues } from '@/lib/sets';
 
 const active = (userId: string) =>
@@ -85,6 +86,8 @@ export type WorkoutExerciseItem = {
   name: string;
   position: number;
   phase: Phase;
+  // The exercise group this workout exercise belongs to, or null.
+  groupId: string | null;
 } & Pick<Exercise, 'loadType' | 'tracksReps' | 'tracksDuration' | 'tracksDistance' | 'category' | 'defaultDurationSeconds'>;
 
 const notDeletedIn = (workoutId: string) =>
@@ -102,6 +105,7 @@ const itemColumns = {
   category: exercises.category,
   defaultDurationSeconds: exercises.defaultDurationSeconds,
   phase: workoutExercises.phase,
+  groupId: workoutExercises.groupId,
 };
 
 // The workout exercises of a workout, in position order.
@@ -147,8 +151,9 @@ export async function addWorkoutExercise(
   return id;
 }
 
-// Swaps the workout exercise with its neighbour above or below in the same phase.
-// Does nothing at the top or bottom of its phase.
+// Moves the workout exercise one block up or down inside its phase. A block is one workout
+// exercise or a whole exercise group, so group members stay together. Does nothing at the
+// top or bottom of the phase.
 export async function moveWorkoutExercise(db: AppDatabase, id: string, direction: 'up' | 'down') {
   await db.transaction(async (tx) => {
     const [row] = await tx
@@ -159,33 +164,50 @@ export async function moveWorkoutExercise(db: AppDatabase, id: string, direction
       throw new Error(`Workout exercise ${id} not found`);
     }
     const list = await tx
-      .select({ id: workoutExercises.id, position: workoutExercises.position })
+      .select({ id: workoutExercises.id, position: workoutExercises.position, groupId: workoutExercises.groupId })
       .from(workoutExercises)
       .where(and(notDeletedIn(row.workoutId), eq(workoutExercises.phase, row.phase)))
       .orderBy(asc(workoutExercises.position));
-    const index = list.findIndex((item) => item.id === id);
-    const other = list[direction === 'up' ? index - 1 : index + 1];
-    if (!other) {
-      return;
+    // The phase keeps its positions; only who holds which position changes.
+    const positions = list.map((item) => item.position);
+    const order = moveBlock(list, id, direction);
+    for (const [index, itemId] of order.entries()) {
+      if (list[index].id !== itemId) {
+        await tx.update(workoutExercises).set({ position: positions[index] }).where(eq(workoutExercises.id, itemId));
+      }
     }
-    const current = list[index];
-    await tx.update(workoutExercises).set({ position: other.position }).where(eq(workoutExercises.id, current.id));
-    await tx.update(workoutExercises).set({ position: current.position }).where(eq(workoutExercises.id, other.id));
   });
 }
 
 // Moves a workout exercise to another phase. Its position stays, so it keeps its
-// order among the exercises of the new phase.
+// order among the exercises of the new phase. A group member takes its whole group along.
 export async function changeWorkoutExercisePhase(db: AppDatabase, id: string, phase: Phase) {
-  await db
-    .update(workoutExercises)
-    .set({ phase })
-    .where(and(eq(workoutExercises.id, id), isNull(workoutExercises.deletedAt)));
+  await db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({ groupId: workoutExercises.groupId })
+      .from(workoutExercises)
+      .where(and(eq(workoutExercises.id, id), isNull(workoutExercises.deletedAt)));
+    if (!row) return;
+    await tx
+      .update(workoutExercises)
+      .set({ phase })
+      .where(
+        and(
+          row.groupId ? eq(workoutExercises.groupId, row.groupId) : eq(workoutExercises.id, id),
+          isNull(workoutExercises.deletedAt),
+        ),
+      );
+  });
 }
 
-// Deletes the workout exercise and its sets, in one transaction.
+// Deletes the workout exercise and its sets, in one transaction. A group left with one
+// member is no group any more, so that member becomes a single workout exercise again.
 export async function deleteWorkoutExercise(db: AppDatabase, id: string, deletedAt: Date = new Date()) {
   await db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({ groupId: workoutExercises.groupId })
+      .from(workoutExercises)
+      .where(and(eq(workoutExercises.id, id), isNull(workoutExercises.deletedAt)));
     await tx
       .update(sets)
       .set({ deletedAt })
@@ -194,6 +216,16 @@ export async function deleteWorkoutExercise(db: AppDatabase, id: string, deleted
       .update(workoutExercises)
       .set({ deletedAt })
       .where(and(eq(workoutExercises.id, id), isNull(workoutExercises.deletedAt)));
+    if (row?.groupId) {
+      const left = await tx
+        .select({ id: workoutExercises.id })
+        .from(workoutExercises)
+        .where(and(eq(workoutExercises.groupId, row.groupId), isNull(workoutExercises.deletedAt)));
+      if (left.length < 2) {
+        await tx.update(workoutExercises).set({ groupId: null }).where(eq(workoutExercises.groupId, row.groupId));
+        await tx.update(workoutGroups).set({ deletedAt }).where(eq(workoutGroups.id, row.groupId));
+      }
+    }
   });
 }
 

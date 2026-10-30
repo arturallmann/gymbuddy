@@ -54,7 +54,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
 
 ## Phase 3b — Supersets and templates (current)
 
-- [ ] **3b.1** Group exercises in a workout into a superset ("Make superset" action).
+- [x] **3b.1** Group exercises in a workout into a superset ("Make superset" action). Guided rounds on the group page (decision 025).
   Done when: the superset card shows one row per round and the rest timer starts after the last member.
 - [ ] **3b.2** Save a superset from a workout as a template.
 - [ ] **3b.3** Add a saved superset to a workout in one tap.
