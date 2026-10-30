@@ -116,8 +116,37 @@ free-exercise-db images of the pinned commit (about 100 MB). They are not in git
 `scripts/download-exercise-images.mjs` fetches them before `npm run dev` and `npm run build`.
 Updating images when the phone is online, and images for custom exercises, come later (Phase 4b).
 
+## 022 — Export: display units, CSV with commas, Excel through ExcelJS
+Date: 2026-10-29
+The export has one row per set. Weight is in the exercise's unit (its unit override, otherwise the
+settings) with a unit column; duration is in seconds; distance is in m or km (ft or mi) with a unit
+column. People read the file, and the numbers still work in formulas.
+CSV is comma separated, UTF-8 with a byte order mark, so spreadsheet apps read letters such as ä.
+The `.xlsx` file comes from ExcelJS (MIT, on npm). It loads only when the user exports, so it does
+not slow the app start. SheetJS was rejected: its npm package is old, and newer versions install
+only from its own server.
+
+## 023 — The stretch timer signals inside the app
+Date: 2026-10-29
+At zero the stretch timer vibrates through the Haptics plugin and plays a short tone through the
+Web Audio API, so the app needs no sound file. It counts from an end time, so it stays right when
+the phone pauses the app; the signal then comes when the app is back in front.
+A notification while the app is in the background needs the Local Notifications plugin and a
+permission prompt; it comes with the rest timer later (see `docs/IDEAS.md`).
+
+## 024 — Import reads the export format, checks everything first, skips what exists
+Date: 2026-10-29
+The app imports the CSV and `.xlsx` files it exports, so a user can move their data or edit it in a
+spreadsheet. Columns are found by their header. The whole file is checked first: if any row cannot be
+read, the app lists the rows and reasons and imports nothing, so a file is never half imported.
+The import itself runs in one transaction for the same reason.
+A workout whose date and start time (to the minute) already exist is skipped, so importing the same
+file twice changes nothing. Exercise names match library and custom exercises without regard to case;
+an unknown name becomes a custom exercise, with its load type from the file and its tracked fields from
+the columns that have values. The export gained an "End time" column; without it, an imported workout
+ends at its start time.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
 - Keep Next.js, or move to Vite + React?
-- Excel library: SheetJS or ExcelJS?

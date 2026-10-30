@@ -1,6 +1,16 @@
 import { and, asc, count, desc, eq, inArray, isNotNull, isNull, max, ne } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
-import { exercises, sets, workoutExercises, workoutGroups, workouts, type Exercise, type Workout, type WorkoutSet } from './schema';
+import {
+  exercises,
+  sets,
+  workoutExercises,
+  workoutGroups,
+  workouts,
+  type Exercise,
+  type Phase,
+  type Workout,
+  type WorkoutSet,
+} from './schema';
 import type { SetValues } from '@/lib/sets';
 
 const active = (userId: string) =>
@@ -74,7 +84,8 @@ export type WorkoutExerciseItem = {
   exerciseId: string;
   name: string;
   position: number;
-} & Pick<Exercise, 'loadType' | 'tracksReps' | 'tracksDuration' | 'tracksDistance'>;
+  phase: Phase;
+} & Pick<Exercise, 'loadType' | 'tracksReps' | 'tracksDuration' | 'tracksDistance' | 'category' | 'defaultDurationSeconds'>;
 
 const notDeletedIn = (workoutId: string) =>
   and(eq(workoutExercises.workoutId, workoutId), isNull(workoutExercises.deletedAt));
@@ -88,6 +99,9 @@ const itemColumns = {
   tracksReps: exercises.tracksReps,
   tracksDuration: exercises.tracksDuration,
   tracksDistance: exercises.tracksDistance,
+  category: exercises.category,
+  defaultDurationSeconds: exercises.defaultDurationSeconds,
+  phase: workoutExercises.phase,
 };
 
 // The workout exercises of a workout, in position order.
@@ -114,26 +128,31 @@ export async function getWorkoutExercise(
   return item ?? null;
 }
 
-// Adds an exercise at the end of the workout. One transaction, so two adds at
-// once still get different positions.
-export async function addWorkoutExercise(db: AppDatabase, workoutId: string, exerciseId: string): Promise<string> {
+// Adds an exercise at the end of the workout, in the given phase. One transaction,
+// so two adds at once still get different positions.
+export async function addWorkoutExercise(
+  db: AppDatabase,
+  workoutId: string,
+  exerciseId: string,
+  phase: Phase = 'main',
+): Promise<string> {
   const id = crypto.randomUUID();
   await db.transaction(async (tx) => {
     const [{ last }] = await tx
       .select({ last: max(workoutExercises.position).as('last') })
       .from(workoutExercises)
       .where(notDeletedIn(workoutId));
-    await tx.insert(workoutExercises).values({ id, workoutId, exerciseId, position: (last ?? 0) + 1 });
+    await tx.insert(workoutExercises).values({ id, workoutId, exerciseId, phase, position: (last ?? 0) + 1 });
   });
   return id;
 }
 
-// Swaps the workout exercise with its neighbour above or below.
-// Does nothing at the top or bottom of the list.
+// Swaps the workout exercise with its neighbour above or below in the same phase.
+// Does nothing at the top or bottom of its phase.
 export async function moveWorkoutExercise(db: AppDatabase, id: string, direction: 'up' | 'down') {
   await db.transaction(async (tx) => {
     const [row] = await tx
-      .select({ workoutId: workoutExercises.workoutId })
+      .select({ workoutId: workoutExercises.workoutId, phase: workoutExercises.phase })
       .from(workoutExercises)
       .where(and(eq(workoutExercises.id, id), isNull(workoutExercises.deletedAt)));
     if (!row) {
@@ -142,7 +161,7 @@ export async function moveWorkoutExercise(db: AppDatabase, id: string, direction
     const list = await tx
       .select({ id: workoutExercises.id, position: workoutExercises.position })
       .from(workoutExercises)
-      .where(notDeletedIn(row.workoutId))
+      .where(and(notDeletedIn(row.workoutId), eq(workoutExercises.phase, row.phase)))
       .orderBy(asc(workoutExercises.position));
     const index = list.findIndex((item) => item.id === id);
     const other = list[direction === 'up' ? index - 1 : index + 1];
@@ -153,6 +172,15 @@ export async function moveWorkoutExercise(db: AppDatabase, id: string, direction
     await tx.update(workoutExercises).set({ position: other.position }).where(eq(workoutExercises.id, current.id));
     await tx.update(workoutExercises).set({ position: current.position }).where(eq(workoutExercises.id, other.id));
   });
+}
+
+// Moves a workout exercise to another phase. Its position stays, so it keeps its
+// order among the exercises of the new phase.
+export async function changeWorkoutExercisePhase(db: AppDatabase, id: string, phase: Phase) {
+  await db
+    .update(workoutExercises)
+    .set({ phase })
+    .where(and(eq(workoutExercises.id, id), isNull(workoutExercises.deletedAt)));
 }
 
 // Deletes the workout exercise and its sets, in one transaction.

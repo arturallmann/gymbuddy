@@ -1,8 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { exercises, workoutExercises } from '@/db/schema';
-import { getLocalSettings } from '@/db/settings';
-import { listWorkoutExercises, startWorkout } from '@/db/workouts';
+import { getLocalSettings, updateSettings } from '@/db/settings';
+import { addWorkoutExercise, listWorkoutExercises, startWorkout } from '@/db/workouts';
 import { createTestDatabase } from '@/testing/database';
 import { renderWithDatabase } from '@/testing/render';
 import WorkoutExercises from './WorkoutExercises';
@@ -73,5 +73,49 @@ describe('WorkoutExercises', () => {
     expect(await names()).toEqual([]);
     const [row] = await db.select().from(workoutExercises);
     expect(row.deletedAt).not.toBeNull();
+  });
+});
+
+describe('phases', () => {
+  async function withStretch(phases: boolean, storedCooldown = false) {
+    const { db } = await createTestDatabase();
+    const local = await getLocalSettings(db);
+    await updateSettings(db, local.id, { features: { phases } });
+    const ids: string[] = [];
+    for (const [name, category] of [['Squat', 'strength'], ['Hamstring Stretch', 'stretch']] as const) {
+      const id = crypto.randomUUID();
+      await db.insert(exercises).values({ id, name, userId: local.userId, source: 'custom', category, loadType: 'none', tracksDuration: true });
+      ids.push(id);
+    }
+    const workout = await startWorkout(db, local.userId);
+    if (storedCooldown) {
+      await addWorkoutExercise(db, workout.id, ids[1], 'cooldown');
+    }
+    const rendered = await renderWithDatabase(<WorkoutExercises workoutId={workout.id} />, { db });
+    return { ...rendered, workout };
+  }
+
+  test('add stretches to the cool-down phase and show one section per phase', async () => {
+    const { db, user, workout } = await withStretch(true);
+    await addExercise(user, 'Squat');
+    await addExercise(user, 'Hamstring Stretch');
+
+    expect(screen.getByRole('region', { name: 'Main phase' })).toHaveTextContent('Squat');
+    expect(screen.getByRole('region', { name: 'Cool-down phase' })).toHaveTextContent('Hamstring Stretch');
+    expect((await listWorkoutExercises(db, workout.id)).map((item) => item.phase)).toEqual(['main', 'cooldown']);
+  });
+
+  test('add everything to the main phase when phases are off, without phase sections', async () => {
+    const { db, user, workout } = await withStretch(false);
+    await addExercise(user, 'Hamstring Stretch');
+
+    expect((await listWorkoutExercises(db, workout.id))[0].phase).toBe('main');
+    expect(screen.queryByRole('region', { name: 'Main phase' })).not.toBeInTheDocument();
+  });
+
+  test('still show a stored phase when phases are off', async () => {
+    await withStretch(false, true);
+
+    expect(await screen.findByRole('link', { name: /Hamstring Stretch/ })).toHaveTextContent('Cool-down phase');
   });
 });

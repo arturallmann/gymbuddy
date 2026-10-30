@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import ExportData from '@/components/ExportData';
 import FeatureSettings from '@/components/FeatureSettings';
+import ImportData from '@/components/ImportData';
 import UnitSettings from '@/components/UnitSettings';
 
 export default function SettingsPage() {
@@ -20,6 +22,11 @@ export default function SettingsPage() {
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">Features</h2>
         <FeatureSettings />
+      </section>
+      <section className="flex flex-col gap-4">
+        <h2 className="text-lg font-semibold">Export and import</h2>
+        <ExportData />
+        <ImportData />
       </section>
     </main>
   );

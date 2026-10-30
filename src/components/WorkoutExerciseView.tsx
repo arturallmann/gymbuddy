@@ -6,10 +6,12 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { getExerciseDetail, type ExerciseDetail } from '@/db/exercises';
-import { getWorkoutExercise, type WorkoutExerciseItem } from '@/db/workouts';
+import { PHASES, type Phase } from '@/db/schema';
+import { changeWorkoutExercisePhase, getWorkoutExercise, type WorkoutExerciseItem } from '@/db/workouts';
 import { useExercisePreferences } from '@/hooks/useExercisePreferences';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
 import { exerciseImageUrl, shortDescription } from '@/lib/exercises';
+import { PHASE_LABELS } from '@/lib/phases';
 import { getUnits } from '@/lib/units';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
 import SetLog from './SetLog';
@@ -93,6 +95,26 @@ export default function WorkoutExerciseView() {
                 <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
               </div>
             </details>
+          )}
+          {features.phases && (
+            <label className="flex items-center gap-3 text-sm">
+              <span className="shrink-0 text-gray-400">Phase</span>
+              <select
+                value={item.phase}
+                onChange={async (event) => {
+                  const phase = event.target.value as Phase;
+                  await changeWorkoutExercisePhase(db, item.id, phase);
+                  setLoaded((current) => (current ? { ...current, item: { ...current.item, phase } } : current));
+                }}
+                className="min-w-0 flex-1 rounded-lg border px-3 py-2 text-black"
+              >
+                {PHASES.map((phase) => (
+                  <option key={phase} value={phase}>
+                    {PHASE_LABELS[phase]}
+                  </option>
+                ))}
+              </select>
+            </label>
           )}
           {preferences !== undefined && <SetLog item={item} workoutId={item.workoutId} units={units} />}
         </>

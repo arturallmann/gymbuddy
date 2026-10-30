@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
+import type { Phase } from '@/db/schema';
 import {
   addWorkoutExercise,
   deleteWorkoutExercise,
@@ -30,8 +31,8 @@ export function useWorkoutExercises(workoutId: string) {
   }, [db, workoutId]);
 
   const add = useCallback(
-    async (exerciseId: string) => {
-      await addWorkoutExercise(db, workoutId, exerciseId);
+    async (exerciseId: string, phase: Phase = 'main') => {
+      await addWorkoutExercise(db, workoutId, exerciseId, phase);
       await reload();
     },
     [db, workoutId, reload],

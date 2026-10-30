@@ -5,6 +5,7 @@ import { getLocalSettings } from './settings';
 import {
   addSet,
   addWorkoutExercise,
+  changeWorkoutExercisePhase,
   deleteSet,
   getLastSets,
   getWorkout,
@@ -495,5 +496,61 @@ describe('workout history', () => {
     await deleteWorkout(db, workout.id);
     expect(await getWorkout(db, workout.id)).toBeNull();
     expect(await getWorkout(db, 'unknown')).toBeNull();
+  });
+});
+
+describe('phases', () => {
+  async function withWorkout() {
+    const { db, userId } = await setup();
+    const ids: Record<string, string> = {};
+    for (const name of ['Jog', 'Squat', 'Row', 'Hamstring Stretch']) {
+      ids[name] = crypto.randomUUID();
+      await db.insert(exercises).values({
+        id: ids[name],
+        source: 'custom',
+        name,
+        category: name.includes('Stretch') ? 'stretch' : 'strength',
+        loadType: 'none',
+        defaultDurationSeconds: name.includes('Stretch') ? 30 : null,
+      });
+    }
+    const workout = await startWorkout(db, userId);
+    return { db, ids, workout };
+  }
+
+  test('add a workout exercise in a phase, and list its phase, category and default duration', async () => {
+    const { db, ids, workout } = await withWorkout();
+    await addWorkoutExercise(db, workout.id, ids['Squat']);
+    await addWorkoutExercise(db, workout.id, ids['Hamstring Stretch'], 'cooldown');
+
+    expect((await listWorkoutExercises(db, workout.id)).map((item) => [item.name, item.phase, item.category, item.defaultDurationSeconds])).toEqual([
+      ['Squat', 'main', 'strength', null],
+      ['Hamstring Stretch', 'cooldown', 'stretch', 30],
+    ]);
+  });
+
+  test('move a workout exercise only among the exercises of its phase', async () => {
+    const { db, ids, workout } = await withWorkout();
+    const jog = await addWorkoutExercise(db, workout.id, ids['Jog'], 'warmup');
+    await addWorkoutExercise(db, workout.id, ids['Squat']);
+    await addWorkoutExercise(db, workout.id, ids['Hamstring Stretch'], 'cooldown');
+    const row = await addWorkoutExercise(db, workout.id, ids['Row']);
+    const names = async () => (await listWorkoutExercises(db, workout.id)).map((item) => item.name);
+
+    await moveWorkoutExercise(db, row, 'up');
+    expect(await names()).toEqual(['Jog', 'Row', 'Hamstring Stretch', 'Squat']);
+
+    await moveWorkoutExercise(db, row, 'up');
+    await moveWorkoutExercise(db, jog, 'down');
+    expect(await names()).toEqual(['Jog', 'Row', 'Hamstring Stretch', 'Squat']);
+  });
+
+  test('change the phase of a workout exercise', async () => {
+    const { db, ids, workout } = await withWorkout();
+    const stretch = await addWorkoutExercise(db, workout.id, ids['Hamstring Stretch']);
+
+    await changeWorkoutExercisePhase(db, stretch, 'cooldown');
+
+    expect((await listWorkoutExercises(db, workout.id))[0].phase).toBe('cooldown');
   });
 });
