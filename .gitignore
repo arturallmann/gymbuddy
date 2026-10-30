@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Knowledge graph of the repo (graphify, see docs/GRAPHIFY.md)
 /graphify-out/
+
+# Exercise images from free-exercise-db (scripts/download-exercise-images.mjs)
+/public/exercise-images/

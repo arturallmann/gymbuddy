@@ -16,7 +16,7 @@ The source of truth is `src/db/schema.ts`. This file explains the meaning behind
 | exercise_preferences | The user's own settings for one exercise: standing notes and unit overrides. |
 | templates | A saved superset or routine. |
 | template_exercises | Exercises in a template, with order, superset key and optional targets. |
-| workouts | One workout, with start and end time. |
+| workouts | One workout, with start and end time. `endedAt` is NULL while it is the active workout (one per user). |
 | workout_groups | A superset, circuit or giant set inside one workout. |
 | workout_exercises | One exercise inside one workout, with order and phase. |
 | sets | One logged effort, with weight, reps, duration or distance. |
@@ -176,3 +176,10 @@ the commit in `data/free-exercise-db/version.json` or `SEED_VERSION` in `src/db/
 `app_state.libraryVersion` holds the version the phone seeded last.
 Raise `SEED_VERSION` when `toLibraryExercise()` maps exercises differently.
 Exercises that free-exercise-db removes stay on the phone, because workouts and exercise preferences use them.
+
+### Custom exercises
+
+A custom exercise has `source = 'custom'`, `userId` set and `sourceId` NULL.
+The user chooses name, category, equipment, load type, tracked fields and muscle groups.
+Only custom exercises can change; library exercises change only through library updates.
+Deleting a custom exercise writes `deletedAt`: search no longer finds it, but workouts that used it still show it.

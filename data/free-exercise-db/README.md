@@ -10,5 +10,7 @@ Exercise library data from https://github.com/yuhonas/free-exercise-db
 and `exercise_images` tables. It runs on first start and again when the library version changes
 (the commit in `version.json` or `SEED_VERSION` in `seed.ts`).
 
-The images (about 100 MB) are not in this repository yet. `exercise_images.path`
-holds their path inside the free-exercise-db `exercises/` folder.
+The images (about 100 MB) are not in this repository. `scripts/download-exercise-images.mjs`
+downloads them for the commit in `version.json` into `public/exercise-images/` before
+`npm run dev` and `npm run build`, so the app bundles them (decision 021).
+`exercise_images.path` holds their path inside that folder, such as `3_4_Sit-Up/0.jpg`.

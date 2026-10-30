@@ -263,7 +263,11 @@ export const workouts = sqliteTable(
     templateId: text('templateId').references(() => templates.id),
     ...timestamps,
   },
-  (t) => [index('workouts_user_started_idx').on(t.userId, t.startedAt)],
+  (t) => [
+    index('workouts_user_started_idx').on(t.userId, t.startedAt),
+    // One active workout per user (decision 019): two starts at once still create one row.
+    uniqueIndex('workouts_user_active_idx').on(t.userId).where(sql`"endedAt" IS NULL AND "deletedAt" IS NULL`),
+  ],
 );
 
 export const workoutGroups = sqliteTable(

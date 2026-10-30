@@ -53,9 +53,10 @@ Rules:
 |---|---|---|
 | `createTestDatabase()` | `database.ts` | In-memory database with migrations. Returns `{ db, conn }`. |
 | `createTestConnection()` | `database.ts` | Plugin-like connection without migrations. |
-| `renderWithDatabase(ui, { settings })` | `render.tsx` | Renders inside the database and settings providers. Returns `{ db, user, ... }`; `user` is a `userEvent` instance. |
+| `renderWithDatabase(ui, { settings, db })` | `render.tsx` | Renders inside the database and settings providers. Returns `{ db, user, ... }`; `user` is a `userEvent` instance. Pass `db` to write rows before rendering. |
 | `savedSettings(db)` | `render.tsx` | Reads the saved settings. |
 | `createFakePlugin()` | `plugin.ts` | Fake `SQLiteConnection` for testing `src/db/client.ts`. |
+| `addTestLibrary(db)` | `exercises.ts` | Two library exercises with muscle groups, images and instructions. |
 
 Pages that use `next/navigation` mock it with `vi.mock('next/navigation', ...)`
 (see `src/components/SetupGate.test.tsx`).
@@ -67,6 +68,8 @@ not on the plugin. It cannot catch plugin bugs. Known plugin limits are guarded 
 (decision 016 in `docs/DECISIONS.md`) and have tests there:
 - RETURNING is rejected, because the plugin fakes it on Android and returns wrong rows.
 - Transactions go through the plugin's transaction API, because its web version ends raw `BEGIN`.
+- A computed column with a dot in its name, such as `count("sets"."id")`, is rejected,
+  because the plugin on Android cannot read it (decision 020).
 
 So a change to `src/db/` or startup also needs a check in the real app:
 1. `npm run dev` and try the change in the browser.

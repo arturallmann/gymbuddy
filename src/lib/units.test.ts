@@ -5,9 +5,11 @@ import {
   formatDuration,
   formatLoad,
   formatWeight,
+  formatWorkoutDuration,
   getUnits,
   gramsToWeight,
   metersToDistance,
+  parseDecimal,
   parseDuration,
   weightToGrams,
 } from './units';
@@ -139,5 +141,35 @@ describe('getUnits', () => {
       weightUnit: 'lb',
       distanceUnit: 'metric',
     });
+  });
+});
+
+describe('parseDecimal', () => {
+  test('read a point or a comma as the decimal mark', () => {
+    expect(parseDecimal('12.5')).toBe(12.5);
+    expect(parseDecimal(' 12,5 ')).toBe(12.5);
+    expect(parseDecimal('.5')).toBe(0.5);
+    expect(parseDecimal('20')).toBe(20);
+  });
+
+  test('read negative numbers', () => {
+    expect(parseDecimal('-20')).toBe(-20);
+  });
+
+  test('return null for empty or invalid input', () => {
+    expect(parseDecimal('')).toBeNull();
+    expect(parseDecimal('abc')).toBeNull();
+    expect(parseDecimal('1.2.3')).toBeNull();
+    expect(parseDecimal('1,2,3')).toBeNull();
+    expect(parseDecimal('-')).toBeNull();
+  });
+});
+
+describe('formatWorkoutDuration', () => {
+  test('show minutes, then hours and minutes', () => {
+    expect(formatWorkoutDuration(30)).toBe('< 1 min');
+    expect(formatWorkoutDuration(45 * 60 + 59)).toBe('45 min');
+    expect(formatWorkoutDuration(65 * 60)).toBe('1 h 5 min');
+    expect(formatWorkoutDuration(120 * 60)).toBe('2 h 0 min');
   });
 });
