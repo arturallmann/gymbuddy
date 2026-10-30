@@ -14,4 +14,5 @@ paths:
 - Group several writes in one transaction. Each call to the SQLite plugin crosses into native code.
 - Query functions return typed objects. They never return raw plugin rows.
 - Never use `.returning()`. The plugin fakes RETURNING on Android and returns wrong rows. Write rows with an id from `crypto.randomUUID()`, then select them by id. See decision 016 in `docs/DECISIONS.md`.
+- Name every computed column with `.as()`, such as `count(sets.id).as('setCount')`. In a join, an unnamed column is called `count("sets"."id")`, and the plugin on Android cannot read a column name with a dot. `src/db/driver.ts` rejects it. See decision 020.
 - Each query file has tests that run against an in-memory SQLite database (`createTestDatabase()` in `src/testing/database.ts`). See `docs/TESTING.md`.

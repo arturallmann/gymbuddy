@@ -69,5 +69,13 @@ export const migrations: Migration[] = [
       "CREATE TABLE `app_state` (\n\t`id` text PRIMARY KEY NOT NULL,\n\t`key` text NOT NULL,\n\t`value` text NOT NULL,\n\t`createdAt` integer NOT NULL,\n\t`updatedAt` integer NOT NULL,\n\t`deletedAt` integer\n);",
       "CREATE UNIQUE INDEX `app_state_key_unique` ON `app_state` (`key`);"
     ]
+  },
+  {
+    "tag": "0004_greedy_lady_ursula",
+    "when": 1793256754443,
+    "hash": "25d4a4ca0d7482d96612d2a9a7da5d7786cae3d343c5dcdc07b4c40aefe7ae17",
+    "statements": [
+      "CREATE UNIQUE INDEX `workouts_user_active_idx` ON `workouts` (`userId`) WHERE \"endedAt\" IS NULL AND \"deletedAt\" IS NULL;"
+    ]
   }
 ];

@@ -1,0 +1,66 @@
+// Display helpers for exercises. Pure functions: no database, no React.
+import type { CustomExerciseInput } from '@/db/exercises';
+import type { Category, Exercise, LoadType } from '@/db/schema';
+
+// Where the bundled image lives in the app: "3_4_Sit-Up/0.jpg" → "/exercise-images/3_4_Sit-Up/0.jpg".
+export function exerciseImageUrl(path: string): string {
+  return `/exercise-images/${path.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+export const CATEGORY_LABELS: Record<Category, string> = {
+  strength: 'Strength',
+  cardio: 'Cardio',
+  stretch: 'Stretch',
+  mobility: 'Mobility',
+};
+
+// How the set form reads a set's weight (docs/DATA_MODEL.md, load types).
+export const LOAD_TYPE_LABELS: Record<LoadType, string> = {
+  external: 'Weight (barbell, dumbbell, machine)',
+  bodyweight: 'Bodyweight, with optional added weight',
+  none: 'No weight',
+};
+
+// "body only" → "Body only". The library stores equipment in lower case.
+export function equipmentLabel(equipment: string): string {
+  return equipment.charAt(0).toUpperCase() + equipment.slice(1);
+}
+
+// The library stores instructions as one step per line.
+export function instructionSteps(instructions: string | null): string[] {
+  return (instructions ?? '')
+    .split('\n')
+    .map((step) => step.trim())
+    .filter((step) => step.length > 0);
+}
+
+// A new custom exercise starts as a strength exercise with weight and reps.
+export const EMPTY_CUSTOM_EXERCISE: CustomExerciseInput = {
+  name: '',
+  category: 'strength',
+  equipment: null,
+  loadType: 'external',
+  tracksReps: true,
+  tracksDuration: false,
+  tracksDistance: false,
+  primaryMuscleGroupIds: [],
+  secondaryMuscleGroupIds: [],
+};
+
+// One line about an exercise: its own description when it has one, otherwise
+// category, equipment and primary muscle groups, such as "Strength · Barbell · Biceps".
+export function shortDescription(
+  exercise: Pick<Exercise, 'description' | 'category' | 'equipment'>,
+  primaryMuscleGroups: string[],
+): string {
+  if (exercise.description?.trim()) {
+    return exercise.description.trim();
+  }
+  return [
+    CATEGORY_LABELS[exercise.category],
+    exercise.equipment ? equipmentLabel(exercise.equipment) : null,
+    primaryMuscleGroups.length > 0 ? primaryMuscleGroups.join(', ') : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
