@@ -146,6 +146,17 @@ an unknown name becomes a custom exercise, with its load type from the file and 
 the columns that have values. The export gained an "End time" column; without it, an imported workout
 ends at its start time.
 
+## 025 — Supersets: any number of exercises, guided rounds, rest after a round
+Date: 2026-10-30
+"Make superset" groups two or more workout exercises of one phase into one exercise group of type
+`superset`; giant set and circuit stay unused for now. The members move next to each other, where the
+first chosen one is, and from then on move up or down as one block. A group left with one member
+after a delete becomes a single workout exercise again.
+The group page guides the user through the rounds: the next exercise is the first one with the fewest
+sets (A → B → … → A), and a tap on the rounds table logs or edits any set instead.
+After the last set of a round, a rest timer counts down from `workout_groups.restSeconds`
+(default 90 s), behind the `restTimer` feature toggle.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

@@ -127,6 +127,12 @@ Library updates never change `exercise_preferences`.
 - Inside a group, `sets.position` is the round number. Round 1 = set 1 of each member.
 - The rest timer starts after the last member of a round. Rest length: `workout_groups.restSeconds`.
 - A user can group exercises during a workout, or add a saved superset template.
+- "Make superset" needs two or more workout exercises of one phase that are not in a group yet
+  (decision 025). They move next to each other; a group moves up or down as one block, and changing
+  the phase of one member changes it for the whole group.
+- "Ungroup" clears `groupId` on the members and deletes the group. A delete that leaves one member
+  does the same.
+- The `supersets` feature toggle hides "Make superset" and "Ungroup"; stored groups still show.
 
 ## Templates
 

@@ -2,7 +2,8 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { exercises, workoutExercises } from '@/db/schema';
 import { getLocalSettings, updateSettings } from '@/db/settings';
-import { addWorkoutExercise, listWorkoutExercises, startWorkout } from '@/db/workouts';
+import { makeSuperset } from '@/db/groups';
+import { addWorkoutExercise, changeWorkoutExercisePhase, listWorkoutExercises, startWorkout } from '@/db/workouts';
 import { createTestDatabase } from '@/testing/database';
 import { renderWithDatabase } from '@/testing/render';
 import WorkoutExercises from './WorkoutExercises';
@@ -117,5 +118,74 @@ describe('phases', () => {
     await withStretch(false, true);
 
     expect(await screen.findByRole('link', { name: /Hamstring Stretch/ })).toHaveTextContent('Cool-down phase');
+  });
+});
+
+describe('supersets', () => {
+  async function withThree(features: { supersets?: boolean; phases?: boolean } = {}) {
+    const { db } = await createTestDatabase();
+    const local = await getLocalSettings(db);
+    await updateSettings(db, local.id, { features: { supersets: true, phases: false, ...features } });
+    const workout = await startWorkout(db, local.userId);
+    const ids: string[] = [];
+    for (const name of ['Squat', 'Curl', 'Press']) {
+      const id = crypto.randomUUID();
+      await db.insert(exercises).values({ id, name, userId: local.userId, source: 'custom', category: 'strength', loadType: 'external', tracksReps: true });
+      ids.push(await addWorkoutExercise(db, workout.id, id));
+    }
+    return { db, workout, ids };
+  }
+
+  test('make a superset of chosen workout exercises', async () => {
+    const { db, workout } = await withThree();
+    const { user } = await renderWithDatabase(<WorkoutExercises workoutId={workout.id} />, { db });
+
+    await user.click(await screen.findByRole('button', { name: 'Make superset' }));
+    expect(screen.getByRole('button', { name: 'Make superset (0)' })).toBeDisabled();
+    await user.click(screen.getByRole('checkbox', { name: 'Press' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Curl' }));
+    await user.click(screen.getByRole('button', { name: 'Make superset (2)' }));
+
+    const card = await screen.findByRole('listitem', { name: 'Superset: Curl + Press' });
+    expect(card).toHaveTextContent('Superset · Rest 1:30');
+    const items = await listWorkoutExercises(db, workout.id);
+    expect(items.map((item) => [item.name, item.groupId !== null])).toEqual([
+      ['Squat', false],
+      ['Curl', true],
+      ['Press', true],
+    ]);
+  });
+
+  test('ungroup a superset', async () => {
+    const { db, workout, ids } = await withThree();
+    await makeSuperset(db, workout.id, [ids[1], ids[2]]);
+    const { user } = await renderWithDatabase(<WorkoutExercises workoutId={workout.id} />, { db });
+
+    await user.click(await screen.findByRole('button', { name: 'Ungroup' }));
+
+    expect(await screen.findByRole('link', { name: /^Curl/ })).toBeInTheDocument();
+    expect((await listWorkoutExercises(db, workout.id)).every((item) => item.groupId === null)).toBe(true);
+  });
+
+  test('hide Make superset and Ungroup when supersets are off, and still show a stored superset', async () => {
+    const { db, workout, ids } = await withThree({ supersets: false });
+    await makeSuperset(db, workout.id, [ids[1], ids[2]]);
+    await renderWithDatabase(<WorkoutExercises workoutId={workout.id} />, { db });
+
+    expect(await screen.findByRole('listitem', { name: 'Superset: Curl + Press' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Make superset' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ungroup' })).not.toBeInTheDocument();
+  });
+
+  test('let the user choose only workout exercises of one phase', async () => {
+    const { db, workout, ids } = await withThree({ phases: true });
+    await changeWorkoutExercisePhase(db, ids[2], 'cooldown');
+    const { user } = await renderWithDatabase(<WorkoutExercises workoutId={workout.id} />, { db });
+
+    await user.click(await screen.findByRole('button', { name: 'Make superset' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Squat' }));
+
+    expect(screen.getByRole('checkbox', { name: 'Curl' })).toBeEnabled();
+    expect(screen.getByRole('checkbox', { name: 'Press' })).toBeDisabled();
   });
 });
