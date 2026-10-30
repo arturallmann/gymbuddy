@@ -3,7 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { exercises, workoutExercises } from '@/db/schema';
 import { getLocalSettings, updateSettings } from '@/db/settings';
 import { makeSuperset } from '@/db/groups';
-import { addWorkoutExercise, changeWorkoutExercisePhase, listWorkoutExercises, startWorkout } from '@/db/workouts';
+import { saveGroupAsTemplate } from '@/db/templates';
+import { addWorkoutExercise, changeWorkoutExercisePhase, endWorkout, listWorkoutExercises, startWorkout } from '@/db/workouts';
 import { createTestDatabase } from '@/testing/database';
 import { renderWithDatabase } from '@/testing/render';
 import WorkoutExercises from './WorkoutExercises';
@@ -187,5 +188,42 @@ describe('supersets', () => {
 
     expect(screen.getByRole('checkbox', { name: 'Curl' })).toBeEnabled();
     expect(screen.getByRole('checkbox', { name: 'Press' })).toBeDisabled();
+  });
+});
+
+describe('saved supersets', () => {
+  async function withSavedSuperset(templatesOn: boolean) {
+    const { db } = await createTestDatabase();
+    const local = await getLocalSettings(db);
+    await updateSettings(db, local.id, { features: { supersets: true, templates: templatesOn, phases: false } });
+    const first = await startWorkout(db, local.userId);
+    const ids: string[] = [];
+    for (const name of ['Curl', 'Press']) {
+      const id = crypto.randomUUID();
+      await db.insert(exercises).values({ id, name, userId: local.userId, source: 'custom', category: 'strength', loadType: 'external', tracksReps: true });
+      ids.push(await addWorkoutExercise(db, first.id, id));
+    }
+    await saveGroupAsTemplate(db, local.userId, await makeSuperset(db, first.id, ids, 60), 'Arms');
+    await endWorkout(db, first.id);
+    const workout = await startWorkout(db, local.userId);
+    const rendered = await renderWithDatabase(<WorkoutExercises workoutId={workout.id} />, { db });
+    return { ...rendered, workout };
+  }
+
+  test('add a saved superset to the workout in one tap', async () => {
+    const { db, user, workout } = await withSavedSuperset(true);
+
+    await user.click(await screen.findByRole('button', { name: 'Add saved superset' }));
+    await user.click(await screen.findByRole('button', { name: /Arms/ }));
+
+    expect(await screen.findByRole('listitem', { name: 'Superset: Curl + Press' })).toHaveTextContent('Rest 1:00');
+    expect((await listWorkoutExercises(db, workout.id)).map((item) => item.name)).toEqual(['Curl', 'Press']);
+  });
+
+  test('hide Add saved superset when templates are off', async () => {
+    await withSavedSuperset(false);
+
+    expect(await screen.findByRole('button', { name: 'Add exercise' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add saved superset' })).not.toBeInTheDocument();
   });
 });

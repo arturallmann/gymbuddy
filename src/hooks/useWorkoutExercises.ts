@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { listGroupRests, makeSuperset, ungroupWorkoutExercises } from '@/db/groups';
 import type { Phase } from '@/db/schema';
+import { addTemplateToWorkout } from '@/db/templates';
 import {
   addWorkoutExercise,
   deleteWorkoutExercise,
@@ -85,5 +86,13 @@ export function useWorkoutExercises(workoutId: string) {
     [db, reload],
   );
 
-  return { items, rests, add, move, remove, group, ungroup };
+  const addTemplate = useCallback(
+    async (templateId: string) => {
+      await addTemplateToWorkout(db, workoutId, templateId);
+      await reload();
+    },
+    [db, workoutId, reload],
+  );
+
+  return { items, rests, add, addTemplate, move, remove, group, ungroup };
 }

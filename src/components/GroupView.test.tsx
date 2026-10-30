@@ -4,8 +4,8 @@ import { getWorkoutGroup, makeSuperset } from '@/db/groups';
 import { saveExercisePreferences } from '@/db/preferences';
 import { exercises } from '@/db/schema';
 import { getLocalSettings, updateSettings } from '@/db/settings';
-import { listTemplates } from '@/db/templates';
-import { addSet, addWorkoutExercise, listSets, startWorkout } from '@/db/workouts';
+import { addTemplateToWorkout, listTemplates, saveGroupAsTemplate } from '@/db/templates';
+import { addSet, addWorkoutExercise, deleteWorkout, listSets, listWorkoutExercises, startWorkout } from '@/db/workouts';
 import { createTestDatabase } from '@/testing/database';
 import { renderWithDatabase } from '@/testing/render';
 import GroupView from './GroupView';
@@ -175,6 +175,22 @@ describe('GroupView', () => {
 
     expect(await screen.findByRole('heading', { name: 'Round 1 · Curl' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Save superset' })).not.toBeInTheDocument();
+  });
+
+  test('prefill from the saved superset’s targets when an exercise has no last time', async () => {
+    const { db, userId, ids, groupId } = await setup();
+    await addSet(db, ids[0], { ...values, weightGrams: 25000, reps: 6 });
+    const templateId = await saveGroupAsTemplate(db, userId, groupId, 'Arms');
+    await deleteWorkout(db, (await getWorkoutGroup(db, groupId))!.group.workoutId);
+    const workout = await startWorkout(db, userId);
+    const [curl] = await addTemplateToWorkout(db, workout.id, templateId);
+    const copied = (await listWorkoutExercises(db, workout.id)).find((item) => item.id === curl)!;
+    navigation.params = new URLSearchParams({ id: copied.groupId! });
+    await renderWithDatabase(<GroupView />, { db });
+
+    const form = await screen.findByRole('region', { name: 'Next set' });
+    expect(within(form).getByRole('textbox', { name: 'Weight (kg)' })).toHaveValue('25');
+    expect(within(form).getByRole('textbox', { name: 'Reps' })).toHaveValue('6');
   });
 
   test('say so when the superset does not exist', async () => {

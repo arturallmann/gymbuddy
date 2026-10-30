@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { defaultSupersetName, formatTargets } from './templates';
+import { defaultSupersetName, formatTargets, targetsAsSet } from './templates';
 
 const kg = { weightUnit: 'kg', distanceUnit: 'metric' } as const;
 const none = { targetSets: null, targetReps: null, targetWeightGrams: null, targetDurationSeconds: null, targetDistanceMeters: null };
@@ -13,4 +13,18 @@ test('write targets with the number of sets in the display units', () => {
 
 test('name a new saved superset after its exercises', () => {
   expect(defaultSupersetName(['Curl', 'Press'])).toBe('Curl + Press');
+});
+
+test('turn targets into a set for the prefill, or null without values', () => {
+  expect(targetsAsSet({ ...none, targetSets: 3, targetReps: 8, targetWeightGrams: 22500 })).toEqual({
+    setType: 'normal',
+    weightGrams: 22500,
+    reps: 8,
+    durationSeconds: null,
+    distanceMeters: null,
+    rpe: null,
+    notes: null,
+  });
+  expect(targetsAsSet({ ...none, targetSets: 3 })).toBeNull();
+  expect(targetsAsSet(null)).toBeNull();
 });

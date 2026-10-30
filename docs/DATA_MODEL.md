@@ -145,6 +145,9 @@ Library updates never change `exercise_preferences`.
 - A saved superset made from a workout (decision 026) has one row per exercise, all with the same
   `groupKey`, the group's `groupType` and `restSeconds`, and targets from the sets logged in the group.
 - Deleting a template writes `deletedAt` to it and its `template_exercises`. Workouts that used it keep their copies.
+- Template targets reach the set form through the origin of a workout exercise: its group's `templateId`,
+  otherwise its workout's `templateId` (a routine). Only the prefill reads them; the structure of the
+  workout never does.
 
 ## Charts and history
 

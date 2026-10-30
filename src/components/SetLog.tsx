@@ -5,6 +5,7 @@ import type { WorkoutExerciseItem } from '@/db/workouts';
 import { useFeatures } from '@/hooks/useSettings';
 import { useSets } from '@/hooks/useSets';
 import { formatSet, setFormValues, type SetValues } from '@/lib/sets';
+import { targetsAsSet } from '@/lib/templates';
 import type { Units } from '@/lib/units';
 import SetForm from './SetForm';
 import SetList from './SetList';
@@ -34,15 +35,16 @@ type Props = {
 // Tapping a logged set opens it for editing in the same form.
 export default function SetLog({ item, workoutId, units }: Props) {
   const features = useFeatures();
-  const { sets, lastSets, add, update, remove } = useSets(item.id, item.exerciseId, workoutId);
+  const { sets, lastSets, targets, add, update, remove } = useSets(item.id, item.exerciseId, workoutId);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   if (sets === undefined || lastSets === undefined) {
     return null;
   }
   const editing = sets.find((set) => set.id === editingId) ?? null;
-  // Prefill: the same set number last time, otherwise the previous set in this workout.
-  const source = lastSets[sets.length] ?? sets.at(-1) ?? null;
+  // Prefill: the same set number last time, otherwise the previous set in this workout,
+  // otherwise the template targets (DATA_MODEL prefill order).
+  const source = lastSets[sets.length] ?? sets.at(-1) ?? targetsAsSet(targets);
   // The stretch timer belongs to the phases feature toggle (docs/DATA_MODEL.md).
   const showTimer =
     features.phases && item.tracksDuration && (item.category === 'stretch' || item.defaultDurationSeconds !== null);

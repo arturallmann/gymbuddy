@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { listExercisePreferences } from '@/db/preferences';
 import type { WorkoutSet } from '@/db/schema';
+import { getTemplateTargets, type Targets } from '@/db/templates';
 import { addSet, deleteSet, getLastSets, listSets, updateSet, type WorkoutExerciseItem } from '@/db/workouts';
 import type { SetValues } from '@/lib/sets';
 import { getUnits, type Units } from '@/lib/units';
@@ -13,6 +14,7 @@ type GroupSets = {
   // Per member, in member order.
   sets: WorkoutSet[][];
   lastSets: WorkoutSet[][];
+  targets: (Targets | null)[];
   units: Units[];
 };
 
@@ -30,11 +32,12 @@ export function useGroupSets(members: WorkoutExerciseItem[], workoutId: string) 
       settings.userId,
       members.map((member) => member.exerciseId),
     );
-    const [sets, lastSets] = await Promise.all([
+    const [sets, lastSets, targets] = await Promise.all([
       Promise.all(members.map((member) => listSets(db, member.id))),
       Promise.all(members.map((member) => getLastSets(db, member.exerciseId, workoutId))),
+      Promise.all(members.map((member) => getTemplateTargets(db, member.id))),
     ]);
-    return { sets, lastSets, units: members.map((member) => getUnits(settings, preferences.get(member.exerciseId))) };
+    return { sets, lastSets, targets, units: members.map((member) => getUnits(settings, preferences.get(member.exerciseId))) };
     // `key` stands for the members; the array itself changes on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db, settings, workoutId, key]);

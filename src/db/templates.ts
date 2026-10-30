@@ -1,7 +1,17 @@
-import { and, asc, desc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, max } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
 import { getWorkoutGroup } from './groups';
-import { exercises, templateExercises, templates, type Exercise, type TemplateExercise, type TemplateKind } from './schema';
+import {
+  exercises,
+  templateExercises,
+  templates,
+  workoutExercises,
+  workoutGroups,
+  workouts,
+  type Exercise,
+  type TemplateExercise,
+  type TemplateKind,
+} from './schema';
 import { listSets } from './workouts';
 
 // The group key of the one exercise group in a saved superset.
@@ -128,4 +138,93 @@ export async function deleteTemplate(db: AppDatabase, userId: string, id: string
       .where(and(eq(templateExercises.templateId, id), isNull(templateExercises.deletedAt)));
     await tx.update(templates).set({ deletedAt }).where(eq(templates.id, id));
   });
+}
+
+// Copies a template into a workout, after its last workout exercise (decision 011): new workout
+// exercises with the template's phases, and a new exercise group per group key that records the
+// template it came from. The workout never reads template rows for its structure afterwards,
+// so later template changes never change the workout. One transaction.
+export async function addTemplateToWorkout(db: AppDatabase, workoutId: string, templateId: string): Promise<string[]> {
+  const ids: string[] = [];
+  await db.transaction(async (tx) => {
+    const rows = await tx
+      .select()
+      .from(templateExercises)
+      .where(and(eq(templateExercises.templateId, templateId), isNull(templateExercises.deletedAt)))
+      .orderBy(asc(templateExercises.position));
+    const [{ last }] = await tx
+      .select({ last: max(workoutExercises.position).as('last') })
+      .from(workoutExercises)
+      .where(and(eq(workoutExercises.workoutId, workoutId), isNull(workoutExercises.deletedAt)));
+    const groups = new Map<string, string>();
+    for (const [index, row] of rows.entries()) {
+      let groupId: string | null = null;
+      if (row.groupKey) {
+        groupId = groups.get(row.groupKey) ?? null;
+        if (!groupId) {
+          groupId = crypto.randomUUID();
+          groups.set(row.groupKey, groupId);
+          await tx.insert(workoutGroups).values({
+            id: groupId,
+            workoutId,
+            groupType: row.groupType ?? 'superset',
+            restSeconds: row.restSeconds,
+            templateId,
+          });
+        }
+      }
+      const id = crypto.randomUUID();
+      await tx.insert(workoutExercises).values({
+        id,
+        workoutId,
+        exerciseId: row.exerciseId,
+        position: (last ?? 0) + index + 1,
+        phase: row.phase,
+        groupId,
+      });
+      ids.push(id);
+    }
+  });
+  return ids;
+}
+
+export type Targets = Pick<
+  TemplateExercise,
+  'targetSets' | 'targetReps' | 'targetWeightGrams' | 'targetDurationSeconds' | 'targetDistanceMeters'
+>;
+
+// The template targets for a workout exercise, or null. The template is the one its exercise group
+// or its workout (a routine) came from. Only the set form's prefill reads them (DATA_MODEL).
+export async function getTemplateTargets(db: AppDatabase, workoutExerciseId: string): Promise<Targets | null> {
+  const [row] = await db
+    .select({
+      exerciseId: workoutExercises.exerciseId,
+      groupTemplateId: workoutGroups.templateId,
+      workoutTemplateId: workouts.templateId,
+    })
+    .from(workoutExercises)
+    .innerJoin(workouts, eq(workouts.id, workoutExercises.workoutId))
+    .leftJoin(workoutGroups, eq(workoutGroups.id, workoutExercises.groupId))
+    .where(eq(workoutExercises.id, workoutExerciseId));
+  const templateId = row?.groupTemplateId ?? row?.workoutTemplateId;
+  if (!row || !templateId) return null;
+  const [targets] = await db
+    .select({
+      targetSets: templateExercises.targetSets,
+      targetReps: templateExercises.targetReps,
+      targetWeightGrams: templateExercises.targetWeightGrams,
+      targetDurationSeconds: templateExercises.targetDurationSeconds,
+      targetDistanceMeters: templateExercises.targetDistanceMeters,
+    })
+    .from(templateExercises)
+    .where(
+      and(
+        eq(templateExercises.templateId, templateId),
+        eq(templateExercises.exerciseId, row.exerciseId),
+        isNull(templateExercises.deletedAt),
+      ),
+    )
+    .orderBy(asc(templateExercises.position))
+    .limit(1);
+  return targets ?? null;
 }
