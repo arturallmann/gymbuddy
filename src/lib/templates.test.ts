@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { defaultSupersetName, formatTargets, targetsAsSet } from './templates';
+import { defaultRoutineName, defaultSupersetName, formatTargets, targetsAsSet } from './templates';
 
 const kg = { weightUnit: 'kg', distanceUnit: 'metric' } as const;
 const none = { targetSets: null, targetReps: null, targetWeightGrams: null, targetDurationSeconds: null, targetDistanceMeters: null };
@@ -27,4 +27,8 @@ test('turn targets into a set for the prefill, or null without values', () => {
   });
   expect(targetsAsSet({ ...none, targetSets: 3 })).toBeNull();
   expect(targetsAsSet(null)).toBeNull();
+});
+
+test('name a new routine after the weekday of the workout', () => {
+  expect(defaultRoutineName(new Date(2026, 9, 29, 9, 0), 'en-GB')).toBe('Thursday routine');
 });

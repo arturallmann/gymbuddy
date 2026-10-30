@@ -2,15 +2,19 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { defaultSupersetName } from '@/lib/templates';
 
 type Props = {
-  names: string[];
+  // "Save superset" or "Save as routine".
+  label: string;
+  defaultName: string;
+  // Where the saved templates are listed, such as "/routines".
+  listHref: string;
+  listLabel: string;
   onSave: (name: string) => Promise<void>;
 };
 
-// "Save superset": asks for a name, then saves the group as a saved superset.
-export default function SaveSuperset({ names, onSave }: Props) {
+// Asks for a name, then saves a template: a saved superset or a routine.
+export default function SaveTemplate({ label, defaultName, listHref, listLabel, onSave }: Props) {
   const [name, setName] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
 
@@ -21,17 +25,17 @@ export default function SaveSuperset({ names, onSave }: Props) {
           type="button"
           onClick={() => {
             setSaved(null);
-            setName(defaultSupersetName(names));
+            setName(defaultName);
           }}
           className="rounded-lg border px-4 py-2 font-semibold"
         >
-          Save superset
+          {label}
         </button>
         {saved && (
           <p role="status" className="text-sm text-gray-400">
             Saved as “{saved}”.{' '}
-            <Link href="/saved-supersets" className="text-sky-600">
-              Saved supersets
+            <Link href={listHref} className="text-sky-600">
+              {listLabel}
             </Link>
           </p>
         )}
@@ -40,7 +44,7 @@ export default function SaveSuperset({ names, onSave }: Props) {
   }
   return (
     <form
-      aria-label="Save superset"
+      aria-label={label}
       className="flex flex-col gap-2"
       onSubmit={async (event) => {
         event.preventDefault();

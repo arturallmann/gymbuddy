@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, test, vi } from 'vitest';
-import SaveSuperset from './SaveSuperset';
+import SaveTemplate from './SaveTemplate';
 
-test('suggest a name from the exercises, save it and confirm', async () => {
+test('suggest the default name, save it and confirm with a link to the list', async () => {
   const user = userEvent.setup();
   const onSave = vi.fn().mockResolvedValue(undefined);
-  render(<SaveSuperset names={['Curl', 'Press']} onSave={onSave} />);
+  render(<SaveTemplate label="Save superset" defaultName="Curl + Press" listHref="/saved-supersets" listLabel="Saved supersets" onSave={onSave} />);
 
   await user.click(screen.getByRole('button', { name: 'Save superset' }));
   const name = screen.getByRole('textbox', { name: 'Name' });
@@ -23,7 +23,7 @@ test('suggest a name from the exercises, save it and confirm', async () => {
 test('refuse an empty name and cancel without saving', async () => {
   const user = userEvent.setup();
   const onSave = vi.fn();
-  render(<SaveSuperset names={['Curl', 'Press']} onSave={onSave} />);
+  render(<SaveTemplate label="Save superset" defaultName="Curl + Press" listHref="/saved-supersets" listLabel="Saved supersets" onSave={onSave} />);
 
   await user.click(screen.getByRole('button', { name: 'Save superset' }));
   await user.clear(screen.getByRole('textbox', { name: 'Name' }));

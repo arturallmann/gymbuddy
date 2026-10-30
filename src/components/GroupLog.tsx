@@ -7,11 +7,11 @@ import { useGroupSets } from '@/hooks/useGroupSets';
 import { useFeatures } from '@/hooks/useSettings';
 import { nextMemberIndex, roundComplete, roundRows } from '@/lib/rounds';
 import { formatSet, setFormValues, type SetValues } from '@/lib/sets';
-import { targetsAsSet } from '@/lib/templates';
+import { defaultSupersetName, targetsAsSet } from '@/lib/templates';
 import { stepDuration } from '@/lib/timer';
 import { formatDuration } from '@/lib/units';
 import RestTimer from './RestTimer';
-import SaveSuperset from './SaveSuperset';
+import SaveTemplate from './SaveTemplate';
 import SetForm from './SetForm';
 
 type Props = {
@@ -168,7 +168,15 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
         </table>
       )}
 
-      {onSaveTemplate && <SaveSuperset names={members.map((item) => item.name)} onSave={onSaveTemplate} />}
+      {onSaveTemplate && (
+        <SaveTemplate
+          label="Save superset"
+          defaultName={defaultSupersetName(members.map((item) => item.name))}
+          listHref="/saved-supersets"
+          listLabel="Saved supersets"
+          onSave={onSaveTemplate}
+        />
+      )}
 
       {onUngroup && (
         <button type="button" onClick={onUngroup} className="self-start text-sky-600">

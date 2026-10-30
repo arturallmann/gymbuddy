@@ -167,6 +167,16 @@ The set form uses targets only when an exercise has no last workout yet (prefill
 `templates` feature toggles are both on. The "Saved supersets" page lists, renames and deletes them;
 it still lists stored saved supersets when the toggles are off.
 
+## 027 — Routines: save any workout, start from the Routines page
+Date: 2026-10-30
+"Save as routine" on the active workout page and on a past workout's detail page copies the whole
+workout into a template of kind `routine`, with the same rules as a saved superset (decision 026):
+order, phases, each exercise group with its own `groupKey`, type and rest, and targets from the logged sets.
+The Routines page (home page link, `templates` feature toggle) lists, renames and deletes routines.
+"Start" starts a workout from a routine in one transaction: the new workout records the routine in
+`workouts.templateId` and gets a copy of its rows. While a workout is active, the page offers
+"Continue workout" instead (decision 019).
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

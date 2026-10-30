@@ -3,7 +3,8 @@ import { describe, expect, test } from 'vitest';
 import type { AppDatabase } from '@/db/driver';
 import { exercises, sets } from '@/db/schema';
 import { getLocalSettings, updateSettings, type SettingsChange } from '@/db/settings';
-import { addSet, addWorkoutExercise, endWorkout, listWorkoutExercises, startWorkout } from '@/db/workouts';
+import { saveWorkoutAsRoutine, startWorkoutFromRoutine } from '@/db/templates';
+import { addSet, addWorkoutExercise, deleteWorkout, endWorkout, listWorkoutExercises, startWorkout } from '@/db/workouts';
 import type { SetValues } from '@/lib/sets';
 import { getUnits } from '@/lib/units';
 import { createTestDatabase } from '@/testing/database';
@@ -195,4 +196,23 @@ describe('stretch timer', () => {
     expect(await screen.findByRole('button', { name: 'Log set' })).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Stretch timer' })).not.toBeInTheDocument();
   });
+});
+
+test('prefill from the routine targets when the exercise has no last time', async () => {
+  const { db } = await createTestDatabase();
+  const local = await getLocalSettings(db);
+  const exerciseId = crypto.randomUUID();
+  await db.insert(exercises).values({ id: exerciseId, source: 'custom', name: 'Squat', category: 'strength', loadType: 'external', tracksReps: true });
+  const first = await startWorkout(db, local.userId);
+  await addSet(db, await addWorkoutExercise(db, first.id, exerciseId), { ...values, weightGrams: 100000, reps: 5 });
+  const routineId = await saveWorkoutAsRoutine(db, local.userId, first.id, 'Monday');
+  await deleteWorkout(db, first.id);
+  const workoutId = await startWorkoutFromRoutine(db, local.userId, routineId);
+  const [item] = await listWorkoutExercises(db, workoutId);
+
+  await renderWithDatabase(<SetLog item={item} workoutId={workoutId} units={getUnits(local)} />, { db });
+
+  expect(await screen.findByRole('textbox', { name: 'Weight (kg)' })).toHaveValue('100');
+  expect(screen.getByRole('textbox', { name: 'Reps' })).toHaveValue('5');
+  expect(screen.queryByText(/Last time/)).not.toBeInTheDocument();
 });

@@ -52,3 +52,8 @@ export function targetsAsSet(targets: Targets | null): SetValues | null {
   const empty = set.weightGrams === null && set.reps === null && set.durationSeconds === null && set.distanceMeters === null;
   return empty ? null : set;
 }
+
+// The name a new routine gets until the user changes it: "Thursday routine".
+export function defaultRoutineName(startedAt: Date, locale?: string): string {
+  return `${new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(startedAt)} routine`;
+}
