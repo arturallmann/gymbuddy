@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 import { getWorkoutGroup, makeSuperset } from './groups';
-import { exercises, templateExercises, templates, users } from './schema';
+import { exercises, templateExercises, templates, users, workouts } from './schema';
 import { getLocalSettings } from './settings';
 import {
   addTemplateToWorkout,
@@ -10,8 +10,10 @@ import {
   listTemplates,
   renameTemplate,
   saveGroupAsTemplate,
+  saveWorkoutAsRoutine,
+  startWorkoutFromRoutine,
 } from './templates';
-import { addSet, addWorkoutExercise, endWorkout, listWorkoutExercises, startWorkout } from './workouts';
+import { addSet, addWorkoutExercise, endWorkout, getActiveWorkout, listWorkoutExercises, startWorkout } from './workouts';
 import { createTestDatabase } from '@/testing/database';
 
 const values = { setType: 'normal' as const, weightGrams: 20000, reps: 10, durationSeconds: null, distanceMeters: null, rpe: null, notes: null };
@@ -168,5 +170,76 @@ describe('getTemplateTargets', () => {
   test('return null for a workout exercise added by hand', async () => {
     const { db, ids } = await setup();
     expect(await getTemplateTargets(db, ids[0])).toBeNull();
+  });
+});
+
+describe('routines', () => {
+  async function workoutWithGroupAndSingle() {
+    const { db, userId, ids, groupId, first } = await setup();
+    const squatId = crypto.randomUUID();
+    await db.insert(exercises).values({ id: squatId, source: 'custom', name: 'Squat', category: 'strength', loadType: 'external' });
+    const squat = await addWorkoutExercise(db, first.id, squatId);
+    await addSet(db, squat, { ...values, weightGrams: 100000, reps: 5 });
+    await addSet(db, squat, { ...values, weightGrams: 100000, reps: 5 });
+    await addSet(db, ids[0], values);
+    return { db, userId, workoutId: first.id, groupId };
+  }
+
+  test('save a whole workout as a routine with its groups, phases and targets', async () => {
+    const { db, userId, workoutId } = await workoutWithGroupAndSingle();
+
+    await saveWorkoutAsRoutine(db, userId, workoutId, 'Monday');
+
+    const [routine] = await listTemplates(db, userId, 'routine');
+    expect(routine.name).toBe('Monday');
+    expect(routine.exercises.map((item) => [item.name, item.phase, item.groupKey, item.restSeconds, item.targetSets])).toEqual([
+      ['Curl', 'warmup', '1', 75, 1],
+      ['Plank', 'warmup', '1', 75, null],
+      ['Squat', 'main', null, null, 2],
+    ]);
+    expect(routine.exercises[2]).toMatchObject({ targetWeightGrams: 100000, targetReps: 5 });
+    expect(await listTemplates(db, userId, 'superset')).toEqual([]);
+  });
+
+  test('start a workout from a routine with a copy of its exercises and groups', async () => {
+    const { db, userId, workoutId } = await workoutWithGroupAndSingle();
+    const routineId = await saveWorkoutAsRoutine(db, userId, workoutId, 'Monday');
+    await endWorkout(db, workoutId);
+    const startedAt = new Date('2026-10-30T18:00:00Z');
+
+    const started = await startWorkoutFromRoutine(db, userId, routineId, startedAt);
+
+    const active = await getActiveWorkout(db, userId);
+    expect(active).toMatchObject({ id: started, templateId: routineId, startedAt, endedAt: null });
+    const items = await listWorkoutExercises(db, started);
+    expect(items.map((item) => [item.name, item.phase, item.groupId !== null])).toEqual([
+      ['Curl', 'warmup', true],
+      ['Plank', 'warmup', true],
+      ['Squat', 'main', false],
+    ]);
+    expect(await getTemplateTargets(db, items[2].id)).toMatchObject({ targetSets: 2, targetWeightGrams: 100000 });
+  });
+
+  test('refuse to start from a routine while a workout is active, and change nothing', async () => {
+    const { db, userId, workoutId } = await workoutWithGroupAndSingle();
+    const routineId = await saveWorkoutAsRoutine(db, userId, workoutId, 'Monday');
+
+    await expect(startWorkoutFromRoutine(db, userId, routineId)).rejects.toThrow('active already');
+    expect((await getActiveWorkout(db, userId))?.id).toBe(workoutId);
+    expect((await db.select().from(workouts)).length).toBe(1);
+  });
+
+  test('start only one workout when two starts run at once', async () => {
+    const { db, userId, workoutId } = await workoutWithGroupAndSingle();
+    const routineId = await saveWorkoutAsRoutine(db, userId, workoutId, 'Monday');
+    await endWorkout(db, workoutId);
+
+    const results = await Promise.allSettled([
+      startWorkoutFromRoutine(db, userId, routineId),
+      startWorkoutFromRoutine(db, userId, routineId),
+    ]);
+
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    expect((await db.select().from(workouts)).filter((row) => row.endedAt === null)).toHaveLength(1);
   });
 });

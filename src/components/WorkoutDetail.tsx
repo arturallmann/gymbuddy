@@ -9,6 +9,7 @@ import { deleteWorkout, getWorkout, listWorkoutExercises, type WorkoutExerciseIt
 import { formatWorkoutDate } from '@/lib/dates';
 import { formatWorkoutDuration } from '@/lib/units';
 import ConfirmAction from './ConfirmAction';
+import SaveRoutine from './SaveRoutine';
 import WorkoutExerciseSets from './WorkoutExerciseSets';
 
 type Loaded = { workout: Workout; items: WorkoutExerciseItem[] } | null;
@@ -64,6 +65,7 @@ export default function WorkoutDetail() {
           ) : (
             loaded.items.map((item) => <WorkoutExerciseSets key={item.id} item={item} />)
           )}
+          <SaveRoutine workoutId={workout.id} startedAt={workout.startedAt} />
           <ConfirmAction
             label="Delete workout"
             question="Delete this workout? Its exercises and sets are deleted."

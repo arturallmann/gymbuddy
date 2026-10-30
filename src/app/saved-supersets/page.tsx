@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import SavedSupersets from '@/components/SavedSupersets';
+import TemplateList from '@/components/TemplateList';
 
 export default function SavedSupersetsPage() {
   return (
@@ -10,7 +10,7 @@ export default function SavedSupersetsPage() {
         </Link>
         <h1 className="text-2xl font-bold">Saved supersets</h1>
       </header>
-      <SavedSupersets />
+      <TemplateList kind="superset" />
     </main>
   );
 }

@@ -59,7 +59,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **3b.2** Save a superset from a workout as a template, with a "Saved supersets" page to rename and delete (decision 026).
 - [x] **3b.3** Add a saved superset to a workout in one tap ("Add saved superset" on the workout page).
   Done when: editing the template afterwards does not change the earlier workout.
-- [ ] **3b.4** Routines: save a full workout as a template and start a workout from it.
+- [x] **3b.4** Routines: save a full workout as a template and start a workout from it (Routines page, decision 027).
 - [ ] **3b.5** Export adds a "Group" column (for example "Superset 1").
 
 ## Phase 4 — Progress views

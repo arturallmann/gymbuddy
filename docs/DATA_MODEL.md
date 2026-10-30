@@ -141,6 +141,7 @@ Library updates never change `exercise_preferences`.
   The workout never references template rows after the copy, so template edits never change history.
   `workout_groups.templateId` only records where a group came from.
 - In a routine, rows with the same `groupKey` become one group in the workout.
+- Starting a workout from a routine writes the routine's id to `workouts.templateId` (decision 027).
 - Prefill order for the set form: last workout with this exercise first, then template targets.
 - A saved superset made from a workout (decision 026) has one row per exercise, all with the same
   `groupKey`, the group's `groupType` and `restSeconds`, and targets from the sets logged in the group.
