@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { changeGroupRest, getWorkoutGroup, ungroupWorkoutExercises, type GroupDetail } from '@/db/groups';
-import { useFeatures } from '@/hooks/useSettings';
+import { saveGroupAsTemplate } from '@/db/templates';
+import { useFeatures, useSettings } from '@/hooks/useSettings';
 import GroupLog from './GroupLog';
 
 // One exercise group: a rounds table and the set form for the next exercise in turn
@@ -14,6 +15,7 @@ export default function GroupView() {
   const db = useDatabase();
   const router = useRouter();
   const features = useFeatures();
+  const { userId } = useSettings().settings;
   const id = useSearchParams().get('id');
   const [detail, setDetail] = useState<GroupDetail | null | undefined>(undefined);
 
@@ -49,6 +51,13 @@ export default function GroupView() {
             await changeGroupRest(db, detail.group.id, seconds);
             await reload();
           }}
+          onSaveTemplate={
+            features.supersets && features.templates
+              ? async (name) => {
+                  await saveGroupAsTemplate(db, userId, detail.group.id, name);
+                }
+              : undefined
+          }
           onUngroup={
             features.supersets
               ? async () => {

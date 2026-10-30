@@ -38,6 +38,7 @@ src/
     appState.ts   Queries for app state, such as the library version
     workouts.ts   Queries for workouts, workout exercises and sets
     groups.ts     Queries for exercise groups (make superset, ungroup, rest)
+    templates.ts  Queries for templates (saved supersets; routines later)
     exercises.ts  Queries for exercises, muscle groups and images, and custom exercises
     preferences.ts  Queries for exercise preferences (notes and unit override)
     export.ts     Queries that build export rows

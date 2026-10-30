@@ -157,6 +157,16 @@ sets (A → B → … → A), and a tap on the rounds table logs or edits any se
 After the last set of a round, a rest timer counts down from `workout_groups.restSeconds`
 (default 90 s), behind the `restTimer` feature toggle.
 
+## 026 — Saved supersets keep targets from the logged sets
+Date: 2026-10-30
+"Save superset" on the group page copies the exercise group into a template of kind `superset`:
+each exercise with its order, phase, the group type and rest, and targets from the sets logged in the
+group (the number of sets as `targetSets`, the values of the last set as the other targets).
+The set form uses targets only when an exercise has no last workout yet (prefill order in DATA_MODEL).
+"Save superset" and the home page link to "Saved supersets" show only when the `supersets` and
+`templates` feature toggles are both on. The "Saved supersets" page lists, renames and deletes them;
+it still lists stored saved supersets when the toggles are off.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

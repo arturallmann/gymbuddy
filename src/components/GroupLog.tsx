@@ -10,6 +10,7 @@ import { formatSet, setFormValues, type SetValues } from '@/lib/sets';
 import { stepDuration } from '@/lib/timer';
 import { formatDuration } from '@/lib/units';
 import RestTimer from './RestTimer';
+import SaveSuperset from './SaveSuperset';
 import SetForm from './SetForm';
 
 type Props = {
@@ -17,11 +18,13 @@ type Props = {
   restTimer: boolean;
   onRest: (seconds: number) => Promise<void>;
   onUngroup?: () => Promise<void>;
+  // Without onSaveTemplate there is no "Save superset" (supersets or templates toggle off).
+  onSaveTemplate?: (name: string) => Promise<void>;
 };
 
 // The rounds table and the guided set form of one exercise group. Tapping a set edits it;
 // tapping an empty cell logs that exercise next instead of the one in turn.
-export default function GroupLog({ detail, restTimer, onRest, onUngroup }: Props) {
+export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveTemplate }: Props) {
   const { group, members } = detail;
   const features = useFeatures();
   const { data, add, update } = useGroupSets(members, group.workoutId);
@@ -163,6 +166,8 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup }: Props
           </tbody>
         </table>
       )}
+
+      {onSaveTemplate && <SaveSuperset names={members.map((item) => item.name)} onSave={onSaveTemplate} />}
 
       {onUngroup && (
         <button type="button" onClick={onUngroup} className="self-start text-sky-600">

@@ -4,6 +4,7 @@ import { getWorkoutGroup, makeSuperset } from '@/db/groups';
 import { saveExercisePreferences } from '@/db/preferences';
 import { exercises } from '@/db/schema';
 import { getLocalSettings, updateSettings } from '@/db/settings';
+import { listTemplates } from '@/db/templates';
 import { addSet, addWorkoutExercise, listSets, startWorkout } from '@/db/workouts';
 import { createTestDatabase } from '@/testing/database';
 import { renderWithDatabase } from '@/testing/render';
@@ -23,10 +24,10 @@ beforeEach(() => {
 
 const values = { setType: 'normal' as const, weightGrams: 20000, reps: 10, durationSeconds: null, distanceMeters: null, rpe: null, notes: null };
 
-async function setup(features: { restTimer?: boolean; supersets?: boolean } = {}) {
+async function setup(features: { restTimer?: boolean; supersets?: boolean; templates?: boolean } = {}) {
   const { db } = await createTestDatabase();
   const local = await getLocalSettings(db);
-  await updateSettings(db, local.id, { features: { restTimer: true, supersets: true, ...features } });
+  await updateSettings(db, local.id, { features: { restTimer: true, supersets: true, templates: true, ...features } });
   const workout = await startWorkout(db, local.userId);
   const ids: string[] = [];
   const exerciseIds: string[] = [];
@@ -150,6 +151,30 @@ describe('GroupView', () => {
     await open(other.db, other.groupId);
     expect(await screen.findByRole('heading', { name: 'Round 1 · Curl' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Ungroup' })).not.toBeInTheDocument();
+  });
+
+  test('save the superset as a saved superset', async () => {
+    const { db, userId, ids, groupId } = await setup();
+    await addSet(db, ids[0], values);
+    const { user } = await open(db, groupId);
+
+    await user.click(await screen.findByRole('button', { name: 'Save superset' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Saved as “Curl + Press”.');
+    const [saved] = await listTemplates(db, userId, 'superset');
+    expect(saved.exercises.map((item) => [item.name, item.targetSets, item.restSeconds])).toEqual([
+      ['Curl', 1, 60],
+      ['Press', null, 60],
+    ]);
+  });
+
+  test('hide Save superset when templates are off', async () => {
+    const { db, groupId } = await setup({ templates: false });
+    await open(db, groupId);
+
+    expect(await screen.findByRole('heading', { name: 'Round 1 · Curl' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Save superset' })).not.toBeInTheDocument();
   });
 
   test('say so when the superset does not exist', async () => {
