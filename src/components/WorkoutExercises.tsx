@@ -7,6 +7,7 @@ import { useWorkoutExercises } from '@/hooks/useWorkoutExercises';
 import { PHASE_LABELS, defaultPhase, groupByPhase } from '@/lib/phases';
 import ExercisePicker from './ExercisePicker';
 import GroupRounds from './GroupRounds';
+import SavedSupersetPicker from './SavedSupersetPicker';
 import SetSummary from './SetSummary';
 import WorkoutExerciseList from './WorkoutExerciseList';
 
@@ -14,9 +15,9 @@ import WorkoutExerciseList from './WorkoutExerciseList';
 // With the phases feature toggle, the list shows one section per workout phase.
 // With the supersets feature toggle, workout exercises can become a superset and back.
 export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
-  const { items, rests, add, move, remove, group, ungroup } = useWorkoutExercises(workoutId);
+  const { items, rests, add, addTemplate, move, remove, group, ungroup } = useWorkoutExercises(workoutId);
   const features = useFeatures();
-  const [picking, setPicking] = useState(false);
+  const [picking, setPicking] = useState<'exercise' | 'superset' | null>(null);
   // The workout exercises chosen for a new superset, or null when not choosing.
   const [chosen, setChosen] = useState<string[] | null>(null);
 
@@ -90,19 +91,32 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
             </button>
           </div>
         </div>
-      ) : picking ? (
+      ) : picking === 'exercise' ? (
         <ExercisePicker
           onPick={async (exercise) => {
-            setPicking(false);
+            setPicking(null);
             await add(exercise.id, defaultPhase(exercise.category, features.phases));
           }}
-          onClose={() => setPicking(false)}
+          onClose={() => setPicking(null)}
+        />
+      ) : picking === 'superset' ? (
+        <SavedSupersetPicker
+          onPick={async (templateId) => {
+            setPicking(null);
+            await addTemplate(templateId);
+          }}
+          onClose={() => setPicking(null)}
         />
       ) : (
         <div className="flex flex-col gap-3">
-          <button type="button" onClick={() => setPicking(true)} className="rounded-lg border px-6 py-3 font-semibold">
+          <button type="button" onClick={() => setPicking('exercise')} className="rounded-lg border px-6 py-3 font-semibold">
             Add exercise
           </button>
+          {features.supersets && features.templates && (
+            <button type="button" onClick={() => setPicking('superset')} className="rounded-lg border px-6 py-3 font-semibold">
+              Add saved superset
+            </button>
+          )}
           {canGroup && (
             <button type="button" onClick={() => setChosen([])} className="rounded-lg border px-6 py-3 font-semibold">
               Make superset

@@ -7,6 +7,7 @@ import { useGroupSets } from '@/hooks/useGroupSets';
 import { useFeatures } from '@/hooks/useSettings';
 import { nextMemberIndex, roundComplete, roundRows } from '@/lib/rounds';
 import { formatSet, setFormValues, type SetValues } from '@/lib/sets';
+import { targetsAsSet } from '@/lib/templates';
 import { stepDuration } from '@/lib/timer';
 import { formatDuration } from '@/lib/units';
 import RestTimer from './RestTimer';
@@ -110,7 +111,7 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
             units={data.units[member]}
             features={features}
             initial={setFormValues(
-              data.lastSets[member][counts[member]] ?? data.sets[member].at(-1) ?? null,
+              data.lastSets[member][counts[member]] ?? data.sets[member].at(-1) ?? targetsAsSet(data.targets[member]),
               data.units[member],
             )}
             onLog={log}
