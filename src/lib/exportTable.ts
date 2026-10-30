@@ -1,7 +1,7 @@
 // Turns export rows into a table in display units, for CSV and Excel.
 // Pure functions: no database, no React.
 import type { ExportRow } from '@/db/export';
-import type { ExercisePreferences, UserSettings } from '@/db/schema';
+import type { ExercisePreferences, GroupType, UserSettings } from '@/db/schema';
 import { PHASE_LABELS } from './phases';
 import { SET_TYPE_LABELS } from './sets';
 import { getUnits, gramsToWeight, metersToDistance } from './units';
@@ -15,12 +15,34 @@ export const LOAD_TYPE_EXPORT_LABELS = {
   none: 'No weight',
 } as const;
 
+export const GROUP_TYPE_LABELS: Record<GroupType, string> = {
+  superset: 'Superset',
+  circuit: 'Circuit',
+  giant_set: 'Giant set',
+};
+
+// "Superset 1", "Superset 2" … numbered per workout in the order the groups first appear.
+function groupLabels(rows: ExportRow[]): (string | null)[] {
+  const numbers = new Map<string, number>();
+  const perWorkout = new Map<string, number>();
+  return rows.map((row) => {
+    if (!row.groupId) return null;
+    if (!numbers.has(row.groupId)) {
+      const next = (perWorkout.get(row.workoutId) ?? 0) + 1;
+      perWorkout.set(row.workoutId, next);
+      numbers.set(row.groupId, next);
+    }
+    return `${GROUP_TYPE_LABELS[row.groupType ?? 'superset']} ${numbers.get(row.groupId)}`;
+  });
+}
+
 export const EXPORT_HEADER = [
   'Date',
   'Start time',
   'End time',
   'Exercise',
   'Phase',
+  'Group',
   'Set',
   'Set type',
   'Load type',
@@ -54,9 +76,10 @@ export function buildExportTable(
   settings: Pick<UserSettings, 'weightUnit' | 'distanceUnit'>,
   preferences: Map<string, Pick<ExercisePreferences, 'weightUnit' | 'distanceUnit'>>,
 ): ExportTable {
+  const groups = groupLabels(rows);
   return {
     header: EXPORT_HEADER,
-    rows: rows.map((row) => {
+    rows: rows.map((row, index) => {
       const units = getUnits(settings, preferences.get(row.exerciseId));
       const hasWeight = row.weightGrams !== null && row.loadType !== 'none';
       const distance = row.distanceMeters !== null ? metersToDistance(row.distanceMeters, units.distanceUnit) : null;
@@ -66,6 +89,7 @@ export function buildExportTable(
         row.workoutEndedAt ? exportTime(row.workoutEndedAt) : null,
         row.exerciseName,
         PHASE_LABELS[row.phase],
+        groups[index],
         row.setPosition,
         SET_TYPE_LABELS[row.setType],
         LOAD_TYPE_EXPORT_LABELS[row.loadType],

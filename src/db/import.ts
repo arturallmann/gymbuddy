@@ -1,6 +1,8 @@
 import { and, eq, gte, isNull, lt, or } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
-import { exercises, sets, workoutExercises, workouts, type LoadType } from './schema';
+import { DEFAULT_REST_SECONDS } from './groups';
+import { exercises, sets, workoutExercises, workoutGroups, workouts, type GroupType, type LoadType } from './schema';
+import { GROUP_TYPE_LABELS } from '@/lib/exportTable';
 import type { ImportWorkout } from '@/lib/importTable';
 
 export type ImportResult = {
@@ -13,6 +15,15 @@ export type ImportResult = {
 };
 
 const MINUTE = 60 * 1000;
+
+// "Giant set 2" → giant_set. A label without a known type counts as a superset.
+function groupTypeOf(label: string): GroupType {
+  const lower = label.toLowerCase();
+  const found = (Object.entries(GROUP_TYPE_LABELS) as [GroupType, string][]).find(([, name]) =>
+    lower.startsWith(name.toLowerCase()),
+  );
+  return found?.[0] ?? 'superset';
+}
 
 // What an unknown exercise tracks, from the values its sets have in the file.
 function newExerciseFields(name: string, all: ImportWorkout[]) {
@@ -71,7 +82,23 @@ export async function importWorkouts(db: AppDatabase, userId: string, toImport: 
         endedAt: workout.endedAt,
         notes: workout.notes,
       });
+      // One exercise group per group label in this workout, such as "Superset 1".
+      const groups = new Map<string, string>();
       for (const [index, item] of workout.exercises.entries()) {
+        let groupId: string | null = null;
+        if (item.group) {
+          groupId = groups.get(item.group) ?? null;
+          if (!groupId) {
+            groupId = crypto.randomUUID();
+            groups.set(item.group, groupId);
+            await tx.insert(workoutGroups).values({
+              id: groupId,
+              workoutId,
+              groupType: groupTypeOf(item.group),
+              restSeconds: DEFAULT_REST_SECONDS,
+            });
+          }
+        }
         let exerciseId = byName.get(item.name.toLowerCase());
         if (!exerciseId) {
           exerciseId = crypto.randomUUID();
@@ -93,6 +120,7 @@ export async function importWorkouts(db: AppDatabase, userId: string, toImport: 
           exerciseId,
           position: index + 1,
           phase: item.phase,
+          groupId,
           notes: item.notes,
         });
         for (const [setIndex, set] of item.sets.entries()) {

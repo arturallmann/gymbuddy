@@ -11,6 +11,8 @@ export type ImportWorkoutExercise = {
   // Null when the file has no load type for the row.
   loadType: LoadType | null;
   phase: Phase;
+  // The label of its exercise group in the file, such as "Superset 1", or null.
+  group: string | null;
   notes: string | null;
   sets: SetValues[];
 };
@@ -69,6 +71,7 @@ type Row = {
   workoutNotes: string | null;
   name: string;
   phase: Phase;
+  group: string | null;
   setNumber: number | null;
   loadType: LoadType | null;
   notes: string | null;
@@ -141,6 +144,7 @@ function parseRow(get: (column: string) => Cell | undefined): Row {
     workoutNotes: text(get('Workout notes')) || null,
     name,
     phase,
+    group: text(get('Group')) || null,
     setNumber,
     loadType,
     notes: text(get('Exercise notes in workout')) || null,
@@ -150,7 +154,7 @@ function parseRow(get: (column: string) => Cell | undefined): Row {
 
 // Checks every row first. Any problem means no workouts, and a list of what to fix (decision 024).
 // Rows of one workout share date and start time. Inside a workout, a new workout exercise starts
-// when the exercise or phase changes, or when the set number does not go up.
+// when the exercise, phase or group changes, or when the set number does not go up.
 export function parseImportTable(table: Cell[][]): ParsedImport {
   const [header, ...body] = table;
   if (!header) return { ok: false, errors: ['The file is empty.'] };
@@ -193,12 +197,20 @@ export function parseImportTable(table: Cell[][]): ParsedImport {
       current &&
       previous.name.toLowerCase() === row.name.toLowerCase() &&
       previous.phase === row.phase &&
+      previous.group === row.group &&
       (row.setNumber === null || previous.setNumber === null || row.setNumber > previous.setNumber);
     if (sameExercise) {
       current.sets.push(row.set);
       current.notes ??= row.notes;
     } else {
-      workout.exercises.push({ name: row.name, loadType: row.loadType, phase: row.phase, notes: row.notes, sets: [row.set] });
+      workout.exercises.push({
+        name: row.name,
+        loadType: row.loadType,
+        phase: row.phase,
+        group: row.group,
+        notes: row.notes,
+        sets: [row.set],
+      });
     }
     lastRow.set(key, row);
   }

@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import RoutinesLink from '@/components/RoutinesLink';
+import SavedSupersetsLink from '@/components/SavedSupersetsLink';
 import StartWorkout from '@/components/StartWorkout';
 
 export default function Home() {
@@ -15,6 +17,8 @@ export default function Home() {
       <Link href="/exercises" className="text-sky-600">
         Exercises
       </Link>
+      <RoutinesLink />
+      <SavedSupersetsLink />
       <Link href="/settings" className="text-sky-600">
         Settings
       </Link>

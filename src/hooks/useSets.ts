@@ -3,23 +3,31 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import type { WorkoutSet } from '@/db/schema';
+import { getTemplateTargets, type Targets } from '@/db/templates';
 import { addSet, deleteSet, getLastSets, listSets, updateSet } from '@/db/workouts';
 import type { SetValues } from '@/lib/sets';
 
-// The sets of one workout exercise, and the sets of this exercise in the last workout.
+// The sets of one workout exercise, the sets of this exercise in the last workout, and the
+// template targets when it came from a template.
 // Both are undefined while they load.
 export function useSets(workoutExerciseId: string, exerciseId: string, workoutId: string) {
   const db = useDatabase();
   const [sets, setSets] = useState<WorkoutSet[] | undefined>(undefined);
   const [lastSets, setLastSets] = useState<WorkoutSet[] | undefined>(undefined);
+  const [targets, setTargets] = useState<Targets | null>(null);
 
   useEffect(() => {
     let current = true;
-    Promise.all([listSets(db, workoutExerciseId), getLastSets(db, exerciseId, workoutId)])
-      .then(([loaded, last]) => {
+    Promise.all([
+      listSets(db, workoutExerciseId),
+      getLastSets(db, exerciseId, workoutId),
+      getTemplateTargets(db, workoutExerciseId),
+    ])
+      .then(([loaded, last, fromTemplate]) => {
         if (!current) return;
         setSets(loaded);
         setLastSets(last);
+        setTargets(fromTemplate);
       })
       .catch((reason: unknown) => console.error(reason));
     return () => {
@@ -51,5 +59,5 @@ export function useSets(workoutExerciseId: string, exerciseId: string, workoutId
     [db, workoutExerciseId],
   );
 
-  return { sets, lastSets, add, update, remove };
+  return { sets, lastSets, targets, add, update, remove };
 }
