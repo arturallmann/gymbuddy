@@ -2,7 +2,8 @@ import { eq } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 import { listExportRows } from './export';
 import { importWorkouts } from './import';
-import { exercises, sets, workouts } from './schema';
+import { DEFAULT_REST_SECONDS, makeSuperset } from './groups';
+import { exercises, sets, workoutGroups, workouts } from './schema';
 import { getLocalSettings } from './settings';
 import { addSet, addWorkoutExercise, endWorkout, startWorkout } from './workouts';
 import { parseCsv, toCsv } from '@/lib/csv';
@@ -44,8 +45,8 @@ describe('importWorkouts', () => {
 
     const result = await importWorkouts(db, userId, [
       workout(startedAt, [
-        { name: 'barbell curl', loadType: 'external', phase: 'main', notes: 'EZ bar', sets: [set({ weightGrams: 20000, reps: 10 }), set({ weightGrams: 20000, reps: 8 })] },
-        { name: 'Bench Press', loadType: 'external', phase: 'cooldown', notes: null, sets: [set({ weightGrams: 60000, reps: 5 })] },
+        { name: 'barbell curl', loadType: 'external', phase: 'main', group: null, notes: 'EZ bar', sets: [set({ weightGrams: 20000, reps: 10 }), set({ weightGrams: 20000, reps: 8 })] },
+        { name: 'Bench Press', loadType: 'external', phase: 'cooldown', group: null, notes: null, sets: [set({ weightGrams: 60000, reps: 5 })] },
       ]),
     ]);
 
@@ -66,8 +67,8 @@ describe('importWorkouts', () => {
     const existing = await startWorkout(db, userId, new Date(2026, 9, 1, 9, 0, 42));
     await endWorkout(db, existing.id);
     const file = [
-      workout(new Date(2026, 9, 1, 9, 0), [{ name: 'Barbell Curl', loadType: null, phase: 'main', notes: null, sets: [set({ reps: 1 })] }]),
-      workout(new Date(2026, 9, 2, 9, 0), [{ name: 'Barbell Curl', loadType: null, phase: 'main', notes: null, sets: [set({ reps: 2 })] }]),
+      workout(new Date(2026, 9, 1, 9, 0), [{ name: 'Barbell Curl', loadType: null, phase: 'main', group: null, notes: null, sets: [set({ reps: 1 })] }]),
+      workout(new Date(2026, 9, 2, 9, 0), [{ name: 'Barbell Curl', loadType: null, phase: 'main', group: null, notes: null, sets: [set({ reps: 2 })] }]),
     ];
 
     expect(await importWorkouts(db, userId, file)).toMatchObject({ addedWorkouts: 1, skippedWorkouts: 1, addedSets: 1 });
@@ -80,11 +81,11 @@ describe('importWorkouts', () => {
 
     const result = await importWorkouts(db, userId, [
       workout(new Date(2026, 9, 1, 9, 0), [
-        { name: 'Sled Push', loadType: null, phase: 'main', notes: null, sets: [set({ weightGrams: 80000, distanceMeters: 20 })] },
+        { name: 'Sled Push', loadType: null, phase: 'main', group: null, notes: null, sets: [set({ weightGrams: 80000, distanceMeters: 20 })] },
       ]),
       workout(new Date(2026, 9, 2, 9, 0), [
-        { name: 'sled push', loadType: null, phase: 'main', notes: null, sets: [set({ durationSeconds: 30 })] },
-        { name: 'Band Walk', loadType: 'none', phase: 'warmup', notes: null, sets: [set({ reps: 20 })] },
+        { name: 'sled push', loadType: null, phase: 'main', group: null, notes: null, sets: [set({ durationSeconds: 30 })] },
+        { name: 'Band Walk', loadType: 'none', phase: 'warmup', group: null, notes: null, sets: [set({ reps: 20 })] },
       ]),
     ]);
 
@@ -103,18 +104,40 @@ describe('importWorkouts', () => {
     await addSet(db, await addWorkoutExercise(db, own.id, curl.id), set({ reps: 12 }));
     await endWorkout(db, own.id);
 
-    await importWorkouts(db, userId, [workout(new Date(2026, 9, 1, 9, 0), [{ name: 'Barbell Curl', loadType: null, phase: 'main', notes: null, sets: [set({ reps: 3 })] }])]);
+    await importWorkouts(db, userId, [workout(new Date(2026, 9, 1, 9, 0), [{ name: 'Barbell Curl', loadType: null, phase: 'main', group: null, notes: null, sets: [set({ reps: 3 })] }])]);
 
     expect((await listExportRows(db, userId)).map((row) => row.reps)).toEqual([3, 12]);
   });
 
+  test('make one exercise group per group label in a workout, with its type and the default rest', async () => {
+    const { db, userId } = await setup();
+
+    await importWorkouts(db, userId, [
+      workout(new Date(2026, 9, 1, 9, 0), [
+        { name: 'Barbell Curl', loadType: null, phase: 'main', group: 'Superset 1', notes: null, sets: [set({ reps: 10 })] },
+        { name: 'Bench Press', loadType: null, phase: 'main', group: 'Superset 1', notes: null, sets: [set({ reps: 8 })] },
+        { name: 'Barbell Curl', loadType: null, phase: 'main', group: 'Giant set 2', notes: null, sets: [set({ reps: 6 })] },
+        { name: 'Bench Press', loadType: null, phase: 'main', group: null, notes: null, sets: [set({ reps: 5 })] },
+      ]),
+    ]);
+
+    const rows = await listExportRows(db, userId);
+    expect(rows[0].groupId).toBe(rows[1].groupId);
+    expect(rows[0].groupType).toBe('superset');
+    expect(rows[2]).toMatchObject({ groupType: 'giant_set' });
+    expect(rows[2].groupId).not.toBe(rows[0].groupId);
+    expect(rows[3].groupId).toBeNull();
+    const [group] = await db.select().from(workoutGroups).where(eq(workoutGroups.id, rows[0].groupId!));
+    expect(group.restSeconds).toBe(DEFAULT_REST_SECONDS);
+  });
+
   test('write nothing when the import fails part way', async () => {
     const { db, userId } = await setup();
-    const broken = { name: null, loadType: null, phase: 'main', notes: null, sets: [] } as unknown as ImportWorkout['exercises'][number];
+    const broken = { name: null, loadType: null, phase: 'main', group: null, notes: null, sets: [] } as unknown as ImportWorkout['exercises'][number];
 
     await expect(
       importWorkouts(db, userId, [
-        workout(new Date(2026, 9, 1, 9, 0), [{ name: 'Barbell Curl', loadType: null, phase: 'main', notes: null, sets: [set({ reps: 3 })] }]),
+        workout(new Date(2026, 9, 1, 9, 0), [{ name: 'Barbell Curl', loadType: null, phase: 'main', group: null, notes: null, sets: [set({ reps: 3 })] }]),
         workout(new Date(2026, 9, 2, 9, 0), [broken]),
       ]),
     ).rejects.toThrow();
@@ -131,10 +154,15 @@ test('import its own export into an empty app and export the same rows again', a
   const curlId = await addWorkoutExercise(db, done.id, curl.id, 'warmup');
   await addSet(db, curlId, set({ weightGrams: 20000, reps: 10, rpe: 7, notes: 'slow, "careful"', setType: 'warmup' }));
   await addSet(db, curlId, set({ weightGrams: 22500, reps: 8 }));
+  const [press] = await db.select().from(exercises).where(eq(exercises.name, 'Bench Press'));
+  const pressId = await addWorkoutExercise(db, done.id, press.id, 'warmup');
+  await addSet(db, pressId, set({ weightGrams: 60000, reps: 5 }));
+  await makeSuperset(db, done.id, [curlId, pressId]);
   await endWorkout(db, done.id, new Date(2026, 9, 1, 9, 50));
   const settings = { weightUnit: 'kg', distanceUnit: 'metric' } as const;
   const first = await listExportRows(db, userId);
   const csv = toCsv(buildExportTable(first, settings, new Map()));
+  expect(csv).toContain(",Superset 1,");
 
   const empty = await createTestDatabase();
   const other = await getLocalSettings(empty.db);

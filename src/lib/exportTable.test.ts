@@ -3,6 +3,9 @@ import type { ExportRow } from '@/db/export';
 import { EXPORT_HEADER, buildExportTable, exportDate, exportFileName, exportTime } from './exportTable';
 
 const row: ExportRow = {
+  workoutId: 'w1',
+  groupId: null,
+  groupType: null,
   workoutStartedAt: new Date(2026, 9, 29, 9, 7),
   workoutEndedAt: new Date(2026, 9, 29, 10, 2),
   workoutNotes: 'Short sleep',
@@ -24,12 +27,30 @@ const kg = { weightUnit: 'kg', distanceUnit: 'metric' } as const;
 const cell = (values: unknown[], name: string) => values[EXPORT_HEADER.indexOf(name)];
 
 describe('buildExportTable', () => {
+  test('label exercise groups per workout in the order they first appear', () => {
+    const rows: ExportRow[] = [
+      { ...row, groupId: 'a', groupType: 'superset' },
+      { ...row, groupId: 'a', groupType: 'superset' },
+      { ...row, groupId: null },
+      { ...row, groupId: 'b', groupType: 'giant_set' },
+      { ...row, workoutId: 'w2', groupId: 'c', groupType: 'superset' },
+    ];
+
+    expect(buildExportTable(rows, kg, new Map()).rows.map((values) => cell(values, 'Group'))).toEqual([
+      'Superset 1',
+      'Superset 1',
+      null,
+      'Giant set 2',
+      'Superset 1',
+    ]);
+  });
+
   test('write one row per set with date, exercise and values in display units', () => {
     const { header, rows } = buildExportTable([row], kg, new Map());
 
     expect(header).toBe(EXPORT_HEADER);
     expect(rows[0]).toEqual([
-      '2026-10-29', '09:07', '10:02', 'Squat', 'Main phase', 1, 'Normal set', 'Weight', 60, 'kg', 8, null, null, null, 8.5, 'belt', null, 'Short sleep',
+      '2026-10-29', '09:07', '10:02', 'Squat', 'Main phase', null, 1, 'Normal set', 'Weight', 60, 'kg', 8, null, null, null, 8.5, 'belt', null, 'Short sleep',
     ]);
   });
 

@@ -177,6 +177,14 @@ The Routines page (home page link, `templates` feature toggle) lists, renames an
 `workouts.templateId` and gets a copy of its rows. While a workout is active, the page offers
 "Continue workout" instead (decision 019).
 
+## 028 — Export and import keep exercise groups
+Date: 2026-10-30
+The export has a "Group" column: the group type and a number per workout, such as "Superset 1",
+in the order the groups first appear; empty for a single workout exercise. The import reads it back:
+rows of one workout with the same label become one exercise group of that type, with the default rest
+(the file has no rest column). So exporting and importing a workout with supersets keeps them.
+This adds to decisions 022 and 024.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
