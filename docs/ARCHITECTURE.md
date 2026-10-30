@@ -42,6 +42,7 @@ src/
     exercises.ts  Queries for exercises, muscle groups and images, and custom exercises
     preferences.ts  Queries for exercise preferences (notes and unit override)
     export.ts     Queries that build export rows
+    progress.ts   The one history query for the history view and the chart view
   hooks/          React hooks, such as useSettings(), useFeatures() and useActiveWorkout()
   lib/            Pure helpers (unit conversion, formatting, CSV building)
   testing/        Test helpers: test database, render with providers, fake plugin
