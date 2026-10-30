@@ -52,7 +52,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **3.4** Import CSV and Excel files in the export format (decision 024).
   Done when: exporting, then importing the file into an empty app, gives the same export again.
 
-## Phase 3b — Supersets and templates (current)
+## Phase 3b — Supersets and templates (done)
 
 - [x] **3b.1** Group exercises in a workout into a superset ("Make superset" action). Guided rounds on the group page (decision 025).
   Done when: the superset card shows one row per round and the rest timer starts after the last member.
@@ -60,9 +60,9 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **3b.3** Add a saved superset to a workout in one tap ("Add saved superset" on the workout page).
   Done when: editing the template afterwards does not change the earlier workout.
 - [x] **3b.4** Routines: save a full workout as a template and start a workout from it (Routines page, decision 027).
-- [ ] **3b.5** Export adds a "Group" column (for example "Superset 1").
+- [x] **3b.5** Export adds a "Group" column (for example "Superset 1"); the import reads it back (decision 028).
 
-## Phase 4 — Progress views
+## Phase 4 — Progress views (current)
 
 - [ ] **4.1** History view per exercise: every set in order, with notes.
 - [ ] **4.2** Chart view per exercise for weight, reps, duration and distance only.
