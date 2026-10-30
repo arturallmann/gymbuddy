@@ -56,7 +56,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
 
 - [x] **3b.1** Group exercises in a workout into a superset ("Make superset" action). Guided rounds on the group page (decision 025).
   Done when: the superset card shows one row per round and the rest timer starts after the last member.
-- [ ] **3b.2** Save a superset from a workout as a template.
+- [x] **3b.2** Save a superset from a workout as a template, with a "Saved supersets" page to rename and delete (decision 026).
 - [ ] **3b.3** Add a saved superset to a workout in one tap.
   Done when: editing the template afterwards does not change the earlier workout.
 - [ ] **3b.4** Routines: save a full workout as a template and start a workout from it.
