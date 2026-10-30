@@ -62,13 +62,13 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **3b.4** Routines: save a full workout as a template and start a workout from it (Routines page, decision 027).
 - [x] **3b.5** Export adds a "Group" column (for example "Superset 1"); the import reads it back (decision 028).
 
-## Phase 4 — Progress views (current)
+## Phase 4 — Progress views (done)
 
-- [ ] **4.1** History view per exercise: every set in order, with notes.
-- [ ] **4.2** Chart view per exercise for weight, reps, duration and distance only.
+- [x] **4.1** History view per exercise: every set in order, with notes.
+- [x] **4.2** Chart view per exercise for weight, reps, duration and distance only (own SVG chart, decision 029).
   Done when: note-only exercises show the history view and no chart.
 
-## Phase 4b — Interface polish
+## Phase 4b — Interface polish (current)
 
 Starts when the basic features above work, so the details can be tuned in one go.
 Most visual and UX overhauls happen here.

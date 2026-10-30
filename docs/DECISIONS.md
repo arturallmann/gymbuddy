@@ -185,6 +185,14 @@ rows of one workout with the same label become one exercise group of that type, 
 (the file has no rest column). So exporting and importing a workout with supersets keeps them.
 This adds to decisions 022 and 024.
 
+## 029 — Progress views: own SVG chart, five values per workout
+Date: 2026-10-30
+Each exercise page has a history view and, when the exercise tracks a fixed field and the `charts`
+feature toggle is on, a chart view. The chart is a small SVG line chart written in the app, not a
+chart library: no new dependency, small enough for a phone. Fancier charts can come in Phase 4b.
+Per workout it shows the heaviest weight, the most reps, the volume (weight × reps, only for
+external load), the longest duration or the longest distance, in the exercise's units.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
