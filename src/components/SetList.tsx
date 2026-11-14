@@ -53,9 +53,10 @@ export default function SetList({ sets, loadType, units, onRemove, onEdit, editi
                 type="button"
                 aria-label={`Remove set ${index + 1}`}
                 onClick={() => onRemove(set.id)}
-                className="shrink-0 rounded-lg p-2 text-danger"
+                className="shrink-0 rounded-lg p-2 text-muted"
               >
-                <TrashIcon />
+                {/* Smaller and grey, unlike the red trash can that removes a whole workout exercise (4b.3). */}
+                <TrashIcon className="h-4 w-4" />
               </button>
             )}
           </li>

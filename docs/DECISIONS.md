@@ -279,6 +279,13 @@ Every red "Remove" text becomes a trash can icon; the button keeps its name for 
 The exercise browser gains the category filter of the "Add exercise" page and a "Custom only" button.
 It keeps its muscle group filter over primary and secondary muscle groups.
 
+## 036 — Removing a workout exercise asks first
+Date: 2026-11-15
+Both "Remove" buttons became trash icons (decision 035), so they looked the same (4b.3).
+Removing a workout exercise takes all its sets along, so its red trash icon now asks first, inside the card:
+"Remove Squat and its sets from this workout?" with "Remove" and "Keep". Android Back keeps it.
+Removing one set stays one tap, with a smaller grey trash icon, because one set is quick to log again.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

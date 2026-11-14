@@ -7,6 +7,7 @@ import { useRef, useState, type ReactNode } from 'react';
 import type { WorkoutExerciseItem } from '@/db/workouts';
 import { toBlocks, type Block } from '@/lib/blocks';
 import { HandleSensor, LONG_PRESS, LongPressSensor } from '@/lib/dragSensors';
+import { useBackHandler } from '@/hooks/useBackHandler';
 import SortableBlock from './SortableBlock';
 import TrashIcon from './icons/TrashIcon';
 
@@ -41,7 +42,7 @@ const upAndDown: Modifier = ({ transform }) => ({ ...transform, x: 0 });
 const keyOf = (block: Block<WorkoutExerciseItem>) => (block.kind === 'single' ? block.item.id : block.groupId);
 
 // The workout exercises in order. A single workout exercise links to its own page; an exercise
-// group is one card that links to the group page. Both move as one block: by dragging (4b.1),
+// group is one card that links to the group page. Removing a workout exercise asks first (4b.3). Both move as one block: by dragging (4b.1),
 // or with the ↑ and ↓ buttons for screen readers.
 export default function WorkoutExerciseList({
   items,
@@ -58,6 +59,9 @@ export default function WorkoutExerciseList({
   const [dropped, setDropped] = useState<{ items: WorkoutExerciseItem[]; keys: string[] } | null>(null);
   // A long press ends with a tap on the card; it must not open the workout exercise.
   const justDragged = useRef(false);
+  // The workout exercise whose remove waits for the confirm step (4b.3): it takes all its sets along.
+  const [removing, setRemoving] = useState<string | null>(null);
+  useBackHandler(removing ? () => setRemoving(null) : null);
 
   const loaded = toBlocks(items);
   const blocks =
@@ -154,6 +158,30 @@ export default function WorkoutExerciseList({
                 </SortableBlock>
               );
             }
+            if (removing === item.id) {
+              return (
+                <SortableBlock key={item.id} id={item.id} disabled className="rounded-lg border border-danger bg-surface p-3">
+                  <div role="group" aria-label={`Remove ${item.name}`} className="flex flex-col gap-3">
+                    <p className="break-words">Remove {item.name} and its sets from this workout?</p>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRemoving(null);
+                          onRemove(item.id);
+                        }}
+                        className="flex-1 rounded-lg bg-danger px-4 py-2 font-semibold text-on-danger"
+                      >
+                        Remove
+                      </button>
+                      <button type="button" onClick={() => setRemoving(null)} className="flex-1 rounded-lg border bg-surface px-4 py-2">
+                        Keep
+                      </button>
+                    </div>
+                  </div>
+                </SortableBlock>
+              );
+            }
             return (
               <SortableBlock key={item.id} id={item.id} disabled={false} className="flex items-center gap-2 rounded-lg border bg-surface p-3">
                 <Link href={`/workout/exercise?id=${item.id}`} className="min-w-0 flex-1 break-words">
@@ -164,7 +192,7 @@ export default function WorkoutExerciseList({
                 <button
                   type="button"
                   aria-label={`Remove ${item.name}`}
-                  onClick={() => onRemove(item.id)}
+                  onClick={() => setRemoving(item.id)}
                   className="shrink-0 rounded-lg p-2 text-danger"
                 >
                   <TrashIcon />
