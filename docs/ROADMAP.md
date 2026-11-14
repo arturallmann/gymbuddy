@@ -118,6 +118,8 @@ Most visual and UX overhauls happen here.
   The drawing is our own SVG (one path per muscle group, matching the library's muscle groups), not
   copied from another app. Bodyweight and duration-only sets need a rule first (for example count sets
   instead of volume); decide it in a decision entry.
+- [x] **4b.11** "Done before" first (decision 037): search results and muscle group lists show the exercises
+  the user did first, the most frequent first, with how many workouts; all others follow.
 
 ## Phase 5 — Online (later)
 

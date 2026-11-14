@@ -9,12 +9,14 @@ type Props = {
   showImages: boolean;
   // Where each exercise links to. Default: its exercise page.
   href?: (exercise: ExerciseListItem) => string;
+  // Extra text after category and equipment, such as "12 workouts".
+  note?: (exercise: ExerciseListItem) => string | null;
 };
 
 const detailHref = (exercise: ExerciseListItem) => `/exercises/detail?id=${exercise.id}`;
 
 // Exercises with category and equipment, each linked to its exercise page or to `href`.
-export default function ExerciseList({ items, showImages, href = detailHref }: Props) {
+export default function ExerciseList({ items, showImages, href = detailHref, note }: Props) {
   return (
     <ul className="flex flex-col">
       {items.map((exercise) => (
@@ -38,6 +40,7 @@ export default function ExerciseList({ items, showImages, href = detailHref }: P
               <span className="block text-sm text-muted">
                 {CATEGORY_LABELS[exercise.category]}
                 {exercise.equipment && ` · ${equipmentLabel(exercise.equipment)}`}
+                {note?.(exercise) && ` · ${note(exercise)}`}
               </span>
             </span>
           </Link>

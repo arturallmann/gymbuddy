@@ -5,10 +5,11 @@ import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { listMuscleGroups, searchExercises, type ExerciseListItem } from '@/db/exercises';
 import type { MuscleGroup } from '@/db/schema';
+import { useExerciseUse } from '@/hooks/useExerciseUse';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
 import { addExerciseHref, logExerciseHref, parseCategory } from '@/lib/addExercise';
 import { CATEGORY_LABELS } from '@/lib/exercises';
-import ExerciseList from './ExerciseList';
+import ExerciseResults from './ExerciseResults';
 import BackLink from './BackLink';
 
 // Room for every exercise of one muscle group.
@@ -27,6 +28,7 @@ export default function MuscleGroupExercises() {
   const id = params.get('id');
   const category = parseCategory(params.get('category'));
   const [loaded, setLoaded] = useState<Loaded | undefined>(undefined);
+  const use = useExerciseUse();
 
   useEffect(() => {
     let current = true;
@@ -43,7 +45,7 @@ export default function MuscleGroupExercises() {
     };
   }, [db, userId, id, category]);
 
-  if (loaded === undefined) {
+  if (loaded === undefined || use === undefined) {
     return null;
   }
   return (
@@ -60,8 +62,9 @@ export default function MuscleGroupExercises() {
       ) : loaded.items.length === 0 ? (
         <p className="text-muted">No exercise found.</p>
       ) : (
-        <ExerciseList
+        <ExerciseResults
           items={loaded.items}
+          use={use}
           showImages={features.exerciseImages}
           href={(exercise) => logExerciseHref(exercise.id)}
         />

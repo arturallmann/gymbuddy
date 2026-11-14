@@ -286,6 +286,18 @@ Removing a workout exercise takes all its sets along, so its red trash icon now 
 "Remove Squat and its sets from this workout?" with "Remove" and "Keep". Android Back keeps it.
 Removing one set stays one tap, with a smaller grey trash icon, because one set is quick to log again.
 
+## 037 — "Done before" first in exercise lists
+Date: 2026-11-15
+A search such as "squat" finds 56 library exercises, sorted by name, so the plain barbell squat drowns in
+variations. Exercise lists (search and muscle groups on the "Add exercise" page, and the exercise browser)
+now show the exercises the user did first, under "Done before", then all others under "All exercises".
+Nothing is hidden.
+"Done before" is sorted by the number of workouts with the exercise, then by the newest of them, then by
+name, so a barbell squat done every week beats a goblet squat tried once last week. Each row says how often,
+such as "12 workouts". `listExerciseUse()` counts active and ended workouts, without deleted rows.
+The search on the "Add exercise" page no longer stops at 50 matches, so a done exercise is never cut off.
+Favourites and a curated list of common exercises were left for later; history alone covers the regular case.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

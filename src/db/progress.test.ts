@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { listExerciseHistory } from './progress';
+import { listExerciseHistory, listExerciseUse } from './progress';
 import { exercises, users } from './schema';
 import { getLocalSettings } from './settings';
 import { addSet, addWorkoutExercise, deleteSet, deleteWorkout, deleteWorkoutExercise, endWorkout, startWorkout } from './workouts';
@@ -60,5 +60,41 @@ describe('listExerciseHistory', () => {
     await addSet(db, await addWorkoutExercise(db, theirs.id, ids['Squat']), values);
 
     expect(await listExerciseHistory(db, userId, ids['Squat'])).toHaveLength(1);
+  });
+});
+
+describe('listExerciseUse', () => {
+  test('count the workouts per exercise and keep the newest start, without deleted rows or other users', async () => {
+    const { db } = await createTestDatabase();
+    const { userId } = await getLocalSettings(db);
+    const squat = crypto.randomUUID();
+    const goblet = crypto.randomUUID();
+    await db.insert(exercises).values([
+      { id: squat, source: 'custom', name: 'Barbell Squat', category: 'strength', loadType: 'external' },
+      { id: goblet, source: 'custom', name: 'Goblet Squat', category: 'strength', loadType: 'external' },
+    ]);
+    const days = ['2026-11-01', '2026-11-05', '2026-11-08'];
+    for (const day of days) {
+      const workout = await startWorkout(db, userId, new Date(`${day}T10:00:00Z`));
+      await addWorkoutExercise(db, workout.id, squat);
+      // Twice in one workout still counts as one workout.
+      if (day === '2026-11-05') await addWorkoutExercise(db, workout.id, squat);
+      await endWorkout(db, workout.id, new Date(`${day}T11:00:00Z`));
+    }
+    const deleted = await startWorkout(db, userId, new Date('2026-11-10T10:00:00Z'));
+    await addWorkoutExercise(db, deleted.id, squat);
+    await deleteWorkout(db, deleted.id);
+    const active = await startWorkout(db, userId, new Date('2026-11-12T10:00:00Z'));
+    await deleteWorkoutExercise(db, await addWorkoutExercise(db, active.id, squat));
+    await addWorkoutExercise(db, active.id, goblet);
+    const other = crypto.randomUUID();
+    await db.insert(users).values({ id: other });
+    await addWorkoutExercise(db, (await startWorkout(db, other)).id, goblet);
+
+    const use = await listExerciseUse(db, userId);
+
+    expect(use.get(squat)).toEqual({ workouts: 3, lastAt: new Date('2026-11-08T10:00:00Z') });
+    expect(use.get(goblet)).toEqual({ workouts: 1, lastAt: new Date('2026-11-12T10:00:00Z') });
+    expect(use.size).toBe(2);
   });
 });
