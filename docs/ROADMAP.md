@@ -79,7 +79,7 @@ Most visual and UX overhauls happen here.
   The ↑ and ↓ buttons from 2.2 go away, or stay only for screen readers.
   Probably needs a drag library (for example dnd-kit); say why in the task summary.
   Done when: reordering by drag works on a phone, and scrolling the page does not start a drag.
-- [ ] **4b.2** Fix every Android Back action: today the Back button and the Back gesture close the app on every page.
+- [x] **4b.2** Fix every Android Back action (decision 034): today the Back button and the Back gesture close the app on every page.
   Back first closes what is open on the page (the exercise picker, a confirm step, a set being edited),
   then goes back one page. Only on the home page does it close the app.
   Needs the Capacitor App plugin (`backButton` event), wrapped in `src/native/`.

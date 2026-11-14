@@ -13,6 +13,7 @@ import { formatDuration } from '@/lib/units';
 import RestTimer from './RestTimer';
 import SaveTemplate from './SaveTemplate';
 import SetForm from './SetForm';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 type Props = {
   detail: GroupDetail;
@@ -32,6 +33,7 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
   // The member the user picked by tapping an empty cell; otherwise the next one in turn.
   const [picked, setPicked] = useState<number | null>(null);
   const [editing, setEditing] = useState<{ setId: string; member: number } | null>(null);
+  useBackHandler(editing ? () => setEditing(null) : null);
   const [resting, setResting] = useState(false);
 
   if (!data) {

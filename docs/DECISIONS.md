@@ -250,6 +250,21 @@ moves earlier scrolls the page. A tap after a drag does not open the workout exe
 A card moves only inside its phase, and an exercise group moves as one card. `moveWorkoutExerciseTo()`
 writes the new order in one transaction. The ↑ and ↓ buttons stay for screen readers and keyboards only.
 
+## 034 — Android Back follows the back arrow, after closing what is open
+Date: 2026-11-15
+Back used to close the app on every page (4b.2). The App plugin (`@capacitor/app`, MIT, from the Capacitor
+team) reports the Back button and the Back gesture; `src/native/app.ts` wraps it.
+Back does what the user sees on screen, in this order:
+1. Close what is open on the page: a confirm step, a set being edited, the name form of "Save as routine"
+   or "Save superset", choosing for a superset, renaming a template, a later step of first-time setup.
+2. Otherwise go where the page's back arrow (`BackLink`) goes. So Back always matches the arrow,
+   for example workout exercise page → workout → home, even when the user came through the
+   "Add exercise" pages.
+3. Otherwise close the app. Only the home page and the first step of first-time setup have no back arrow.
+Components register these handlers with `useBackHandler()` while they are shown; `src/lib/backStack.ts`
+picks the newest "close" handler, then the newest "page" handler. The browser history was rejected as the
+rule: after "Add exercise" it would walk back through the search pages instead of to the workout.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

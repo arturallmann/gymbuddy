@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, test, vi } from 'vitest';
 import ConfirmAction from './ConfirmAction';
+import { backStack } from '@/lib/backStack';
 
 function renderAction(onConfirm = vi.fn().mockResolvedValue(undefined)) {
   render(
@@ -35,4 +36,17 @@ test('do nothing when the user changes their mind', async () => {
 
   expect(onConfirm).not.toHaveBeenCalled();
   expect(screen.getByRole('button', { name: 'Discard workout' })).toBeInTheDocument();
+});
+
+test('close the confirm step with Android Back, without running the action', async () => {
+  const { user, onConfirm } = renderAction();
+  await user.click(screen.getByRole('button', { name: 'Discard workout' }));
+
+  act(() => {
+    expect(backStack.back()).toBe(true);
+  });
+
+  expect(screen.queryByText(/Its exercises and sets are deleted/)).not.toBeInTheDocument();
+  expect(onConfirm).not.toHaveBeenCalled();
+  expect(backStack.back()).toBe(false);
 });

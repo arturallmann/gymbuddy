@@ -6,8 +6,8 @@ import { addTestLibrary } from '@/testing/exercises';
 import { renderWithDatabase } from '@/testing/render';
 import MuscleGroupExercises from './MuscleGroupExercises';
 
-const navigation = vi.hoisted(() => ({ params: new URLSearchParams() }));
-vi.mock('next/navigation', () => ({ useSearchParams: () => navigation.params }));
+const navigation = vi.hoisted(() => ({ params: new URLSearchParams(), router: { push: vi.fn() } }));
+vi.mock('next/navigation', () => ({ useSearchParams: () => navigation.params, useRouter: () => navigation.router }));
 
 beforeEach(() => {
   navigation.params = new URLSearchParams();

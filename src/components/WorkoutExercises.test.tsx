@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { exercises, workoutExercises } from '@/db/schema';
 import { getLocalSettings, updateSettings } from '@/db/settings';
@@ -7,6 +7,7 @@ import { addWorkoutExercise, changeWorkoutExercisePhase, listWorkoutExercises, s
 import { createTestDatabase } from '@/testing/database';
 import { renderWithDatabase } from '@/testing/render';
 import WorkoutExercises from './WorkoutExercises';
+import { backStack } from '@/lib/backStack';
 
 // A workout with these exercises in it, in this order.
 async function setup(...added: string[]) {
@@ -136,6 +137,20 @@ describe('supersets', () => {
       ['Curl', true],
       ['Press', true],
     ]);
+  });
+
+
+  test('stop choosing for a superset with Android Back', async () => {
+    const { db, workout } = await withThree();
+    const { user } = await renderWithDatabase(<WorkoutExercises workoutId={workout.id} />, { db });
+    await user.click(await screen.findByRole('button', { name: 'Make superset' }));
+
+    act(() => {
+      backStack.back();
+    });
+
+    expect(screen.getByRole('button', { name: 'Make superset' })).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 
   test('ungroup a superset', async () => {

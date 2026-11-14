@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 type Props = {
   label: string;
@@ -13,6 +14,8 @@ type Props = {
 // A button for an action that deletes something, with a confirm step.
 export default function ConfirmAction({ label, question, confirmLabel, keepLabel, onConfirm }: Props) {
   const [confirming, setConfirming] = useState(false);
+  // Android Back keeps the data, like the keep button.
+  useBackHandler(confirming ? () => setConfirming(false) : null);
 
   if (!confirming) {
     return (

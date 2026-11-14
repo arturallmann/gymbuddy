@@ -10,6 +10,7 @@ import { useSettings } from '@/hooks/useSettings';
 import { PRESET_FEATURES } from '@/lib/features';
 import { suggestUnits } from '@/lib/region';
 import type { Units } from '@/lib/units';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 type Step = 'units' | 'preset' | 'features';
 
@@ -18,6 +19,8 @@ export default function SetupPage() {
   const { updateSettings } = useSettings();
   const router = useRouter();
   const [step, setStep] = useState<Step>('units');
+  // Android Back goes one step back; on the first step it closes the app.
+  useBackHandler(step === 'units' ? null : () => setStep(step === 'features' ? 'preset' : 'units'));
   const [units, setUnits] = useState<Units>(() =>
     suggestUnits(typeof navigator === 'undefined' ? 'en' : navigator.language),
   );

@@ -13,6 +13,7 @@ import { toBlocks } from '@/lib/blocks';
 import { formatTargets } from '@/lib/templates';
 import { formatDuration, getUnits } from '@/lib/units';
 import ConfirmAction from './ConfirmAction';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 type Loaded = { items: TemplateItem[]; preferences: Map<string, ExercisePreferences> };
 
@@ -38,6 +39,7 @@ export default function TemplateList({ kind }: { kind: TemplateKind }) {
   const { workout } = useActiveWorkout();
   const [loaded, setLoaded] = useState<Loaded | undefined>(undefined);
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
+  useBackHandler(renaming ? () => setRenaming(null) : null);
 
   const load = useCallback(async (): Promise<Loaded> => {
     const items = await listTemplates(db, settings.userId, kind);

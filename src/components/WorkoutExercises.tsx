@@ -8,6 +8,7 @@ import { PHASE_LABELS, groupByPhase } from '@/lib/phases';
 import GroupRounds from './GroupRounds';
 import SetSummary from './SetSummary';
 import WorkoutExerciseList from './WorkoutExerciseList';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 // The exercises of one workout: list with set summaries, reorder (drag, 4b.1) and remove.
 // Adding happens on the "Add exercise" page (decision 031).
@@ -18,6 +19,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
   const features = useFeatures();
   // The workout exercises chosen for a new superset, or null when not choosing.
   const [chosen, setChosen] = useState<string[] | null>(null);
+  useBackHandler(chosen ? () => setChosen(null) : null);
 
   if (items === undefined) {
     return null;
