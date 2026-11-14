@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { gatherIds, moveBlock, toBlocks } from './blocks';
+import { gatherIds, moveBlock, moveBlockTo, toBlocks } from './blocks';
 
 const items = [
   { id: 'a', groupId: null },
@@ -31,6 +31,25 @@ describe('moveBlock', () => {
   test('keep the order at the top and the bottom', () => {
     expect(moveBlock(items, 'a', 'up')).toEqual(['a', 'b', 'c', 'd']);
     expect(moveBlock(items, 'd', 'down')).toEqual(['a', 'b', 'c', 'd']);
+  });
+});
+
+describe('moveBlockTo', () => {
+  test('move a single exercise to any block index', () => {
+    expect(moveBlockTo(items, 'd', 0)).toEqual(['d', 'a', 'b', 'c']);
+    expect(moveBlockTo(items, 'a', 2)).toEqual(['b', 'c', 'd', 'a']);
+  });
+
+  test('move a group as a whole, from any of its members', () => {
+    expect(moveBlockTo(items, 'c', 0)).toEqual(['b', 'c', 'a', 'd']);
+    expect(moveBlockTo(items, 'b', 2)).toEqual(['a', 'd', 'b', 'c']);
+  });
+
+  test('clamp the index, and keep the order for the same index or an unknown id', () => {
+    expect(moveBlockTo(items, 'a', 99)).toEqual(['b', 'c', 'd', 'a']);
+    expect(moveBlockTo(items, 'd', -1)).toEqual(['d', 'a', 'b', 'c']);
+    expect(moveBlockTo(items, 'a', 0)).toEqual(['a', 'b', 'c', 'd']);
+    expect(moveBlockTo(items, 'x', 1)).toEqual(['a', 'b', 'c', 'd']);
   });
 });
 

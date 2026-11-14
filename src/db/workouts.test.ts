@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 import { exercises, sets, workoutExercises, workoutGroups, workouts } from './schema';
+import { makeSuperset } from './groups';
 import { getLocalSettings } from './settings';
 import {
   addSet,
@@ -19,6 +20,7 @@ import {
   getActiveWorkout,
   listWorkoutExercises,
   moveWorkoutExercise,
+  moveWorkoutExerciseTo,
   startWorkout,
   updateSet,
 } from './workouts';
@@ -210,6 +212,33 @@ describe('workout exercises', () => {
 
     await moveWorkoutExercise(db, squat.id, 'down');
     expect(await names()).toEqual(['Row', 'Squat', 'Bench Press']);
+  });
+
+  test('move a workout exercise to another place, such as after a drag', async () => {
+    const { db, workout, ids, names } = await withExercises('Squat', 'Bench Press', 'Row', 'Curl');
+    for (const name of ['Squat', 'Bench Press', 'Row', 'Curl']) await addWorkoutExercise(db, workout.id, ids[name]);
+    const [squat, bench, , curl] = await listWorkoutExercises(db, workout.id);
+
+    await moveWorkoutExerciseTo(db, curl.id, 0);
+    expect(await names()).toEqual(['Curl', 'Squat', 'Bench Press', 'Row']);
+
+    await makeSuperset(db, workout.id, [squat.id, bench.id]);
+    await moveWorkoutExerciseTo(db, bench.id, 2);
+    expect(await names()).toEqual(['Curl', 'Row', 'Squat', 'Bench Press']);
+    expect((await listWorkoutExercises(db, workout.id)).map((item) => item.position)).toEqual([1, 2, 3, 4]);
+  });
+
+  test('move only inside the phase of the workout exercise', async () => {
+    const { db, workout, ids, names } = await withExercises('Squat', 'Row', 'Stretch');
+    for (const name of ['Squat', 'Row', 'Stretch']) await addWorkoutExercise(db, workout.id, ids[name]);
+    const [, row, stretch] = await listWorkoutExercises(db, workout.id);
+    await changeWorkoutExercisePhase(db, stretch.id, 'cooldown');
+
+    await moveWorkoutExerciseTo(db, stretch.id, 0);
+    await moveWorkoutExerciseTo(db, row.id, 0);
+
+    expect(await names()).toEqual(['Row', 'Squat', 'Stretch']);
+    await expect(moveWorkoutExerciseTo(db, 'unknown', 0)).rejects.toThrow('not found');
   });
 
   test('keep the order when the first moves up or the last moves down', async () => {

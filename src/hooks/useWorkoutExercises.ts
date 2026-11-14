@@ -7,6 +7,7 @@ import {
   deleteWorkoutExercise,
   listWorkoutExercises,
   moveWorkoutExercise,
+  moveWorkoutExerciseTo,
   type WorkoutExerciseItem,
 } from '@/db/workouts';
 
@@ -51,6 +52,14 @@ export function useWorkoutExercises(workoutId: string) {
     [db, reload],
   );
 
+  const moveTo = useCallback(
+    async (id: string, to: number) => {
+      await moveWorkoutExerciseTo(db, id, to);
+      await reload();
+    },
+    [db, reload],
+  );
+
   const remove = useCallback(
     async (id: string) => {
       await deleteWorkoutExercise(db, id);
@@ -75,5 +84,5 @@ export function useWorkoutExercises(workoutId: string) {
     [db, reload],
   );
 
-  return { items, rests, move, remove, group, ungroup };
+  return { items, rests, move, moveTo, remove, group, ungroup };
 }

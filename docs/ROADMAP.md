@@ -73,7 +73,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
 Starts when the basic features above work, so the details can be tuned in one go.
 Most visual and UX overhauls happen here.
 
-- [ ] **4b.1** Drag to reorder workout exercises.
+- [x] **4b.1** Drag to reorder workout exercises (dnd-kit, decision 033).
   A drag handle on the right of each workout exercise starts a drag right away.
   A short hold anywhere on the workout exercise also starts a drag from where the finger is.
   The ↑ and ↓ buttons from 2.2 go away, or stay only for screen readers.
@@ -108,6 +108,12 @@ Most visual and UX overhauls happen here.
 - [ ] **4b.8** Calendar view of past workouts, like FitNotes: a month calendar that marks every day with a
   workout; tapping a day shows that day's workouts, each opening its workout detail page.
   Swipe or arrows change the month. Done when: on a phone, a past workout is two taps away from the calendar.
+- [ ] **4b.9** Muscle map: a front and back drawing of the body with one area per muscle group. After a workout,
+  and on a workout detail page, each area is colored by the volume its muscle group got in that workout
+  (primary muscle group counts fully, secondary for example half), with a small legend.
+  The drawing is our own SVG (one path per muscle group, matching the library's muscle groups), not
+  copied from another app. Bodyweight and duration-only sets need a rule first (for example count sets
+  instead of volume); decide it in a decision entry.
 
 ## Phase 5 — Online (later)
 
