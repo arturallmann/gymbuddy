@@ -13,6 +13,7 @@ import { getUnits } from '@/lib/units';
 import ConfirmAction from './ConfirmAction';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
 import ExerciseProgress from './ExerciseProgress';
+import BackLink from './BackLink';
 
 // One exercise: images, category, equipment, muscle groups, description and instructions.
 // The exercise id comes from the address: /exercises/detail?id=…
@@ -46,9 +47,7 @@ export default function ExerciseDetailView() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <Link href="/exercises" className="shrink-0 text-link">
-          ← Exercises
-        </Link>
+        <BackLink href="/exercises" label="Back to exercises" />
       </header>
       {!detail || !exercise ? (
         <p className="text-muted">This exercise does not exist.</p>

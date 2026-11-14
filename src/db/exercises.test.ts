@@ -6,12 +6,14 @@ import {
   getExerciseDetail,
   listEquipment,
   listMuscleGroups,
+  listPrimaryMuscleGroups,
   searchExercises,
   updateCustomExercise,
 } from './exercises';
 import { exerciseImages, exerciseMuscleGroups, exercises, muscleGroups, users } from './schema';
 import { getLocalSettings } from './settings';
 import { createTestDatabase } from '@/testing/database';
+import { addTestLibrary } from '@/testing/exercises';
 
 async function setup() {
   const { db } = await createTestDatabase();
@@ -295,5 +297,75 @@ describe('custom exercises', () => {
     await createCustomExercise(db, userId, { ...input, equipment: null });
 
     expect(await listEquipment(db)).toEqual(['bands', 'barbell']);
+  });
+});
+
+describe('filters for the Add exercise page', () => {
+  // Library: Barbell Curl (biceps primary), Bench Press (chest primary, biceps secondary),
+  // plus a deleted custom stretch for chest and a hamstring stretch.
+  async function withLibrary() {
+    const { db, userId } = await setup();
+    await addTestLibrary(db);
+    const groups = await listMuscleGroups(db);
+    const id = (key: string) => groups.find((group) => group.key === key)!.id;
+    await db.insert(muscleGroups).values({ key: 'hamstrings', name: 'Hamstrings' });
+    const hamstrings = (await listMuscleGroups(db)).find((group) => group.key === 'hamstrings')!.id;
+    const stretch = await createCustomExercise(db, userId, {
+      name: 'Hamstring Stretch',
+      category: 'stretch',
+      equipment: null,
+      loadType: 'none',
+      tracksReps: false,
+      tracksDuration: true,
+      tracksDistance: false,
+      primaryMuscleGroupIds: [hamstrings],
+      secondaryMuscleGroupIds: [],
+    });
+    const deleted = await createCustomExercise(db, userId, {
+      name: 'Chest Stretch',
+      category: 'stretch',
+      equipment: null,
+      loadType: 'none',
+      tracksReps: false,
+      tracksDuration: true,
+      tracksDistance: false,
+      primaryMuscleGroupIds: [id('chest')],
+      secondaryMuscleGroupIds: [],
+    });
+    await deleteCustomExercise(db, userId, deleted);
+    return { db, userId, biceps: id('biceps'), stretch };
+  }
+
+  test('find only exercises where the muscle group is primary', async () => {
+    const { db, userId, biceps } = await withLibrary();
+
+    const any = await searchExercises(db, userId, '', { muscleGroupId: biceps });
+    const primary = await searchExercises(db, userId, '', { muscleGroupId: biceps, role: 'primary' });
+
+    expect(any.map((exercise) => exercise.name)).toEqual(['Barbell Curl', 'Bench Press']);
+    expect(primary.map((exercise) => exercise.name)).toEqual(['Barbell Curl']);
+  });
+
+  test('find only exercises of one category', async () => {
+    const { db, userId } = await withLibrary();
+
+    const found = await searchExercises(db, userId, '', { category: 'stretch' });
+
+    expect(found.map((exercise) => exercise.name)).toEqual(['Hamstring Stretch']);
+  });
+
+  test('list muscle groups that are primary for a visible exercise, of a category when given', async () => {
+    const { db, userId } = await withLibrary();
+
+    expect((await listPrimaryMuscleGroups(db, userId)).map((group) => group.name)).toEqual(['Biceps', 'Chest', 'Hamstrings']);
+    expect((await listPrimaryMuscleGroups(db, userId, 'stretch')).map((group) => group.name)).toEqual(['Hamstrings']);
+  });
+
+  test('leave out custom exercises of other users', async () => {
+    const { db } = await withLibrary();
+    const otherUser = crypto.randomUUID();
+    await db.insert(users).values({ id: otherUser });
+
+    expect(await listPrimaryMuscleGroups(db, otherUser, 'stretch')).toEqual([]);
   });
 });

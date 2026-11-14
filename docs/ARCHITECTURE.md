@@ -56,8 +56,9 @@ docs/             Project documentation
 
 ## Adding an exercise to a workout (decision 031)
 
-`/workout` (+) → `/workout/add` (search, muscle groups; top bar: `/workout/add/superset`)
-→ `/workout/add/muscle?id=…` → `/workout/exercise?exercise=…`. That page adds nothing until the first set:
+`/workout` (+) → `/workout/add?category=…` (search, category filter, muscle groups; top bar:
+`/workout/add/superset`) → `/workout/add/muscle?id=…&category=…` → `/workout/exercise?exercise=…`.
+`src/lib/addExercise.ts` builds these addresses. That page adds nothing until the first set:
 `addWorkoutExerciseWithSet()` writes the workout exercise and the set, and the address changes to
 `/workout/exercise?id=…`.
 

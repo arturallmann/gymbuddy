@@ -102,7 +102,9 @@ Most visual and UX overhauls happen here.
 - [x] **4b.7** Adding exercises (decision 031): a + button on the workout page opens an "Add exercise" page
   with a search field and the muscle groups, each opening its exercises; saved supersets in its top bar.
   Tapping an exercise opens its page right away; the first logged set adds it to the workout.
-  "Discard workout" goes away; "End workout" and a smaller elapsed time move to the top bar.
+  "Discard workout" goes away; the elapsed time gets smaller.
+  Then (decision 032): "End workout" and + in a bottom bar, "Save as routine" in the top bar, muscle groups
+  list only exercises where they are primary, a category filter, and arrow-only back links.
 - [ ] **4b.8** Calendar view of past workouts, like FitNotes: a month calendar that marks every day with a
   workout; tapping a day shows that day's workouts, each opening its workout detail page.
   Swipe or arrows change the month. Done when: on a phone, a past workout is two taps away from the calendar.

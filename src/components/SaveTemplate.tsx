@@ -11,28 +11,35 @@ type Props = {
   listHref: string;
   listLabel: string;
   onSave: (name: string) => Promise<void>;
+  // In a page's top bar: a small button, and the form and the message on their own line below
+  // (the top bar wraps).
+  compact?: boolean;
 };
 
 // Asks for a name, then saves a template: a saved superset or a routine.
-export default function SaveTemplate({ label, defaultName, listHref, listLabel, onSave }: Props) {
+export default function SaveTemplate({ label, defaultName, listHref, listLabel, onSave, compact = false }: Props) {
   const [name, setName] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
 
   if (name === null) {
     return (
-      <div className="flex flex-col items-start gap-2">
+      <div className={compact ? 'contents' : 'flex flex-col items-start gap-2'}>
         <button
           type="button"
           onClick={() => {
             setSaved(null);
             setName(defaultName);
           }}
-          className="rounded-lg border bg-surface px-4 py-2 font-semibold"
+          className={
+            compact
+              ? 'shrink-0 rounded-lg border bg-surface px-3 py-2 text-sm font-semibold'
+              : 'rounded-lg border bg-surface px-4 py-2 font-semibold'
+          }
         >
           {label}
         </button>
         {saved && (
-          <p role="status" className="text-sm text-muted">
+          <p role="status" className={`text-sm text-muted ${compact ? 'basis-full' : ''}`}>
             Saved as “{saved}”.{' '}
             <Link href={listHref} className="text-link">
               {listLabel}
@@ -45,7 +52,7 @@ export default function SaveTemplate({ label, defaultName, listHref, listLabel, 
   return (
     <form
       aria-label={label}
-      className="flex flex-col gap-2"
+      className={`flex flex-col gap-2 ${compact ? 'basis-full' : ''}`}
       onSubmit={async (event) => {
         event.preventDefault();
         if (!name.trim()) return;

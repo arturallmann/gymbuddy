@@ -39,7 +39,7 @@ test('show the workout exercise from the address with its set form', async () =>
   expect(await screen.findByRole('heading', { name: 'Plank' })).toBeInTheDocument();
   expect(await screen.findByRole('textbox', { name: 'Duration' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Log set' })).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: '← Workout' })).toHaveAttribute('href', '/workout');
+  expect(screen.getByRole('link', { name: 'Back to workout' })).toHaveAttribute('href', '/workout');
 });
 
 test('say so when the workout exercise does not exist', async () => {

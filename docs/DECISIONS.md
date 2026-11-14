@@ -224,6 +224,20 @@ after the first set.
 the workout and, if it was a mistake, deletes it with "Delete workout" on its workout history page.
 "End workout" and a smaller elapsed time move into the top bar of the workout page.
 
+## 032 — Workout page bars, primary muscle groups, category filter, arrow-only back links
+Date: 2026-11-15
+This adjusts decision 031 after trying it on a phone.
+- The workout page has a bar at the bottom with "End workout" and the + button, where the thumb is.
+  "Save as routine" moves to the top bar; its name form opens on a line below it.
+- A muscle group on the "Add exercise" page lists only exercises where it is the primary muscle group,
+  so Biceps shows curls, not rows. The page lists only muscle groups that have such an exercise.
+  The exercise browser (`/exercises`) keeps its filter over primary and secondary muscle groups.
+- A category filter (All, Strength, Cardio, Stretch, Mobility) narrows the muscle groups, their
+  exercises and the search. It lives in the address (`?category=…`), so it stays when the user opens
+  a muscle group and comes back.
+- Back links are an arrow only (`BackLink`), named for screen readers ("Back to workout"), because the
+  text next to long page titles pushed them onto two lines.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
