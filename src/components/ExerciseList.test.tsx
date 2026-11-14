@@ -25,3 +25,9 @@ test('show no images when they are turned off', () => {
 
   expect(screen.getByRole('link', { name: /Barbell Curl/ }).querySelector('img')).toBeNull();
 });
+
+test('link each exercise to another address when given one', () => {
+  render(<ExerciseList items={[curl]} showImages={false} href={(exercise) => `/workout/exercise?exercise=${exercise.id}`} />);
+
+  expect(screen.getByRole('link', { name: /Barbell Curl/ })).toHaveAttribute('href', '/workout/exercise?exercise=e1');
+});

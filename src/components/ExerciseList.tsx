@@ -7,15 +7,19 @@ type Props = {
   items: ExerciseListItem[];
   // Off when the exerciseImages feature toggle is off.
   showImages: boolean;
+  // Where each exercise links to. Default: its exercise page.
+  href?: (exercise: ExerciseListItem) => string;
 };
 
-// Exercises with category and equipment, each linked to its exercise page.
-export default function ExerciseList({ items, showImages }: Props) {
+const detailHref = (exercise: ExerciseListItem) => `/exercises/detail?id=${exercise.id}`;
+
+// Exercises with category and equipment, each linked to its exercise page or to `href`.
+export default function ExerciseList({ items, showImages, href = detailHref }: Props) {
   return (
     <ul className="flex flex-col">
       {items.map((exercise) => (
         <li key={exercise.id}>
-          <Link href={`/exercises/detail?id=${exercise.id}`} className="flex items-center gap-3 border-b border-line py-2">
+          <Link href={href(exercise)} className="flex items-center gap-3 border-b border-line py-2">
             {showImages && (
               <span className="block h-12 w-16 shrink-0 overflow-hidden rounded bg-line">
                 {exercise.imagePath && (

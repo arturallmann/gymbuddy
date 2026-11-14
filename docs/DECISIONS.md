@@ -208,6 +208,22 @@ The theme is a setting: `user_settings.theme` is `system` (default, "Same as pho
 `light` and `dark` write `data-theme` on `<html>`; `system` leaves it out, so the phone's light or dark mode
 decides through `prefers-color-scheme`. Until the settings load, the phone's mode applies.
 
+## 031 — Add exercise page; an exercise joins the workout with its first set; no discard
+Date: 2026-11-14
+The workout page shows a round + button instead of "Add exercise" and "Add saved superset".
+It opens the "Add exercise" page: a search field over all exercises and, while the search is empty,
+the list of muscle groups, each opening the exercises that work it (primary or secondary).
+The top bar of the page links to saved supersets (with the `supersets` and `templates` feature toggles);
+tapping one adds it to the workout as before (decision 026).
+Tapping an exercise opens the workout exercise page for it right away, but adds nothing yet.
+The first logged set adds the exercise and that set in one transaction (`addWorkoutExerciseWithSet`),
+so looking at an exercise never leaves an empty workout exercise behind. An exercise already in the
+workout opens its workout exercise instead. The phase follows the same default as before; it can change
+after the first set.
+"Discard workout" is gone from the active workout (this replaces that part of decision 019). The user ends
+the workout and, if it was a mistake, deletes it with "Delete workout" on its workout history page.
+"End workout" and a smaller elapsed time move into the top bar of the workout page.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
