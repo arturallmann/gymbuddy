@@ -1,6 +1,7 @@
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
+import { backStack } from '@/lib/backStack';
 import WorkoutExerciseList from './WorkoutExerciseList';
 
 const exercise = {
@@ -44,9 +45,31 @@ test('report moves and removals', async () => {
 
   await user.click(screen.getByRole('button', { name: 'Move Row up' }));
   await user.click(screen.getByRole('button', { name: 'Remove Squat' }));
+  expect(onRemove).not.toHaveBeenCalled();
+  const confirm = screen.getByRole('group', { name: 'Remove Squat' });
+  expect(confirm).toHaveTextContent('Remove Squat and its sets from this workout?');
+  await user.click(within(confirm).getByRole('button', { name: 'Remove' }));
 
   expect(onMove).toHaveBeenCalledWith('b', 'up');
   expect(onRemove).toHaveBeenCalledWith('a');
+  expect(screen.queryByRole('group', { name: 'Remove Squat' })).not.toBeInTheDocument();
+});
+
+test('keep the workout exercise with Keep or Android Back on the confirm step', async () => {
+  const user = userEvent.setup();
+  const onRemove = vi.fn();
+  render(<WorkoutExerciseList items={items} onMove={vi.fn()} onMoveTo={vi.fn()} onRemove={onRemove} />);
+
+  await user.click(screen.getByRole('button', { name: 'Remove Squat' }));
+  await user.click(screen.getByRole('button', { name: 'Keep' }));
+  expect(screen.getByRole('link', { name: /Squat/ })).toBeInTheDocument();
+
+  await user.click(screen.getByRole('button', { name: 'Remove Row' }));
+  act(() => {
+    expect(backStack.back()).toBe(true);
+  });
+  expect(screen.getByRole('link', { name: /Row/ })).toBeInTheDocument();
+  expect(onRemove).not.toHaveBeenCalled();
 });
 
 test('link each workout exercise to its own page', () => {

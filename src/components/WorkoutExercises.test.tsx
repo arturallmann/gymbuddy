@@ -64,6 +64,8 @@ describe('WorkoutExercises', () => {
     const { db, user, names } = await setup('Squat');
 
     await user.click(await screen.findByRole('button', { name: 'Remove Squat' }));
+    expect(await names()).toEqual(['Squat']);
+    await user.click(screen.getByRole('button', { name: 'Remove' }));
 
     expect(await screen.findByText('No exercises yet.')).toBeInTheDocument();
     expect(await names()).toEqual([]);

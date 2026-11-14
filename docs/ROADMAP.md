@@ -85,8 +85,9 @@ Most visual and UX overhauls happen here.
   Needs the Capacitor App plugin (`backButton` event), wrapped in `src/native/`.
   Done when: on a phone, Back never closes the app outside the home page, for example
   workout exercise page → workout → home, exercise detail → exercises → home, workout detail → workout history → home.
-- [ ] **4b.3** Make "Remove" for a workout exercise and "Remove" for a set look different,
+- [x] **4b.3** Make "Remove" for a workout exercise and "Remove" for a set look different,
   so a tap meant for a set never removes the whole workout exercise (for example an icon, or a confirm step).
+  Done with a confirm step and two different trash icons (decision 036).
 - [ ] **4b.4** Update exercise images when the phone is online.
   The app ships the images of one free-exercise-db commit (decision 021). When the phone has internet,
   the app checks for a newer library version and downloads only changed or new images.
@@ -105,13 +106,13 @@ Most visual and UX overhauls happen here.
   "Discard workout" goes away; the elapsed time gets smaller.
   Then (decision 032): "End workout" and + in a bottom bar, "Save as routine" in the top bar, muscle groups
   list only exercises where they are primary, a category filter, and arrow-only back links.
-- [x] **4b.10** Clean home page (decision 035): app name top left; a book icon with workout history, exercises,
+- [x] **4b.8** Clean home page (decision 035): app name top left; a book icon with workout history, exercises,
   routines and saved supersets, and a gear icon for settings, top right; today's workouts under "Start workout".
   Trash icons instead of "Remove"; category and "Custom only" filters in the exercise browser.
-- [ ] **4b.8** Calendar view of past workouts, like FitNotes: a month calendar that marks every day with a
+- [ ] **4b.9** Calendar view of past workouts, like FitNotes: a month calendar that marks every day with a
   workout; tapping a day shows that day's workouts, each opening its workout detail page.
   Swipe or arrows change the month. Done when: on a phone, a past workout is two taps away from the calendar.
-- [ ] **4b.9** Muscle map: a front and back drawing of the body with one area per muscle group. After a workout,
+- [ ] **4b.10** Muscle map: a front and back drawing of the body with one area per muscle group. After a workout,
   and on a workout detail page, each area is colored by the volume its muscle group got in that workout
   (primary muscle group counts fully, secondary for example half), with a small legend.
   The drawing is our own SVG (one path per muscle group, matching the library's muscle groups), not
