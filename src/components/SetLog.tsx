@@ -10,6 +10,7 @@ import type { Units } from '@/lib/units';
 import SetForm from './SetForm';
 import SetList from './SetList';
 import StretchTimer from './StretchTimer';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 const DEFAULT_STRETCH_SECONDS = 30;
 
@@ -42,6 +43,7 @@ export default function SetLog({ item, workoutId, units, onFirstSet }: Props) {
   const features = useFeatures();
   const { sets, lastSets, targets, add, update, remove } = useSets(item.id, item.exerciseId, workoutId, onFirstSet);
   const [editingId, setEditingId] = useState<string | null>(null);
+  useBackHandler(editingId ? () => setEditingId(null) : null);
 
   if (sets === undefined || lastSets === undefined) {
     return null;

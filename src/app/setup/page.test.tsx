@@ -1,9 +1,10 @@
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { DEFAULT_FEATURES } from '@/db/schema';
 import { PRESET_FEATURES } from '@/lib/features';
 import { renderWithDatabase, savedSettings } from '@/testing/render';
 import SetupPage from './page';
+import { backStack } from '@/lib/backStack';
 
 const replace = vi.hoisted(() => vi.fn());
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
@@ -77,6 +78,24 @@ describe('first-time setup', () => {
     await user.click(screen.getByRole('button', { name: 'Back' }));
 
     expect(screen.getByRole('radio', { name: 'lb' })).toHaveAttribute('aria-checked', 'true');
+  });
+
+
+  test('go one step back with Android Back, and leave the first step to the phone', async () => {
+    useLanguage('de-DE');
+    const { user } = await renderWithDatabase(<SetupPage />);
+    expect(backStack.back()).toBe(false);
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.click(screen.getByRole('button', { name: 'Fine-tune features' }));
+    act(() => {
+      backStack.back();
+    });
+    expect(screen.getByRole('heading', { name: 'Preset' })).toBeInTheDocument();
+    act(() => {
+      backStack.back();
+    });
+    expect(screen.getByRole('heading', { name: 'Units' })).toBeInTheDocument();
   });
 
   test('save nothing before Finish', async () => {

@@ -65,6 +65,7 @@ If a needed term is missing, stop and ask before inventing one.
   `border-line` and so on), never fixed colors such as `text-sky-600` (decision 030).
 - One component per file. File name matches the component name.
 - Back links at the top of a page use `BackLink` (an arrow with a label for screen readers, decision 032).
+- Anything a page opens (a confirm step, a form, an edit mode) closes on Android Back: `useBackHandler()` (decision 034).
 - Small pure functions for unit conversion and formatting live in `src/lib/`.
 
 ## Workflow

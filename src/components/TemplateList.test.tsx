@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { makeSuperset } from '@/db/groups';
 import { saveExercisePreferences } from '@/db/preferences';
@@ -9,6 +9,7 @@ import { addSet, addWorkoutExercise, endWorkout, getActiveWorkout, listWorkoutEx
 import { createTestDatabase } from '@/testing/database';
 import { renderWithDatabase } from '@/testing/render';
 import TemplateList from './TemplateList';
+import { backStack } from '@/lib/backStack';
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: navigation.push }) }));
@@ -60,6 +61,20 @@ describe('TemplateList: saved supersets', () => {
 
     expect(await screen.findByRole('heading', { name: 'Biceps finisher' })).toBeInTheDocument();
     expect((await listTemplates(db, userId, 'superset'))[0].name).toBe('Biceps finisher');
+  });
+
+
+  test('stop renaming with Android Back', async () => {
+    const { db, user, userId } = await withSaved();
+    await user.click(await screen.findByRole('button', { name: 'Rename' }));
+    await user.type(screen.getByRole('textbox', { name: 'Name' }), ' changed');
+
+    act(() => {
+      backStack.back();
+    });
+
+    expect(screen.queryByRole('textbox', { name: 'Name' })).not.toBeInTheDocument();
+    expect((await listTemplates(db, userId, 'superset'))[0].name).not.toContain('changed');
   });
 
   test('delete a saved superset after the confirm step', async () => {

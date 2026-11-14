@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 type Props = {
   // "Save superset" or "Save as routine".
@@ -20,6 +21,7 @@ type Props = {
 export default function SaveTemplate({ label, defaultName, listHref, listLabel, onSave, compact = false }: Props) {
   const [name, setName] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  useBackHandler(name !== null ? () => setName(null) : null);
 
   if (name === null) {
     return (

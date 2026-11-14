@@ -18,7 +18,15 @@ SQLite database file on the phone
 
 Native features (file save, share menu, timers in the background) go through Capacitor plugins.
 Wrap each plugin in a small module in `src/native/`, so the interface never calls plugins directly:
-`files.ts` (Filesystem), `share.ts` (Share) and `alert.ts` (Haptics, plus a tone for the stretch timer).
+`files.ts` (Filesystem), `share.ts` (Share), `alert.ts` (Haptics, plus a tone for the stretch timer) and
+`app.ts` (App: the Android Back button).
+
+## Android Back (decision 034)
+
+`BackButtonListener` (in the root layout) catches Back once. `src/lib/backStack.ts` runs the newest
+"close" handler (something open on the page), otherwise the newest "page" handler (registered by
+`BackLink`), otherwise the app closes. A component that opens something calls
+`useBackHandler(open ? close : null)`.
 
 ## Folder layout (target)
 
