@@ -59,14 +59,14 @@ export default function TemplateList({ kind }: { kind: TemplateKind }) {
     return null;
   }
   if (loaded.items.length === 0) {
-    return <p className="text-gray-500">{TEXT[kind].empty}</p>;
+    return <p className="text-muted">{TEXT[kind].empty}</p>;
   }
   return (
     <div className="flex flex-col gap-3">
       {kind === 'routine' && workout && (
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-muted">
           A workout is active.{' '}
-          <Link href="/workout" className="text-sky-600">
+          <Link href="/workout" className="text-link">
             Continue workout
           </Link>
         </p>
@@ -82,13 +82,13 @@ export default function TemplateList({ kind }: { kind: TemplateKind }) {
             return (
               <>
                 {exercise.name}
-                {targets && <span className="text-gray-500"> · {targets}</span>}
+                {targets && <span className="text-muted"> · {targets}</span>}
               </>
             );
           };
           const blocks = toBlocks(item.exercises.map((exercise) => ({ ...exercise, groupId: exercise.groupKey })));
           return (
-            <li key={item.id} aria-label={item.name} className="flex flex-col gap-2 rounded-lg border p-3">
+            <li key={item.id} aria-label={item.name} className="flex flex-col gap-2 rounded-lg border bg-surface p-3">
               {renaming?.id === item.id ? (
                 <form
                   aria-label="Rename"
@@ -105,12 +105,12 @@ export default function TemplateList({ kind }: { kind: TemplateKind }) {
                     aria-label="Name"
                     value={renaming.name}
                     onChange={(event) => setRenaming({ id: item.id, name: event.target.value })}
-                    className="min-w-0 flex-1 rounded-lg border px-3 py-2 text-black"
+                    className="min-w-0 flex-1 rounded-lg border px-3 py-2"
                   />
-                  <button type="submit" className="shrink-0 rounded-lg bg-sky-600 px-3 py-2 text-white">
+                  <button type="submit" className="shrink-0 rounded-lg bg-primary px-3 py-2 text-on-primary">
                     Save
                   </button>
-                  <button type="button" onClick={() => setRenaming(null)} className="shrink-0 rounded-lg border px-3 py-2">
+                  <button type="button" onClick={() => setRenaming(null)} className="shrink-0 rounded-lg border bg-surface px-3 py-2">
                     Cancel
                   </button>
                 </form>
@@ -120,7 +120,7 @@ export default function TemplateList({ kind }: { kind: TemplateKind }) {
                   <button
                     type="button"
                     onClick={() => setRenaming({ id: item.id, name: item.name })}
-                    className="shrink-0 text-sm text-sky-600"
+                    className="shrink-0 text-sm text-link"
                   >
                     Rename
                   </button>
@@ -134,11 +134,11 @@ export default function TemplateList({ kind }: { kind: TemplateKind }) {
                     </li>
                   ) : (
                     <li key={block.groupId} className="flex flex-col gap-1">
-                      <span className="text-xs uppercase text-sky-500">
+                      <span className="text-xs uppercase text-link">
                         Superset
                         {block.items[0].restSeconds !== null && ` · Rest ${formatDuration(block.items[0].restSeconds)}`}
                       </span>
-                      <ol className="flex flex-col gap-1 border-l-2 border-sky-700 pl-3">
+                      <ol className="flex flex-col gap-1 border-l-2 border-primary pl-3">
                         {block.items.map((exercise) => (
                           <li key={exercise.id} className="break-words">
                             {exerciseText(exercise)}
@@ -156,7 +156,7 @@ export default function TemplateList({ kind }: { kind: TemplateKind }) {
                     await startWorkoutFromRoutine(db, settings.userId, item.id);
                     router.push('/workout');
                   }}
-                  className="rounded-lg bg-sky-600 px-4 py-2 font-semibold text-white"
+                  className="rounded-lg bg-primary px-4 py-2 font-semibold text-on-primary"
                 >
                   Start
                 </button>

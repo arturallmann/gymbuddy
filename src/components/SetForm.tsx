@@ -25,14 +25,14 @@ type Props = {
   onCancel?: () => void;
 };
 
-const inputClass = 'w-full min-w-0 rounded-lg border px-3 py-2 text-black';
+const inputClass = 'w-full min-w-0 rounded-lg border px-3 py-2';
 
 function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
   return (
     <label className="flex min-w-0 flex-col gap-1 text-sm">
       <span>{label}</span>
       {children}
-      {hint && <span className="text-xs text-gray-500">{hint}</span>}
+      {hint && <span className="text-xs text-muted">{hint}</span>}
     </label>
   );
 }
@@ -129,7 +129,7 @@ export default function SetForm({
                 aria-label="Distance unit"
                 value={form.distanceUnit}
                 onChange={(event) => change({ distanceUnit: event.target.value as DistanceInputUnit })}
-                className="shrink-0 rounded-lg border px-2 text-black"
+                className="shrink-0 rounded-lg border px-2"
               >
                 {DISTANCE_INPUT_UNITS[units.distanceUnit].map((unit) => (
                   <option key={unit}>{unit}</option>
@@ -145,7 +145,7 @@ export default function SetForm({
           onToggle={(event) => setShowExtras(event.currentTarget.open)}
           className="rounded-lg border px-3 py-2"
         >
-          <summary className="cursor-pointer text-sm text-gray-400">{extras}</summary>
+          <summary className="cursor-pointer text-sm text-muted">{extras}</summary>
           <div className="mt-3 flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3">
               {fields.rpe && (
@@ -183,7 +183,7 @@ export default function SetForm({
         </details>
       )}
       {error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
@@ -191,12 +191,12 @@ export default function SetForm({
         <button
           type="submit"
           disabled={saving}
-          className="flex-1 rounded-lg bg-sky-600 px-4 py-2 font-semibold text-white disabled:opacity-50"
+          className="flex-1 rounded-lg bg-primary px-4 py-2 font-semibold text-on-primary disabled:opacity-50"
         >
           {submitLabel}
         </button>
         {onCancel && (
-          <button type="button" onClick={onCancel} className="rounded-lg border px-4 py-2">
+          <button type="button" onClick={onCancel} className="rounded-lg border bg-surface px-4 py-2">
             Cancel
           </button>
         )}

@@ -29,7 +29,7 @@ export default function ExercisePicker({ onPick, onClose }: Props) {
   }, [db, userId, query]);
 
   return (
-    <section aria-label="Add exercise" className="flex flex-col gap-3 rounded-lg border p-4">
+    <section aria-label="Add exercise" className="flex flex-col gap-3 rounded-lg border bg-surface p-4">
       <div className="flex items-center gap-3">
         <input
           type="search"
@@ -38,20 +38,20 @@ export default function ExercisePicker({ onPick, onClose }: Props) {
           autoFocus
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          className="min-w-0 flex-1 rounded-lg border px-3 py-2 text-black"
+          className="min-w-0 flex-1 rounded-lg border px-3 py-2"
         />
-        <button type="button" onClick={onClose} className="shrink-0 text-sky-600">
+        <button type="button" onClick={onClose} className="shrink-0 text-link">
           Cancel
         </button>
       </div>
-      {found && found.length === 0 && <p className="text-gray-500">No exercise found.</p>}
+      {found && found.length === 0 && <p className="text-muted">No exercise found.</p>}
       <ul className="flex max-h-96 flex-col overflow-y-auto">
         {found?.map((exercise) => (
           <li key={exercise.id}>
             <button
               type="button"
               onClick={() => onPick(exercise)}
-              className="w-full break-words border-b py-3 text-left"
+              className="w-full break-words border-b border-line py-3 text-left"
             >
               {exercise.name}
             </button>

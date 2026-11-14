@@ -10,7 +10,7 @@ export default function SavedSupersetsLink() {
     return null;
   }
   return (
-    <Link href="/saved-supersets" className="text-sky-600">
+    <Link href="/saved-supersets" className="text-link">
       Saved supersets
     </Link>
   );

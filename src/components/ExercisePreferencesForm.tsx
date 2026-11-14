@@ -17,7 +17,7 @@ const DISTANCE_LABELS: Record<DistanceUnit, string> = {
   imperial: 'Imperial (ft, mi)',
 };
 
-const inputClass = 'w-full min-w-0 rounded-lg border px-3 py-2 text-black';
+const inputClass = 'w-full min-w-0 rounded-lg border px-3 py-2';
 
 // The user's own notes and unit override for one exercise.
 export default function ExercisePreferencesForm({ preferences, settingsUnits, onSave }: Props) {
@@ -80,11 +80,11 @@ export default function ExercisePreferencesForm({ preferences, settingsUnits, on
         </label>
       </div>
       <div className="flex items-center gap-3">
-        <button type="submit" disabled={saving} className="rounded-lg border px-4 py-2 font-semibold disabled:opacity-50">
+        <button type="submit" disabled={saving} className="rounded-lg border bg-surface px-4 py-2 font-semibold disabled:opacity-50">
           Save
         </button>
         {saved && (
-          <span role="status" className="text-sm text-gray-500">
+          <span role="status" className="text-sm text-muted">
             Saved
           </span>
         )}

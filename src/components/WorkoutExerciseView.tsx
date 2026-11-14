@@ -57,13 +57,13 @@ export default function WorkoutExerciseView() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <Link href="/workout" className="shrink-0 text-sky-600">
+        <Link href="/workout" className="shrink-0 text-link">
           ← Workout
         </Link>
         <h1 className="min-w-0 break-words text-2xl font-bold">{item?.name ?? 'Exercise'}</h1>
       </header>
       {!item ? (
-        <p className="text-gray-500">This exercise is not in the workout.</p>
+        <p className="text-muted">This exercise is not in the workout.</p>
       ) : (
         <>
           {detail && (
@@ -78,8 +78,8 @@ export default function WorkoutExerciseView() {
                 />
               )}
               <div className="min-w-0 flex-1">
-                <p className="break-words text-sm text-gray-400">{shortDescription(detail.exercise, primary)}</p>
-                <Link href={`/exercises/detail?id=${detail.exercise.id}`} className="text-sm text-sky-600">
+                <p className="break-words text-sm text-muted">{shortDescription(detail.exercise, primary)}</p>
+                <Link href={`/exercises/detail?id=${detail.exercise.id}`} className="text-sm text-link">
                   Exercise details
                 </Link>
               </div>
@@ -88,7 +88,7 @@ export default function WorkoutExerciseView() {
           {preferences?.notes && <p className="break-words rounded-lg border px-3 py-2">{preferences.notes}</p>}
           {preferences !== undefined && (
             <details className="rounded-lg border px-3 py-2">
-              <summary className="cursor-pointer text-sm text-gray-400">
+              <summary className="cursor-pointer text-sm text-muted">
                 Notes and units ({units.weightUnit})
               </summary>
               <div className="mt-3">
@@ -98,7 +98,7 @@ export default function WorkoutExerciseView() {
           )}
           {features.phases && (
             <label className="flex items-center gap-3 text-sm">
-              <span className="shrink-0 text-gray-400">Phase</span>
+              <span className="shrink-0 text-muted">Phase</span>
               <select
                 value={item.phase}
                 onChange={async (event) => {
@@ -106,7 +106,7 @@ export default function WorkoutExerciseView() {
                   await changeWorkoutExercisePhase(db, item.id, phase);
                   setLoaded((current) => (current ? { ...current, item: { ...current.item, phase } } : current));
                 }}
-                className="min-w-0 flex-1 rounded-lg border px-3 py-2 text-black"
+                className="min-w-0 flex-1 rounded-lg border px-3 py-2"
               >
                 {PHASES.map((phase) => (
                   <option key={phase} value={phase}>

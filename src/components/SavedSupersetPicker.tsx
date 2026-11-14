@@ -27,20 +27,20 @@ export default function SavedSupersetPicker({ onPick, onClose }: Props) {
   }, [db, userId]);
 
   return (
-    <section aria-label="Add saved superset" className="flex flex-col gap-3 rounded-lg border p-4">
+    <section aria-label="Add saved superset" className="flex flex-col gap-3 rounded-lg border bg-surface p-4">
       <div className="flex items-center gap-3">
         <h2 className="min-w-0 flex-1 font-semibold">Add saved superset</h2>
-        <button type="button" onClick={onClose} className="shrink-0 text-sky-600">
+        <button type="button" onClick={onClose} className="shrink-0 text-link">
           Cancel
         </button>
       </div>
-      {items && items.length === 0 && <p className="text-gray-500">No saved supersets yet.</p>}
+      {items && items.length === 0 && <p className="text-muted">No saved supersets yet.</p>}
       <ul className="flex flex-col">
         {items?.map((item) => (
           <li key={item.id}>
-            <button type="button" onClick={() => onPick(item.id)} className="w-full break-words border-b py-3 text-left">
+            <button type="button" onClick={() => onPick(item.id)} className="w-full break-words border-b border-line py-3 text-left">
               <span className="block font-semibold">{item.name}</span>
-              <span className="block text-sm text-gray-500">
+              <span className="block text-sm text-muted">
                 {item.exercises.map((exercise) => exercise.name).join(' + ')}
               </span>
             </button>

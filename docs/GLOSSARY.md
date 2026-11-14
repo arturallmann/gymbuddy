@@ -84,6 +84,7 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 | Unit override | `exercise_preferences.weightUnit`, `.distanceUnit` | A different unit for one exercise. | custom unit, exercise unit |
 | Feature toggle | type `FeatureToggles`, hook `useFeatures()` | An on/off switch that hides part of the interface. | feature flag, switch, option |
 | Preset | `preset` | A set of feature toggles: `simple`, `standard`, `advanced`, `custom`. Only for settings. | mode, profile, template |
+| Theme | `theme`, type `Theme` | The app's colors: `system` ("Same as phone"), `light` or `dark` (decision 030). | dark mode (as the setting), appearance, skin, color mode |
 | First-time setup | `setupCompletedAt` | The short setup at first start: units, preset, fine-tuning. | onboarding, wizard, intro |
 
 ## Progress

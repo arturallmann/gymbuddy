@@ -26,13 +26,13 @@ export default function RestTimer({ seconds, onClose }: Props) {
   }, [left]);
 
   return (
-    <section aria-label="Rest timer" className="flex flex-col items-center gap-3 rounded-lg border border-sky-700 p-4">
-      <h2 className="text-sm text-gray-400">Rest</h2>
+    <section aria-label="Rest timer" className="flex flex-col items-center gap-3 rounded-lg border-2 border-accent bg-surface p-4">
+      <h2 className="rounded-full bg-accent px-3 py-0.5 text-sm font-semibold text-on-accent">Rest</h2>
       <p role="timer" className="text-5xl tabular-nums">
         {formatDuration(left)}
       </p>
-      {left === 0 && <p role="status">Rest is over</p>}
-      <button type="button" onClick={onClose} className="rounded-lg border px-4 py-2 font-semibold">
+      {left === 0 && <p role="status" className="font-semibold text-success">Rest is over</p>}
+      <button type="button" onClick={onClose} className="rounded-lg border bg-surface px-4 py-2 font-semibold">
         {left === 0 ? 'Next round' : 'Skip rest'}
       </button>
     </section>

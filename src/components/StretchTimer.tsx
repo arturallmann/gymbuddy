@@ -50,20 +50,20 @@ export default function StretchTimer({ initialSeconds, onLog }: Props) {
   const button = 'rounded-lg border px-4 py-2 font-semibold';
 
   return (
-    <section aria-label="Stretch timer" className="flex flex-col items-center gap-3 rounded-lg border p-4">
-      <h2 className="text-sm text-gray-400">Stretch timer</h2>
+    <section aria-label="Stretch timer" className="flex flex-col items-center gap-3 rounded-lg border bg-surface p-4">
+      <h2 className="rounded-full bg-accent px-3 py-0.5 text-sm font-semibold text-on-accent">Stretch timer</h2>
       <p role="timer" className="text-5xl tabular-nums">
         {formatDuration(left)}
       </p>
       {state.status === 'idle' && (
         <div className="flex gap-3">
-          <button type="button" aria-label="15 seconds less" onClick={() => setLength(stepDuration(length, -1))} className={button}>
+          <button type="button" aria-label="15 seconds less" onClick={() => setLength(stepDuration(length, -1))} className={`${button} bg-surface`}>
             −15 s
           </button>
-          <button type="button" onClick={() => start(length)} className={`${button} bg-sky-600 text-white`}>
+          <button type="button" onClick={() => start(length)} className={`${button} bg-primary text-on-primary`}>
             Start
           </button>
-          <button type="button" aria-label="15 seconds more" onClick={() => setLength(stepDuration(length, 1))} className={button}>
+          <button type="button" aria-label="15 seconds more" onClick={() => setLength(stepDuration(length, 1))} className={`${button} bg-surface`}>
             +15 s
           </button>
         </div>
@@ -71,22 +71,22 @@ export default function StretchTimer({ initialSeconds, onLog }: Props) {
       {(state.status === 'running' || state.status === 'paused') && (
         <div className="flex gap-3">
           {state.status === 'running' ? (
-            <button type="button" onClick={() => setState({ status: 'paused', left })} className={button}>
+            <button type="button" onClick={() => setState({ status: 'paused', left })} className={`${button} bg-surface`}>
               Pause
             </button>
           ) : (
-            <button type="button" onClick={() => start(state.left)} className={`${button} bg-sky-600 text-white`}>
+            <button type="button" onClick={() => start(state.left)} className={`${button} bg-primary text-on-primary`}>
               Resume
             </button>
           )}
-          <button type="button" onClick={() => setState({ status: 'idle' })} className={button}>
+          <button type="button" onClick={() => setState({ status: 'idle' })} className={`${button} bg-surface`}>
             Reset
           </button>
         </div>
       )}
       {state.status === 'done' && (
         <div className="flex flex-col items-center gap-3">
-          <p role="status">Done</p>
+          <p role="status" className="font-semibold text-success">Done</p>
           <div className="flex gap-3">
             <button
               type="button"
@@ -94,11 +94,11 @@ export default function StretchTimer({ initialSeconds, onLog }: Props) {
                 await onLog(length);
                 setState({ status: 'idle' });
               }}
-              className={`${button} bg-sky-600 text-white`}
+              className={`${button} bg-primary text-on-primary`}
             >
               Log set ({formatDuration(length)})
             </button>
-            <button type="button" onClick={() => setState({ status: 'idle' })} className={button}>
+            <button type="button" onClick={() => setState({ status: 'idle' })} className={`${button} bg-surface`}>
               Reset
             </button>
           </div>

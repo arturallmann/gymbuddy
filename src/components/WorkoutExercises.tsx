@@ -51,7 +51,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
           <SetSummary workoutExerciseId={item.id} exerciseId={item.exerciseId} loadType={item.loadType} />
           {/* A toggle hides controls only: a stored phase still shows. */}
           {!features.phases && item.phase !== 'main' && (
-            <span className="block text-xs text-gray-500">{PHASE_LABELS[item.phase]}</span>
+            <span className="block text-xs text-muted">{PHASE_LABELS[item.phase]}</span>
           )}
         </>
       )}
@@ -60,11 +60,11 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
   return (
     <section className="flex flex-col gap-4">
       {items.length === 0 ? (
-        <p className="text-gray-500">No exercises yet.</p>
+        <p className="text-muted">No exercises yet.</p>
       ) : features.phases ? (
         groupByPhase(items).map((phaseGroup) => (
           <section key={phaseGroup.phase} aria-label={PHASE_LABELS[phaseGroup.phase]} className="flex flex-col gap-2">
-            <h2 className="text-sm font-semibold uppercase text-gray-400">{PHASE_LABELS[phaseGroup.phase]}</h2>
+            <h2 className="text-sm font-semibold uppercase text-muted">{PHASE_LABELS[phaseGroup.phase]}</h2>
             {renderList(phaseGroup.items)}
           </section>
         ))
@@ -73,7 +73,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
       )}
       {chosen ? (
         <div className="flex flex-col gap-2">
-          <p className="text-sm text-gray-400">Choose two or more exercises of one phase.</p>
+          <p className="text-sm text-muted">Choose two or more exercises of one phase.</p>
           <div className="flex gap-3">
             <button
               type="button"
@@ -82,11 +82,11 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
                 await group(chosen);
                 setChosen(null);
               }}
-              className="flex-1 rounded-lg bg-sky-600 px-4 py-2 font-semibold text-white disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2 font-semibold text-on-primary disabled:opacity-50"
             >
               Make superset ({chosen.length})
             </button>
-            <button type="button" onClick={() => setChosen(null)} className="rounded-lg border px-4 py-2">
+            <button type="button" onClick={() => setChosen(null)} className="rounded-lg border bg-surface px-4 py-2">
               Cancel
             </button>
           </div>
@@ -109,16 +109,16 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
         />
       ) : (
         <div className="flex flex-col gap-3">
-          <button type="button" onClick={() => setPicking('exercise')} className="rounded-lg border px-6 py-3 font-semibold">
+          <button type="button" onClick={() => setPicking('exercise')} className="rounded-lg border bg-surface px-6 py-3 font-semibold">
             Add exercise
           </button>
           {features.supersets && features.templates && (
-            <button type="button" onClick={() => setPicking('superset')} className="rounded-lg border px-6 py-3 font-semibold">
+            <button type="button" onClick={() => setPicking('superset')} className="rounded-lg border bg-surface px-6 py-3 font-semibold">
               Add saved superset
             </button>
           )}
           {canGroup && (
-            <button type="button" onClick={() => setChosen([])} className="rounded-lg border px-6 py-3 font-semibold">
+            <button type="button" onClick={() => setChosen([])} className="rounded-lg border bg-surface px-6 py-3 font-semibold">
               Make superset
             </button>
           )}

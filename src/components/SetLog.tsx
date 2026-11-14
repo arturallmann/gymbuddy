@@ -51,7 +51,7 @@ export default function SetLog({ item, workoutId, units }: Props) {
   return (
     <div className="flex flex-col gap-4">
       {lastSets.length > 0 && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           Last time:{' '}
           {lastSets
             .map((set) => formatSet(set, item.loadType, units) + (set.notes ? ` (${set.notes})` : ''))

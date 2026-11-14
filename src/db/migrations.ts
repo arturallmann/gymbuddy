@@ -77,5 +77,13 @@ export const migrations: Migration[] = [
     "statements": [
       "CREATE UNIQUE INDEX `workouts_user_active_idx` ON `workouts` (`userId`) WHERE \"endedAt\" IS NULL AND \"deletedAt\" IS NULL;"
     ]
+  },
+  {
+    "tag": "0005_blue_zaran",
+    "when": 1794691661074,
+    "hash": "404ca17f02a4c66775590a39973c0f14bc4ce5029d1797afd4898b0ee3772c9f",
+    "statements": [
+      "ALTER TABLE `user_settings` ADD `theme` text DEFAULT 'system' NOT NULL;"
+    ]
   }
 ];

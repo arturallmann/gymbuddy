@@ -193,6 +193,21 @@ chart library: no new dependency, small enough for a phone. Fancier charts can c
 Per workout it shows the heaviest weight, the most reps, the volume (weight × reps, only for
 external load), the longest duration or the longest distance, in the exercise's units.
 
+## 030 — Color theme "Bumper Plate", light, dark or same as the phone
+Date: 2026-11-14
+The user chose the "Bumper Plate" color scheme around their favourite color #0b3f57: petrol for main
+buttons and chosen options, competition plate colors for states (yellow for timers, red for delete,
+green for done), on cool grey neutrals. Each color has a light and a dark value, and the main pairs
+reach WCAG AA contrast in both.
+The colors are CSS variables in `src/app/globals.css`, exposed as named colors in `tailwind.config.ts`
+(`page`, `surface`, `line`, `line-strong`, `ink`, `muted`, `primary`, `link`, `accent`, `danger`,
+`success`, plus `on-…` for text on a filled color). Components use only these names, never fixed
+Tailwind colors such as `sky-600`, so one change of a variable changes the whole app. A plain `border`
+uses `line-strong`, so cards and buttons keep visible borders in the light theme.
+The theme is a setting: `user_settings.theme` is `system` (default, "Same as phone"), `light` or `dark`.
+`light` and `dark` write `data-theme` on `<html>`; `system` leaves it out, so the phone's light or dark mode
+decides through `prefers-color-scheme`. Until the settings load, the phone's mode applies.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
