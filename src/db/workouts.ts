@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, isNotNull, isNull, max, ne } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, lt, max, ne } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
 import {
   exercises,
@@ -342,11 +342,25 @@ export type WorkoutHistoryItem = Pick<Workout, 'id' | 'startedAt' | 'endedAt'> &
 };
 
 // Ended workouts of the user, newest first, with their exercise names and number of sets.
-export async function listWorkoutHistory(db: AppDatabase, userId: string): Promise<WorkoutHistoryItem[]> {
+// With `startedIn`, only workouts that started in that time span (from included, to not),
+// such as today for the home page.
+export async function listWorkoutHistory(
+  db: AppDatabase,
+  userId: string,
+  startedIn?: { from: Date; to: Date },
+): Promise<WorkoutHistoryItem[]> {
   const ended = await db
     .select({ id: workouts.id, startedAt: workouts.startedAt, endedAt: workouts.endedAt })
     .from(workouts)
-    .where(and(eq(workouts.userId, userId), isNotNull(workouts.endedAt), isNull(workouts.deletedAt)))
+    .where(
+      and(
+        eq(workouts.userId, userId),
+        isNotNull(workouts.endedAt),
+        isNull(workouts.deletedAt),
+        startedIn ? gte(workouts.startedAt, startedIn.from) : undefined,
+        startedIn ? lt(workouts.startedAt, startedIn.to) : undefined,
+      ),
+    )
     .orderBy(desc(workouts.startedAt));
   if (ended.length === 0) {
     return [];

@@ -105,6 +105,9 @@ Most visual and UX overhauls happen here.
   "Discard workout" goes away; the elapsed time gets smaller.
   Then (decision 032): "End workout" and + in a bottom bar, "Save as routine" in the top bar, muscle groups
   list only exercises where they are primary, a category filter, and arrow-only back links.
+- [x] **4b.10** Clean home page (decision 035): app name top left; a book icon with workout history, exercises,
+  routines and saved supersets, and a gear icon for settings, top right; today's workouts under "Start workout".
+  Trash icons instead of "Remove"; category and "Custom only" filters in the exercise browser.
 - [ ] **4b.8** Calendar view of past workouts, like FitNotes: a month calendar that marks every day with a
   workout; tapping a day shows that day's workouts, each opening its workout detail page.
   Swipe or arrows change the month. Done when: on a phone, a past workout is two taps away from the calendar.

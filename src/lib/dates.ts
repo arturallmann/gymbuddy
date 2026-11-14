@@ -11,3 +11,10 @@ export function formatWorkoutDate(date: Date, locale?: string): string {
     minute: '2-digit',
   }).format(date);
 }
+
+// The local day that holds `date`: from midnight to the next midnight, in the phone's time zone.
+export function dayRange(date: Date): { from: Date; to: Date } {
+  const from = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const to = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+  return { from, to };
+}

@@ -3,6 +3,7 @@
 import type { LoadType, WorkoutSet } from '@/db/schema';
 import { formatSet } from '@/lib/sets';
 import type { Units } from '@/lib/units';
+import TrashIcon from './icons/TrashIcon';
 
 type Props = {
   sets: WorkoutSet[];
@@ -52,9 +53,9 @@ export default function SetList({ sets, loadType, units, onRemove, onEdit, editi
                 type="button"
                 aria-label={`Remove set ${index + 1}`}
                 onClick={() => onRemove(set.id)}
-                className="shrink-0 px-2 text-sm text-danger"
+                className="shrink-0 rounded-lg p-2 text-danger"
               >
-                Remove
+                <TrashIcon />
               </button>
             )}
           </li>

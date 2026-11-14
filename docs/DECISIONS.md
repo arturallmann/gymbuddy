@@ -265,6 +265,20 @@ Components register these handlers with `useBackHandler()` while they are shown;
 picks the newest "close" handler, then the newest "page" handler. The browser history was rejected as the
 rule: after "Add exercise" it would walk back through the search pages instead of to the workout.
 
+## 035 — A clean home page with icons; trash icons; more exercise filters
+Date: 2026-11-15
+The home page shows only the app name with a dumbbell mark (top left), two icons (top right),
+"Start workout" or "Continue workout" in the middle and, below it, the workouts ended today.
+- The book icon opens a menu: workout history, exercises, routines (`templates` feature toggle) and saved
+  supersets (`supersets` and `templates`). Android Back, a tap outside or a second tap closes it.
+- The gear icon opens the settings.
+- "Today" lists ended workouts that started on the phone's current day (`listWorkoutHistory()` with a time
+  span from `dayRange()`), like the workout history.
+Every red "Remove" text becomes a trash can icon; the button keeps its name for screen readers
+("Remove set 1", "Remove Squat"). Task 4b.3 (telling the two apart) stays open.
+The exercise browser gains the category filter of the "Add exercise" page and a "Custom only" button.
+It keeps its muscle group filter over primary and secondary muscle groups.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

@@ -1,13 +1,19 @@
 import { screen, waitFor } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
+import { exercises } from '@/db/schema';
+import { getLocalSettings } from '@/db/settings';
 import { createTestDatabase } from '@/testing/database';
 import { addTestLibrary } from '@/testing/exercises';
 import { renderWithDatabase } from '@/testing/render';
 import ExerciseBrowser from './ExerciseBrowser';
 
-async function setup(exerciseImages = true) {
+async function setup(exerciseImages = true, withCustomStretch = false) {
   const { db } = await createTestDatabase();
   await addTestLibrary(db);
+  if (withCustomStretch) {
+    const { userId } = await getLocalSettings(db);
+    await db.insert(exercises).values({ userId, source: 'custom', name: 'Couch Stretch', category: 'stretch', loadType: 'none', tracksDuration: true });
+  }
   return renderWithDatabase(<ExerciseBrowser />, { db, settings: { features: { exerciseImages } } });
 }
 
@@ -64,5 +70,28 @@ describe('ExerciseBrowser', () => {
     const link = await screen.findByRole('link', { name: /Barbell Curl/ });
     expect(link.querySelector('img')).toBeNull();
     expect(link).toHaveTextContent('Strength · Barbell');
+  });
+
+  test('filter by category', async () => {
+    const { user } = await setup(true, true);
+    await screen.findByText('3 exercises');
+
+    await user.click(screen.getByRole('radio', { name: 'Stretch' }));
+
+    expect(await screen.findByText('1 exercise')).toBeInTheDocument();
+    expect(names()).toEqual(['Couch Stretch']);
+  });
+
+  test('show only custom exercises, together with the other filters', async () => {
+    const { user } = await setup(true, true);
+    await screen.findByText('3 exercises');
+
+    await user.click(screen.getByRole('button', { name: 'Custom only' }));
+    expect(await screen.findByText('1 exercise')).toBeInTheDocument();
+    expect(names()).toEqual(['Couch Stretch']);
+    expect(screen.getByRole('button', { name: 'Custom only' })).toHaveAttribute('aria-pressed', 'true');
+
+    await user.click(screen.getByRole('radio', { name: 'Strength' }));
+    expect(await screen.findByText('No exercise found.')).toBeInTheDocument();
   });
 });

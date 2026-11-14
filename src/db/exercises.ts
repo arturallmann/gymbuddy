@@ -24,6 +24,8 @@ type SearchOptions = {
   role?: MuscleGroupRole | null;
   // Only exercises of this category.
   category?: Category | null;
+  // Only the user's custom exercises.
+  customOnly?: boolean;
   limit?: number;
 };
 
@@ -42,7 +44,7 @@ export async function searchExercises(
   db: AppDatabase,
   userId: string,
   query: string,
-  { muscleGroupId = null, role = null, category = null, limit = SEARCH_LIMIT }: SearchOptions = {},
+  { muscleGroupId = null, role = null, category = null, customOnly = false, limit = SEARCH_LIMIT }: SearchOptions = {},
 ): Promise<ExerciseListItem[]> {
   const text = query.trim();
   return db
@@ -76,6 +78,7 @@ export async function searchExercises(
             )
           : undefined,
         category ? eq(exercises.category, category) : undefined,
+        customOnly ? eq(exercises.source, 'custom') : undefined,
       ),
     )
     .orderBy(asc(exercises.name))

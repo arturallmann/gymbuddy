@@ -8,6 +8,7 @@ import type { WorkoutExerciseItem } from '@/db/workouts';
 import { toBlocks, type Block } from '@/lib/blocks';
 import { HandleSensor, LONG_PRESS, LongPressSensor } from '@/lib/dragSensors';
 import SortableBlock from './SortableBlock';
+import TrashIcon from './icons/TrashIcon';
 
 // While the user picks workout exercises for a superset, single workout exercises show a checkbox.
 export type Selection = {
@@ -164,9 +165,9 @@ export default function WorkoutExerciseList({
                   type="button"
                   aria-label={`Remove ${item.name}`}
                   onClick={() => onRemove(item.id)}
-                  className="shrink-0 px-2 text-danger"
+                  className="shrink-0 rounded-lg p-2 text-danger"
                 >
-                  Remove
+                  <TrashIcon />
                 </button>
               </SortableBlock>
             );

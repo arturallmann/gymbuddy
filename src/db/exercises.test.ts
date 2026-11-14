@@ -346,6 +346,14 @@ describe('filters for the Add exercise page', () => {
     expect(primary.map((exercise) => exercise.name)).toEqual(['Barbell Curl']);
   });
 
+  test('find only the user’s custom exercises', async () => {
+    const { db, userId } = await withLibrary();
+
+    const found = await searchExercises(db, userId, '', { customOnly: true });
+
+    expect(found.map((exercise) => exercise.name)).toEqual(['Hamstring Stretch']);
+  });
+
   test('find only exercises of one category', async () => {
     const { db, userId } = await withLibrary();
 
