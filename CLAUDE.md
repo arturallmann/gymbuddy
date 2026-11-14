@@ -64,6 +64,7 @@ If a needed term is missing, stop and ask before inventing one.
 - Tailwind for styling. Use only the named colors from `tailwind.config.ts` (`bg-primary`, `text-muted`,
   `border-line` and so on), never fixed colors such as `text-sky-600` (decision 030).
 - One component per file. File name matches the component name.
+- Back links at the top of a page use `BackLink` (an arrow with a label for screen readers, decision 032).
 - Small pure functions for unit conversion and formatting live in `src/lib/`.
 
 ## Workflow

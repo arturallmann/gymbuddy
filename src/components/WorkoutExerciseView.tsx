@@ -22,6 +22,7 @@ import type { SetValues } from '@/lib/sets';
 import { getUnits } from '@/lib/units';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
 import SetLog, { type SetLogItem } from './SetLog';
+import BackLink from './BackLink';
 
 type Loaded = {
   // `id` is null for an exercise that is not in the workout yet.
@@ -111,9 +112,7 @@ export default function WorkoutExerciseView() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <Link href="/workout" className="shrink-0 text-link">
-          ← Workout
-        </Link>
+        <BackLink href="/workout" label="Back to workout" />
         <h1 className="min-w-0 break-words text-2xl font-bold">{item?.name ?? 'Exercise'}</h1>
       </header>
       {!item ? (

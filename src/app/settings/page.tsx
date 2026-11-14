@@ -1,19 +1,17 @@
 'use client';
 
-import Link from 'next/link';
 import ExportData from '@/components/ExportData';
 import FeatureSettings from '@/components/FeatureSettings';
 import ImportData from '@/components/ImportData';
 import ThemeSettings from '@/components/ThemeSettings';
 import UnitSettings from '@/components/UnitSettings';
+import BackLink from '@/components/BackLink';
 
 export default function SettingsPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-8 p-6">
       <header className="flex items-center gap-4">
-        <Link href="/" className="text-link">
-          ← Back
-        </Link>
+        <BackLink href="/" label="Back" />
         <h1 className="text-2xl font-bold">Settings</h1>
       </header>
       <section className="flex flex-col gap-4">

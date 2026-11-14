@@ -41,7 +41,7 @@ describe('ExerciseDetailView', () => {
       'Stand up straight.',
       'Curl the bar.',
     ]);
-    expect(screen.getByRole('link', { name: '← Exercises' })).toHaveAttribute('href', '/exercises');
+    expect(screen.getByRole('link', { name: 'Back to exercises' })).toHaveAttribute('href', '/exercises');
   });
 
   test('show secondary muscle groups', async () => {

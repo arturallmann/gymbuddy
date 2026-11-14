@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
@@ -11,6 +10,7 @@ import { formatWorkoutDuration } from '@/lib/units';
 import ConfirmAction from './ConfirmAction';
 import SaveRoutine from './SaveRoutine';
 import WorkoutExerciseSets from './WorkoutExerciseSets';
+import BackLink from './BackLink';
 
 type Loaded = { workout: Workout; items: WorkoutExerciseItem[] } | null;
 
@@ -43,9 +43,7 @@ export default function WorkoutDetail() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <Link href="/history" className="shrink-0 text-link">
-          ← Workout history
-        </Link>
+        <BackLink href="/history" label="Back to workout history" />
       </header>
       {!loaded || !workout ? (
         <p className="text-muted">This workout does not exist.</p>

@@ -20,6 +20,10 @@ export type ExerciseListItem = Exercise & { imagePath: string | null };
 type SearchOptions = {
   // Only exercises that work this muscle group, as primary or secondary muscle group.
   muscleGroupId?: string | null;
+  // With muscleGroupId: only exercises where it has this role, such as 'primary'.
+  role?: MuscleGroupRole | null;
+  // Only exercises of this category.
+  category?: Category | null;
   limit?: number;
 };
 
@@ -38,7 +42,7 @@ export async function searchExercises(
   db: AppDatabase,
   userId: string,
   query: string,
-  { muscleGroupId = null, limit = SEARCH_LIMIT }: SearchOptions = {},
+  { muscleGroupId = null, role = null, category = null, limit = SEARCH_LIMIT }: SearchOptions = {},
 ): Promise<ExerciseListItem[]> {
   const text = query.trim();
   return db
@@ -65,11 +69,13 @@ export async function searchExercises(
                   and(
                     eq(exerciseMuscleGroups.exerciseId, exercises.id),
                     eq(exerciseMuscleGroups.muscleGroupId, muscleGroupId),
+                    role ? eq(exerciseMuscleGroups.role, role) : undefined,
                     isNull(exerciseMuscleGroups.deletedAt),
                   ),
                 ),
             )
           : undefined,
+        category ? eq(exercises.category, category) : undefined,
       ),
     )
     .orderBy(asc(exercises.name))
@@ -79,6 +85,39 @@ export async function searchExercises(
 // All muscle groups, sorted by name.
 export async function listMuscleGroups(db: AppDatabase): Promise<MuscleGroup[]> {
   return db.select().from(muscleGroups).where(isNull(muscleGroups.deletedAt)).orderBy(asc(muscleGroups.name));
+}
+
+// The muscle groups that are the primary muscle group of at least one exercise the user can see,
+// of `category` when given, sorted by name. The "Add exercise" page lists them (decision 032).
+export async function listPrimaryMuscleGroups(
+  db: AppDatabase,
+  userId: string,
+  category: Category | null = null,
+): Promise<MuscleGroup[]> {
+  return db
+    .select()
+    .from(muscleGroups)
+    .where(
+      and(
+        isNull(muscleGroups.deletedAt),
+        exists(
+          db
+            .select({ id: exerciseMuscleGroups.id })
+            .from(exerciseMuscleGroups)
+            .innerJoin(exercises, eq(exercises.id, exerciseMuscleGroups.exerciseId))
+            .where(
+              and(
+                eq(exerciseMuscleGroups.muscleGroupId, muscleGroups.id),
+                eq(exerciseMuscleGroups.role, 'primary'),
+                isNull(exerciseMuscleGroups.deletedAt),
+                visibleTo(userId),
+                category ? eq(exercises.category, category) : undefined,
+              ),
+            ),
+        ),
+      ),
+    )
+    .orderBy(asc(muscleGroups.name));
 }
 
 export type ExerciseDetail = {
