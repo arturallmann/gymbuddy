@@ -449,6 +449,26 @@ describe('updateSet', () => {
 });
 
 describe('workout history', () => {
+  test('list only workouts that started in a time span, such as today', async () => {
+    const { db, userId } = await setup();
+    for (const [start, end] of [
+      ['2026-11-14T23:30:00Z', '2026-11-15T00:30:00Z'],
+      ['2026-11-15T08:00:00Z', '2026-11-15T09:00:00Z'],
+      ['2026-11-16T00:00:00Z', '2026-11-16T01:00:00Z'],
+    ]) {
+      const workout = await startWorkout(db, userId, new Date(start));
+      await endWorkout(db, workout.id, new Date(end));
+    }
+    await startWorkout(db, userId, new Date('2026-11-15T10:00:00Z'));
+
+    const found = await listWorkoutHistory(db, userId, {
+      from: new Date('2026-11-15T00:00:00Z'),
+      to: new Date('2026-11-16T00:00:00Z'),
+    });
+
+    expect(found.map((workout) => workout.startedAt)).toEqual([new Date('2026-11-15T08:00:00Z')]);
+  });
+
   const values = { setType: 'normal' as const, weightGrams: 60000, reps: 8, durationSeconds: null, distanceMeters: null, rpe: null, notes: null };
 
   async function withExercises() {
