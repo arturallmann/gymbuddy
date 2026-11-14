@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { listGroupRests, makeSuperset, ungroupWorkoutExercises } from '@/db/groups';
-import type { Phase } from '@/db/schema';
-import { addTemplateToWorkout } from '@/db/templates';
 import {
-  addWorkoutExercise,
   deleteWorkoutExercise,
   listWorkoutExercises,
   moveWorkoutExercise,
@@ -46,14 +43,6 @@ export function useWorkoutExercises(workoutId: string) {
     };
   }, [db, workoutId]);
 
-  const add = useCallback(
-    async (exerciseId: string, phase: Phase = 'main') => {
-      await addWorkoutExercise(db, workoutId, exerciseId, phase);
-      await reload();
-    },
-    [db, workoutId, reload],
-  );
-
   const move = useCallback(
     async (id: string, direction: 'up' | 'down') => {
       await moveWorkoutExercise(db, id, direction);
@@ -86,13 +75,5 @@ export function useWorkoutExercises(workoutId: string) {
     [db, reload],
   );
 
-  const addTemplate = useCallback(
-    async (templateId: string) => {
-      await addTemplateToWorkout(db, workoutId, templateId);
-      await reload();
-    },
-    [db, workoutId, reload],
-  );
-
-  return { items, rests, add, addTemplate, move, remove, group, ungroup };
+  return { items, rests, move, remove, group, ungroup };
 }

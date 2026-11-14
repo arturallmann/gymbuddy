@@ -46,14 +46,11 @@ describe('workout page', () => {
     expect(navigation.push).toHaveBeenCalledWith('/');
   });
 
-  test('discard the workout after the confirm step', async () => {
-    const { db, user, workout } = await withActiveWorkout();
+  test('offer + to add an exercise, and no discard', async () => {
+    await withActiveWorkout();
 
-    await user.click(await screen.findByRole('button', { name: 'Discard workout' }));
-    await user.click(screen.getByRole('button', { name: 'Discard' }));
-
-    expect((await saved(db, workout.id)).deletedAt).not.toBeNull();
-    expect(navigation.push).toHaveBeenCalledWith('/');
+    expect(await screen.findByRole('link', { name: 'Add exercise' })).toHaveAttribute('href', '/workout/add');
+    expect(screen.queryByRole('button', { name: 'Discard workout' })).not.toBeInTheDocument();
   });
 
   test('say so when there is no active workout', async () => {
@@ -61,5 +58,6 @@ describe('workout page', () => {
 
     expect(await screen.findByText('No active workout.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'End workout' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Add exercise' })).not.toBeInTheDocument();
   });
 });

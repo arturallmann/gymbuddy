@@ -54,6 +54,13 @@ data/             Seed data (exercise library from free-exercise-db)
 docs/             Project documentation
 ```
 
+## Adding an exercise to a workout (decision 031)
+
+`/workout` (+) → `/workout/add` (search, muscle groups; top bar: `/workout/add/superset`)
+→ `/workout/add/muscle?id=…` → `/workout/exercise?exercise=…`. That page adds nothing until the first set:
+`addWorkoutExerciseWithSet()` writes the workout exercise and the set, and the address changes to
+`/workout/exercise?id=…`.
+
 ## Data flow
 
 1. The app starts and `src/db/client.ts` opens the database.

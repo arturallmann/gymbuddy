@@ -5,6 +5,7 @@ import { getLocalSettings } from './settings';
 import {
   addSet,
   addWorkoutExercise,
+  addWorkoutExerciseWithSet,
   changeWorkoutExercisePhase,
   deleteSet,
   getLastSets,
@@ -552,5 +553,65 @@ describe('phases', () => {
     await changeWorkoutExercisePhase(db, stretch, 'cooldown');
 
     expect((await listWorkoutExercises(db, workout.id))[0].phase).toBe('cooldown');
+  });
+});
+
+describe('addWorkoutExerciseWithSet', () => {
+  const values = {
+    setType: 'normal' as const,
+    weightGrams: 60000,
+    reps: 8,
+    durationSeconds: null,
+    distanceMeters: null,
+    rpe: null,
+    notes: null,
+  };
+
+  async function withTwoExercises() {
+    const { db, userId } = await setup();
+    const workout = await startWorkout(db, userId);
+    const squat = crypto.randomUUID();
+    const stretch = crypto.randomUUID();
+    await db.insert(exercises).values([
+      { id: squat, source: 'custom', name: 'Squat', category: 'strength', loadType: 'external' },
+      { id: stretch, source: 'custom', name: 'Hamstring Stretch', category: 'stretch', loadType: 'none' },
+    ]);
+    return { db, workout, squat, stretch };
+  }
+
+  test('add the exercise at the end with its first set', async () => {
+    const { db, workout, squat, stretch } = await withTwoExercises();
+    await addWorkoutExercise(db, workout.id, squat);
+
+    const id = await addWorkoutExerciseWithSet(db, workout.id, stretch, 'cooldown', values);
+
+    const items = await listWorkoutExercises(db, workout.id);
+    expect(items.map((item) => [item.name, item.position, item.phase])).toEqual([
+      ['Squat', 1, 'main'],
+      ['Hamstring Stretch', 2, 'cooldown'],
+    ]);
+    expect(items[1].id).toBe(id);
+    expect(await listSets(db, id)).toEqual([expect.objectContaining({ position: 1, weightGrams: 60000, reps: 8 })]);
+  });
+
+  test('count only workout exercises that are not deleted for the position', async () => {
+    const { db, workout, squat, stretch } = await withTwoExercises();
+    await deleteWorkoutExercise(db, await addWorkoutExercise(db, workout.id, squat));
+    await addWorkoutExercise(db, workout.id, squat);
+
+    const id = await addWorkoutExerciseWithSet(db, workout.id, stretch, 'main', values);
+
+    expect((await getWorkoutExercise(db, id))?.position).toBe(2);
+  });
+
+  test('two adds at once get different positions', async () => {
+    const { db, workout, squat, stretch } = await withTwoExercises();
+
+    await Promise.all([
+      addWorkoutExerciseWithSet(db, workout.id, squat, 'main', values),
+      addWorkoutExerciseWithSet(db, workout.id, stretch, 'main', values),
+    ]);
+
+    expect((await listWorkoutExercises(db, workout.id)).map((item) => item.position).sort()).toEqual([1, 2]);
   });
 });

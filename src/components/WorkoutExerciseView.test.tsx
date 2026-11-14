@@ -3,17 +3,25 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { saveExercisePreferences } from '@/db/preferences';
 import { exercises } from '@/db/schema';
 import { getLocalSettings, updateSettings } from '@/db/settings';
-import { addWorkoutExercise, listWorkoutExercises, startWorkout } from '@/db/workouts';
+import { addWorkoutExercise, endWorkout, listSets, listWorkoutExercises, startWorkout } from '@/db/workouts';
 import { createTestDatabase } from '@/testing/database';
 import { addTestLibrary } from '@/testing/exercises';
 import { renderWithDatabase } from '@/testing/render';
 import WorkoutExerciseView from './WorkoutExerciseView';
 
-const navigation = vi.hoisted(() => ({ params: new URLSearchParams() }));
-vi.mock('next/navigation', () => ({ useSearchParams: () => navigation.params }));
+const navigation = vi.hoisted(() => {
+  const replace = vi.fn();
+  // One router object for every render, as in Next.js.
+  return { params: new URLSearchParams(), replace, router: { replace } };
+});
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => navigation.params,
+  useRouter: () => navigation.router,
+}));
 
 beforeEach(() => {
   navigation.params = new URLSearchParams();
+  navigation.replace.mockReset();
 });
 
 test('show the workout exercise from the address with its set form', async () => {
@@ -140,5 +148,69 @@ describe('phase', () => {
 
     expect(await screen.findByRole('button', { name: 'Log set' })).toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: 'Phase' })).not.toBeInTheDocument();
+  });
+});
+
+describe('an exercise from the Add exercise page', () => {
+  async function withExercise({ phases = false, stretch = false } = {}) {
+    const { db } = await createTestDatabase();
+    const local = await getLocalSettings(db);
+    await updateSettings(db, local.id, { features: { phases } });
+    const exerciseId = crypto.randomUUID();
+    await db.insert(exercises).values(
+      stretch
+        ? { id: exerciseId, source: 'custom', name: 'Hamstring Stretch', category: 'stretch', loadType: 'none', tracksReps: true }
+        : { id: exerciseId, source: 'custom', name: 'Squat', category: 'strength', loadType: 'external', tracksReps: true },
+    );
+    const workout = await startWorkout(db, local.userId);
+    navigation.params = new URLSearchParams({ exercise: exerciseId });
+    return { db, workout, exerciseId };
+  }
+
+  test('open it without adding it, then add it with the first set', async () => {
+    const { db, workout } = await withExercise();
+    const { user } = await renderWithDatabase(<WorkoutExerciseView />, { db });
+
+    expect(await screen.findByRole('heading', { name: 'Squat' })).toBeInTheDocument();
+    expect(screen.getByText('Log a set to add this exercise to the workout.')).toBeInTheDocument();
+    expect(await listWorkoutExercises(db, workout.id)).toEqual([]);
+
+    await user.type(await screen.findByRole('textbox', { name: 'Reps' }), '5');
+    await user.click(screen.getByRole('button', { name: 'Log set' }));
+
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalled());
+    const [item] = await listWorkoutExercises(db, workout.id);
+    expect(item).toMatchObject({ name: 'Squat', phase: 'main' });
+    expect(navigation.replace).toHaveBeenCalledWith(`/workout/exercise?id=${item.id}`);
+    expect(await listSets(db, item.id)).toEqual([expect.objectContaining({ reps: 5, position: 1 })]);
+  });
+
+  test('add a stretch to the cool-down phase when phases are on, without a phase choice before', async () => {
+    const { db, workout } = await withExercise({ phases: true, stretch: true });
+    const { user } = await renderWithDatabase(<WorkoutExerciseView />, { db });
+
+    await user.type(await screen.findByRole('textbox', { name: 'Reps' }), '1');
+    expect(screen.queryByRole('combobox', { name: 'Phase' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Log set' }));
+
+    await waitFor(async () => expect((await listWorkoutExercises(db, workout.id))[0]?.phase).toBe('cooldown'));
+  });
+
+  test('open the workout exercise when the exercise is already in the workout', async () => {
+    const { db, workout, exerciseId } = await withExercise();
+    const id = await addWorkoutExercise(db, workout.id, exerciseId);
+
+    await renderWithDatabase(<WorkoutExerciseView />, { db });
+
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith(`/workout/exercise?id=${id}`));
+  });
+
+  test('say so when there is no active workout', async () => {
+    const { db, workout } = await withExercise();
+    await endWorkout(db, workout.id);
+
+    await renderWithDatabase(<WorkoutExerciseView />, { db });
+
+    expect(await screen.findByText('This exercise is not in the workout.')).toBeInTheDocument();
   });
 });

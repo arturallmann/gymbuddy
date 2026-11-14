@@ -10,7 +10,7 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 |---|---|---|---|
 | Workout | `workout`, table `workouts` | One training occasion with a start and end time. | session, day, training, workout log |
 | Active workout | `activeWorkout`, `getActiveWorkout()` | The workout the user has started and not ended (`endedAt` and `deletedAt` are NULL). One per user. | current session, open workout, running workout |
-| Discard workout | `deleteWorkout()` on the active workout | Deletes the active workout with its workout exercises, sets and exercise groups, after a confirm step. A past workout uses "Delete workout" with the same function. | cancel workout, abort |
+| Delete workout | `deleteWorkout()` | Deletes a past workout with its workout exercises, sets and exercise groups, after a confirm step. The active workout has no discard; the user ends it first (decision 031). | discard workout, cancel workout, abort |
 | Exercise | `exercise`, table `exercises` | A type of movement in the library, such as Bench Press. | movement, lift, activity, drill |
 | Workout exercise | `workoutExercise`, table `workout_exercises` | One exercise inside one workout, together with its sets. The interface shows only the exercise name; docs and code always use the full term. | entry, slot, session exercise, exercise log |
 | Set | `set`, table `sets`, type `WorkoutSet` | One logged effort: weight, reps, duration and/or distance. The type is `WorkoutSet` because `Set` is a JavaScript built-in. | entry, log, round |

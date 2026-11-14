@@ -53,7 +53,7 @@ export async function endWorkout(db: AppDatabase, id: string, endedAt: Date = ne
 }
 
 // Deletes the workout with its workout exercises, sets and exercise groups, in one transaction.
-// "Discard workout" uses it for the active workout, "Delete workout" for a past one.
+// "Delete workout" on a past workout uses it.
 export async function deleteWorkout(db: AppDatabase, id: string, deletedAt: Date = new Date()) {
   await db.transaction(async (tx) => {
     const exerciseIds = tx
@@ -147,6 +147,29 @@ export async function addWorkoutExercise(
       .from(workoutExercises)
       .where(notDeletedIn(workoutId));
     await tx.insert(workoutExercises).values({ id, workoutId, exerciseId, phase, position: (last ?? 0) + 1 });
+  });
+  return id;
+}
+
+// Adds an exercise to the end of the workout together with its first set, in one transaction.
+// An exercise opened from the "Add exercise" page joins the workout only when its first set is
+// logged (decision 031), so the workout never gets a workout exercise without sets this way.
+export async function addWorkoutExerciseWithSet(
+  db: AppDatabase,
+  workoutId: string,
+  exerciseId: string,
+  phase: Phase,
+  values: SetValues,
+  completedAt: Date = new Date(),
+): Promise<string> {
+  const id = crypto.randomUUID();
+  await db.transaction(async (tx) => {
+    const [{ last }] = await tx
+      .select({ last: max(workoutExercises.position).as('last') })
+      .from(workoutExercises)
+      .where(notDeletedIn(workoutId));
+    await tx.insert(workoutExercises).values({ id, workoutId, exerciseId, phase, position: (last ?? 0) + 1 });
+    await tx.insert(sets).values({ ...values, id: crypto.randomUUID(), workoutExerciseId: id, position: 1, completedAt });
   });
   return id;
 }

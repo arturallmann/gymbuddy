@@ -12,18 +12,15 @@ test('list saved supersets and pick one', async () => {
   const id = crypto.randomUUID();
   await db.insert(templates).values({ id, userId, kind: 'superset', name: 'Arms' });
   const onPick = vi.fn();
-  const { user } = await renderWithDatabase(<SavedSupersetPicker onPick={onPick} onClose={vi.fn()} />, { db });
+  const { user } = await renderWithDatabase(<SavedSupersetPicker onPick={onPick} />, { db });
 
   await user.click(await screen.findByRole('button', { name: /Arms/ }));
 
   expect(onPick).toHaveBeenCalledWith(id);
 });
 
-test('say so without saved supersets, and close', async () => {
-  const onClose = vi.fn();
-  const { user } = await renderWithDatabase(<SavedSupersetPicker onPick={vi.fn()} onClose={onClose} />);
+test('say so without saved supersets', async () => {
+  await renderWithDatabase(<SavedSupersetPicker onPick={vi.fn()} />);
 
   expect(await screen.findByText('No saved supersets yet.')).toBeInTheDocument();
-  await user.click(screen.getByRole('button', { name: 'Cancel' }));
-  expect(onClose).toHaveBeenCalledOnce();
 });

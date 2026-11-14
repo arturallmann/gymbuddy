@@ -3,14 +3,16 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import ConfirmAction from '@/components/ConfirmAction';
 import ElapsedTime from '@/components/ElapsedTime';
 import SaveRoutine from '@/components/SaveRoutine';
 import WorkoutExercises from '@/components/WorkoutExercises';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
 
+// The active workout. "End workout" sits in the top bar; the + button opens the "Add exercise"
+// page. There is no discard: an ended workout can be deleted from its workout history page
+// (decision 031).
 export default function WorkoutPage() {
-  const { workout, end, discard } = useActiveWorkout();
+  const { workout, end } = useActiveWorkout();
   const router = useRouter();
   const [ending, setEnding] = useState(false);
 
@@ -18,20 +20,20 @@ export default function WorkoutPage() {
     return null;
   }
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-8 p-6">
+    <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6 pb-28">
       <header className="flex items-center gap-4">
-        <Link href="/" className="text-link">
+        <Link href="/" className="shrink-0 text-link">
           ← Back
         </Link>
-        <h1 className="text-2xl font-bold">Workout</h1>
-      </header>
-      {workout ? (
-        <>
-          <p className="text-4xl">
-            <ElapsedTime since={workout.startedAt} />
-          </p>
-          <WorkoutExercises workoutId={workout.id} />
-          <SaveRoutine workoutId={workout.id} startedAt={workout.startedAt} />
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-bold">Workout</h1>
+          {workout && (
+            <p className="text-sm text-muted">
+              <ElapsedTime since={workout.startedAt} />
+            </p>
+          )}
+        </div>
+        {workout && (
           <button
             type="button"
             disabled={ending}
@@ -40,20 +42,23 @@ export default function WorkoutPage() {
               await end();
               router.push('/');
             }}
-            className="rounded-lg bg-primary px-6 py-3 font-semibold text-on-primary disabled:opacity-50"
+            className="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-on-primary disabled:opacity-50"
           >
             End workout
           </button>
-          <ConfirmAction
-            label="Discard workout"
-            question="Discard this workout? Its exercises and sets are deleted."
-            confirmLabel="Discard"
-            keepLabel="Keep workout"
-            onConfirm={async () => {
-              await discard();
-              router.push('/');
-            }}
-          />
+        )}
+      </header>
+      {workout ? (
+        <>
+          <WorkoutExercises workoutId={workout.id} />
+          <SaveRoutine workoutId={workout.id} startedAt={workout.startedAt} />
+          <Link
+            href="/workout/add"
+            aria-label="Add exercise"
+            className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] right-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-3xl leading-none text-on-primary shadow-lg"
+          >
+            <span aria-hidden>+</span>
+          </Link>
         </>
       ) : (
         <p className="text-muted">No active workout.</p>

@@ -2,50 +2,104 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { getExerciseDetail, type ExerciseDetail } from '@/db/exercises';
 import { PHASES, type Phase } from '@/db/schema';
-import { changeWorkoutExercisePhase, getWorkoutExercise, type WorkoutExerciseItem } from '@/db/workouts';
+import {
+  addWorkoutExerciseWithSet,
+  changeWorkoutExercisePhase,
+  getActiveWorkout,
+  getWorkoutExercise,
+  listWorkoutExercises,
+} from '@/db/workouts';
 import { useExercisePreferences } from '@/hooks/useExercisePreferences';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
 import { exerciseImageUrl, shortDescription } from '@/lib/exercises';
-import { PHASE_LABELS } from '@/lib/phases';
+import { PHASE_LABELS, defaultPhase } from '@/lib/phases';
+import type { SetValues } from '@/lib/sets';
 import { getUnits } from '@/lib/units';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
-import SetLog from './SetLog';
+import SetLog, { type SetLogItem } from './SetLog';
 
 type Loaded = {
-  item: WorkoutExerciseItem & { workoutId: string };
+  // `id` is null for an exercise that is not in the workout yet.
+  item: SetLogItem & { workoutId: string };
   // Null when the exercise is no longer in the browser, such as a deleted custom exercise.
   detail: ExerciseDetail | null;
 } | null;
 
 // One workout exercise on its own page: what the exercise is, the user's notes and
 // units for it, last time, the set form and the logged sets.
-// The workout exercise id comes from the address: /workout/exercise?id=…
+// The address holds the workout exercise (/workout/exercise?id=…) or, from the "Add exercise"
+// page, an exercise (/workout/exercise?exercise=…). An exercise joins the active workout only
+// when its first set is logged (decision 031); one already in the workout opens as it is.
 export default function WorkoutExerciseView() {
   const db = useDatabase();
+  const router = useRouter();
   const { settings } = useSettings();
   const features = useFeatures();
-  const id = useSearchParams().get('id');
+  const params = useSearchParams();
+  const id = params.get('id');
+  const exerciseId = params.get('exercise');
+  const phasesOn = features.phases;
   const [loaded, setLoaded] = useState<Loaded | undefined>(undefined);
   const { preferences, units, save } = useExercisePreferences(loaded?.item.exerciseId ?? null);
 
   useEffect(() => {
     let current = true;
-    const load = async (): Promise<Loaded> => {
-      const item = id ? await getWorkoutExercise(db, id) : null;
-      return item ? { item, detail: await getExerciseDetail(db, settings.userId, item.exerciseId) } : null;
+    const load = async (): Promise<Loaded | 'redirected'> => {
+      if (id) {
+        const item = await getWorkoutExercise(db, id);
+        return item ? { item, detail: await getExerciseDetail(db, settings.userId, item.exerciseId) } : null;
+      }
+      if (!exerciseId) return null;
+      const workout = await getActiveWorkout(db, settings.userId);
+      if (!workout) return null;
+      const existing = (await listWorkoutExercises(db, workout.id)).find((item) => item.exerciseId === exerciseId);
+      if (existing) {
+        router.replace(`/workout/exercise?id=${existing.id}`);
+        return 'redirected';
+      }
+      const detail = await getExerciseDetail(db, settings.userId, exerciseId);
+      if (!detail) return null;
+      const { exercise } = detail;
+      const item: SetLogItem & { workoutId: string } = {
+        id: null,
+        workoutId: workout.id,
+        exerciseId,
+        name: exercise.name,
+        position: 0,
+        phase: defaultPhase(exercise.category, phasesOn),
+        groupId: null,
+        loadType: exercise.loadType,
+        tracksReps: exercise.tracksReps,
+        tracksDuration: exercise.tracksDuration,
+        tracksDistance: exercise.tracksDistance,
+        category: exercise.category,
+        defaultDurationSeconds: exercise.defaultDurationSeconds,
+      };
+      return { item, detail };
     };
     load()
-      .then((result) => current && setLoaded(result))
+      .then((result) => current && result !== 'redirected' && setLoaded(result))
       .catch((reason: unknown) => console.error(reason));
     return () => {
       current = false;
     };
-  }, [db, settings.userId, id]);
+  }, [db, router, settings.userId, id, exerciseId, phasesOn]);
+
+  const pending = loaded?.item.id === null ? loaded.item : null;
+  // The first set adds the exercise to the workout; the address then names the new workout exercise.
+  const addWithFirstSet = useCallback(
+    async (values: SetValues) => {
+      if (!pending) return;
+      const newId = await addWorkoutExerciseWithSet(db, pending.workoutId, pending.exerciseId, pending.phase, values);
+      router.replace(`/workout/exercise?id=${newId}`);
+    },
+    [db, router, pending],
+  );
 
   if (loaded === undefined) {
     return null;
@@ -96,13 +150,14 @@ export default function WorkoutExerciseView() {
               </div>
             </details>
           )}
-          {features.phases && (
+          {features.phases && item.id !== null && (
             <label className="flex items-center gap-3 text-sm">
               <span className="shrink-0 text-muted">Phase</span>
               <select
                 value={item.phase}
                 onChange={async (event) => {
                   const phase = event.target.value as Phase;
+                  if (item.id === null) return;
                   await changeWorkoutExercisePhase(db, item.id, phase);
                   setLoaded((current) => (current ? { ...current, item: { ...current.item, phase } } : current));
                 }}
@@ -116,7 +171,16 @@ export default function WorkoutExerciseView() {
               </select>
             </label>
           )}
-          {preferences !== undefined && <SetLog item={item} workoutId={item.workoutId} units={units} />}
+          {item.id === null && <p className="text-sm text-muted">Log a set to add this exercise to the workout.</p>}
+          {preferences !== undefined && (
+            <SetLog
+              key={item.id ?? 'new'}
+              item={item}
+              workoutId={item.workoutId}
+              units={units}
+              onFirstSet={item.id === null ? addWithFirstSet : undefined}
+            />
+          )}
         </>
       )}
     </main>
