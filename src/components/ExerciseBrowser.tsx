@@ -5,9 +5,10 @@ import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { listMuscleGroups, searchExercises, type ExerciseListItem } from '@/db/exercises';
 import type { Category, MuscleGroup } from '@/db/schema';
+import { useExerciseUse } from '@/hooks/useExerciseUse';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
 import CategoryFilter from './CategoryFilter';
-import ExerciseList from './ExerciseList';
+import ExerciseResults from './ExerciseResults';
 
 // Room for the whole library, so a muscle group filter shows every match.
 const BROWSE_LIMIT = 2000;
@@ -21,6 +22,7 @@ export default function ExerciseBrowser() {
   const [muscleGroupId, setMuscleGroupId] = useState('');
   const [category, setCategory] = useState<Category | null>(null);
   const [customOnly, setCustomOnly] = useState(false);
+  const use = useExerciseUse();
   const [groups, setGroups] = useState<MuscleGroup[]>([]);
   const [found, setFound] = useState<ExerciseListItem[] | undefined>(undefined);
 
@@ -77,13 +79,13 @@ export default function ExerciseBrowser() {
           Custom only
         </button>
       </div>
-      {found && (
+      {found && use && (
         <>
           <p className="text-sm text-muted">{found.length === 1 ? '1 exercise' : `${found.length} exercises`}</p>
           {found.length === 0 ? (
             <p className="text-muted">No exercise found.</p>
           ) : (
-            <ExerciseList items={found} showImages={features.exerciseImages} />
+            <ExerciseResults items={found} use={use} showImages={features.exerciseImages} />
           )}
         </>
       )}

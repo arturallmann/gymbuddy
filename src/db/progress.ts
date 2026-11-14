@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, countDistinct, eq, isNull, max } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
 import { sets, workoutExercises, workouts, type Workout, type WorkoutExercise, type WorkoutSet } from './schema';
 
@@ -36,4 +36,24 @@ export async function listExerciseHistory(db: AppDatabase, userId: string, exerc
       ),
     )
     .orderBy(asc(workouts.startedAt), asc(workoutExercises.position), asc(sets.position));
+}
+
+// How often the user did an exercise: the number of workouts it is in, and when the newest of
+// them started. Search results and muscle group lists put these exercises first (decision 037).
+export type ExerciseUse = { workouts: number; lastAt: Date };
+
+// The use of every exercise the user did, by exercise id. Active and ended workouts count;
+// deleted workouts and deleted workout exercises do not.
+export async function listExerciseUse(db: AppDatabase, userId: string): Promise<Map<string, ExerciseUse>> {
+  const rows = await db
+    .select({
+      exerciseId: workoutExercises.exerciseId,
+      workouts: countDistinct(workouts.id).as('workoutCount'),
+      lastAt: max(workouts.startedAt).as('lastAt'),
+    })
+    .from(workoutExercises)
+    .innerJoin(workouts, eq(workouts.id, workoutExercises.workoutId))
+    .where(and(eq(workouts.userId, userId), isNull(workouts.deletedAt), isNull(workoutExercises.deletedAt)))
+    .groupBy(workoutExercises.exerciseId);
+  return new Map(rows.map((row) => [row.exerciseId, { workouts: row.workouts, lastAt: row.lastAt ?? new Date(0) }]));
 }

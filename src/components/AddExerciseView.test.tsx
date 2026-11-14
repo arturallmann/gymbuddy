@@ -1,6 +1,9 @@
 import { screen, within } from '@testing-library/react';
+import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { exerciseMuscleGroups, exercises, muscleGroups } from '@/db/schema';
+import { getLocalSettings } from '@/db/settings';
+import { addWorkoutExercise, endWorkout, startWorkout } from '@/db/workouts';
 import { createTestDatabase } from '@/testing/database';
 import { addTestLibrary } from '@/testing/exercises';
 import { renderWithDatabase } from '@/testing/render';
@@ -76,6 +79,23 @@ describe('AddExerciseView', () => {
 
     expect(await screen.findByRole('radio', { name: 'Stretch' })).toHaveAttribute('aria-checked', 'true');
     expect(await screen.findByRole('link', { name: /Hamstrings/ })).toBeInTheDocument();
+  });
+
+  test('put exercises the user did first in the search, under Done before', async () => {
+    const { db } = await createTestDatabase();
+    await addTestLibrary(db);
+    const { userId } = await getLocalSettings(db);
+    const [press] = await db.select().from(exercises).where(eq(exercises.name, 'Bench Press'));
+    const workout = await startWorkout(db, userId);
+    await addWorkoutExercise(db, workout.id, press.id);
+    await endWorkout(db, workout.id);
+    const { user } = await renderWithDatabase(<AddExerciseView />, { db });
+
+    await user.type(await screen.findByRole('searchbox', { name: 'Search exercises' }), 'b');
+
+    const done = await screen.findByRole('region', { name: 'Done before' });
+    expect(within(done).getByRole('link', { name: /Bench Press/ })).toHaveTextContent('1 workout');
+    expect(within(screen.getByRole('region', { name: 'All exercises' })).getByRole('link', { name: /Barbell Curl/ })).toBeInTheDocument();
   });
 
   test('say so when the search finds nothing', async () => {
