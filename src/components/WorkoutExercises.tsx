@@ -9,12 +9,12 @@ import GroupRounds from './GroupRounds';
 import SetSummary from './SetSummary';
 import WorkoutExerciseList from './WorkoutExerciseList';
 
-// The exercises of one workout: list with set summaries, reorder and remove.
+// The exercises of one workout: list with set summaries, reorder (drag, 4b.1) and remove.
 // Adding happens on the "Add exercise" page (decision 031).
 // With the phases feature toggle, the list shows one section per workout phase.
 // With the supersets feature toggle, workout exercises can become a superset and back.
 export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
-  const { items, rests, move, remove, group, ungroup } = useWorkoutExercises(workoutId);
+  const { items, rests, move, moveTo, remove, group, ungroup } = useWorkoutExercises(workoutId);
   const features = useFeatures();
   // The workout exercises chosen for a new superset, or null when not choosing.
   const [chosen, setChosen] = useState<string[] | null>(null);
@@ -29,6 +29,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
     <WorkoutExerciseList
       items={list}
       onMove={move}
+      onMoveTo={moveTo}
       onRemove={remove}
       onUngroup={features.supersets ? ungroup : undefined}
       selection={

@@ -238,6 +238,18 @@ This adjusts decision 031 after trying it on a phone.
 - Back links are an arrow only (`BackLink`), named for screen readers ("Back to workout"), because the
   text next to long page titles pushed them onto two lines.
 
+## 033 — Drag to reorder with dnd-kit
+Date: 2026-11-15
+Workout exercises move by dragging (4b.1). The drag library is dnd-kit (`@dnd-kit/core`, `@dnd-kit/sortable`,
+`@dnd-kit/utilities`, MIT): it handles touch, scrolling while dragging and screen reader text, and it is small.
+Writing touch dragging by hand was rejected: phones differ in how they report touches, and scrolling
+and dragging easily get mixed up.
+Two sensors start a drag (`src/lib/dragSensors.ts`): a press on the handle on the right starts it at once;
+a long press (300 ms, the finger moving less than 8 px) anywhere on the card starts it too. A finger that
+moves earlier scrolls the page. A tap after a drag does not open the workout exercise.
+A card moves only inside its phase, and an exercise group moves as one card. `moveWorkoutExerciseTo()`
+writes the new order in one transaction. The ↑ and ↓ buttons stay for screen readers and keyboards only.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

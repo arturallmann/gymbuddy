@@ -11,7 +11,7 @@ import {
   type Workout,
   type WorkoutSet,
 } from './schema';
-import { moveBlock } from '@/lib/blocks';
+import { moveBlock, moveBlockTo } from '@/lib/blocks';
 import type { SetValues } from '@/lib/sets';
 
 const active = (userId: string) =>
@@ -174,10 +174,12 @@ export async function addWorkoutExerciseWithSet(
   return id;
 }
 
-// Moves the workout exercise one block up or down inside its phase. A block is one workout
-// exercise or a whole exercise group, so group members stay together. Does nothing at the
-// top or bottom of the phase.
-export async function moveWorkoutExercise(db: AppDatabase, id: string, direction: 'up' | 'down') {
+type PhaseItem = { id: string; position: number; groupId: string | null };
+
+// Gives the workout exercises of one phase a new order, in one transaction. `reorder` gets the
+// phase in position order and returns the new id order. The phase keeps its positions; only who
+// holds which position changes.
+async function reorderPhase(db: AppDatabase, id: string, reorder: (list: PhaseItem[]) => string[]) {
   await db.transaction(async (tx) => {
     const [row] = await tx
       .select({ workoutId: workoutExercises.workoutId, phase: workoutExercises.phase })
@@ -191,15 +193,27 @@ export async function moveWorkoutExercise(db: AppDatabase, id: string, direction
       .from(workoutExercises)
       .where(and(notDeletedIn(row.workoutId), eq(workoutExercises.phase, row.phase)))
       .orderBy(asc(workoutExercises.position));
-    // The phase keeps its positions; only who holds which position changes.
     const positions = list.map((item) => item.position);
-    const order = moveBlock(list, id, direction);
+    const order = reorder(list);
     for (const [index, itemId] of order.entries()) {
       if (list[index].id !== itemId) {
         await tx.update(workoutExercises).set({ position: positions[index] }).where(eq(workoutExercises.id, itemId));
       }
     }
   });
+}
+
+// Moves the workout exercise one block up or down inside its phase. A block is one workout
+// exercise or a whole exercise group, so group members stay together. Does nothing at the
+// top or bottom of the phase.
+export async function moveWorkoutExercise(db: AppDatabase, id: string, direction: 'up' | 'down') {
+  await reorderPhase(db, id, (list) => moveBlock(list, id, direction));
+}
+
+// Moves the block of the workout exercise to block index `to` inside its phase (0 is the top),
+// such as after a drag (4b.1). A group moves as a whole.
+export async function moveWorkoutExerciseTo(db: AppDatabase, id: string, to: number) {
+  await reorderPhase(db, id, (list) => moveBlockTo(list, id, to));
 }
 
 // Moves a workout exercise to another phase. Its position stays, so it keeps its
