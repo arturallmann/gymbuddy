@@ -7,7 +7,7 @@ The source of truth is `src/db/schema.ts`. This file explains the meaning behind
 | Table | Holds |
 |---|---|
 | users | One local user per phone. Later linked to an online account. |
-| user_settings | Units, feature toggles, preset and first-time setup state. One row per user. |
+| user_settings | Units, theme, feature toggles, preset and first-time setup state. One row per user. |
 | app_state | Values the app keeps for itself, one row per key (`libraryVersion`). Not user data. |
 | muscle_groups | Muscle areas such as back, biceps, hamstrings. |
 | exercises | Library exercises (`userId` is null) and custom exercises (`userId` set). |
@@ -52,6 +52,11 @@ A user can choose a different unit for one exercise in `exercise_preferences` (f
 - Totals across exercises (for example weekly volume) use the global unit, because storage is the same everywhere.
 - The set form shows the active unit next to the input, so the user always sees which unit applies.
 - First-time setup suggests units from the phone's region (for example `en-US` → lb and imperial).
+
+## Theme
+
+`user_settings.theme` is `system` (default), `light` or `dark` (decision 030). It changes only colors.
+`system` follows the phone's light or dark mode.
 
 ## Feature toggles
 

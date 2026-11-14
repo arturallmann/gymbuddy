@@ -46,17 +46,17 @@ export default function ExerciseDetailView() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <Link href="/exercises" className="shrink-0 text-sky-600">
+        <Link href="/exercises" className="shrink-0 text-link">
           ← Exercises
         </Link>
       </header>
       {!detail || !exercise ? (
-        <p className="text-gray-500">This exercise does not exist.</p>
+        <p className="text-muted">This exercise does not exist.</p>
       ) : (
         <>
           <div>
             <h1 className="break-words text-2xl font-bold">{exercise.name}</h1>
-            <p className="text-gray-500">
+            <p className="text-muted">
               {exercise.source === 'custom' && 'Custom exercise · '}
               {CATEGORY_LABELS[exercise.category]}
               {exercise.equipment && ` · ${equipmentLabel(exercise.equipment)}`}
@@ -78,13 +78,13 @@ export default function ExerciseDetailView() {
           )}
           {primary.length > 0 && (
             <p>
-              <span className="text-gray-500">Primary muscle groups: </span>
+              <span className="text-muted">Primary muscle groups: </span>
               {primary.map((group) => group.name).join(', ')}
             </p>
           )}
           {secondary.length > 0 && (
             <p>
-              <span className="text-gray-500">Secondary muscle groups: </span>
+              <span className="text-muted">Secondary muscle groups: </span>
               {secondary.map((group) => group.name).join(', ')}
             </p>
           )}
@@ -98,7 +98,7 @@ export default function ExerciseDetailView() {
           )}
           {exercise.source === 'custom' && (
             <div className="flex flex-col items-start gap-4">
-              <Link href={`/exercises/edit?id=${exercise.id}`} className="rounded-lg border px-4 py-2 font-semibold">
+              <Link href={`/exercises/edit?id=${exercise.id}`} className="rounded-lg border bg-surface px-4 py-2 font-semibold">
                 Edit
               </Link>
               <ConfirmAction

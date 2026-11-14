@@ -34,6 +34,10 @@ export type DistanceUnit = (typeof DISTANCE_UNITS)[number];
 export const PRESETS = ['simple', 'standard', 'advanced', 'custom'] as const;
 export type Preset = (typeof PRESETS)[number];
 
+// The color theme: "system" follows the phone's light or dark mode (decision 030).
+export const THEMES = ['system', 'light', 'dark'] as const;
+export type Theme = (typeof THEMES)[number];
+
 export const CATEGORIES = ['strength', 'cardio', 'stretch', 'mobility'] as const;
 export type Category = (typeof CATEGORIES)[number];
 
@@ -108,6 +112,7 @@ export const userSettings = sqliteTable(
       .notNull()
       .default(sql`'{}'`),
     setupCompletedAt: integer('setupCompletedAt', { mode: 'timestamp_ms' }),
+    theme: text('theme', { enum: THEMES }).notNull().default('system'),
     ...timestamps,
   },
   (t) => [uniqueIndex('user_settings_user_idx').on(t.userId).where(notDeleted)],

@@ -93,11 +93,12 @@ Most visual and UX overhauls happen here.
   Offline, the bundled images stay. Logging never waits for the check.
 - [ ] **4b.5** Images for custom exercises: take a photo or pick one from the phone.
   Needs the Camera plugin, wrapped in `src/native/`, and images stored on the phone.
-- [ ] **4b.6** Color schemes and theme support: light, dark and "same as the phone".
+- [x] **4b.6** Color schemes and theme support: light, dark and "same as the phone".
   Colors come from a small set of named colors (Tailwind theme or CSS variables), not hard-coded classes,
   so cards, borders and plain buttons stay visible in every theme. Today the light theme hides most borders
   (for example "Add exercise", "Skip rest", "Ungroup" look like plain text).
   Done when: every page reads well in light and dark on a phone, and the choice lives in settings.
+  Done with the "Bumper Plate" colors (decision 030).
 
 ## Phase 5 — Online (later)
 

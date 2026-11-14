@@ -75,7 +75,7 @@ export default function CustomExerciseEditor() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <Link href={id ? `/exercises/detail?id=${id}` : '/exercises'} className="shrink-0 text-sky-600">
+        <Link href={id ? `/exercises/detail?id=${id}` : '/exercises'} className="shrink-0 text-link">
           ← Back
         </Link>
         <h1 className="text-2xl font-bold">{id ? 'Edit exercise' : 'New custom exercise'}</h1>
@@ -97,7 +97,7 @@ export default function CustomExerciseEditor() {
           }}
         />
       ) : (
-        <p className="text-gray-500">Only custom exercises can change.</p>
+        <p className="text-muted">Only custom exercises can change.</p>
       )}
     </main>
   );

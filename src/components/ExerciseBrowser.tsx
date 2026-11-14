@@ -39,7 +39,7 @@ export default function ExerciseBrowser() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href="/exercises/edit" className="rounded-lg border px-4 py-2 text-center font-semibold">
+      <Link href="/exercises/edit" className="rounded-lg border bg-surface px-4 py-2 text-center font-semibold">
         New custom exercise
       </Link>
       <input
@@ -48,13 +48,13 @@ export default function ExerciseBrowser() {
         placeholder="Search exercises"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        className="w-full min-w-0 rounded-lg border px-3 py-2 text-black"
+        className="w-full min-w-0 rounded-lg border px-3 py-2"
       />
       <select
         aria-label="Muscle group"
         value={muscleGroupId}
         onChange={(event) => setMuscleGroupId(event.target.value)}
-        className="w-full min-w-0 rounded-lg border px-3 py-2 text-black"
+        className="w-full min-w-0 rounded-lg border px-3 py-2"
       >
         <option value="">All muscle groups</option>
         {groups.map((group) => (
@@ -65,9 +65,9 @@ export default function ExerciseBrowser() {
       </select>
       {found && (
         <>
-          <p className="text-sm text-gray-500">{found.length === 1 ? '1 exercise' : `${found.length} exercises`}</p>
+          <p className="text-sm text-muted">{found.length === 1 ? '1 exercise' : `${found.length} exercises`}</p>
           {found.length === 0 ? (
-            <p className="text-gray-500">No exercise found.</p>
+            <p className="text-muted">No exercise found.</p>
           ) : (
             <ExerciseList items={found} showImages={features.exerciseImages} />
           )}

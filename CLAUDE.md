@@ -61,7 +61,8 @@ If a needed term is missing, stop and ask before inventing one.
 
 - TypeScript strict mode. No `any`.
 - Function components and hooks only.
-- Tailwind for styling.
+- Tailwind for styling. Use only the named colors from `tailwind.config.ts` (`bg-primary`, `text-muted`,
+  `border-line` and so on), never fixed colors such as `text-sky-600` (decision 030).
 - One component per file. File name matches the component name.
 - Small pure functions for unit conversion and formatting live in `src/lib/`.
 

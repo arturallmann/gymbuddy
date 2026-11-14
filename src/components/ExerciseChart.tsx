@@ -34,19 +34,19 @@ export default function ExerciseChart({ metrics, pointsFor, units }: Props) {
               setMetric(option);
               setSelected(null);
             }}
-            className={`rounded-full border px-3 py-1 text-sm ${option === metric ? 'border-sky-600 bg-sky-600 text-white' : ''}`}
+            className={`rounded-full border px-3 py-1 text-sm ${option === metric ? 'border-primary bg-primary text-on-primary' : 'bg-surface'}`}
           >
             {METRIC_LABELS[option]}
           </button>
         ))}
       </div>
       {points.length === 0 ? (
-        <p className="text-gray-500">No values to chart yet.</p>
+        <p className="text-muted">No values to chart yet.</p>
       ) : (
         <>
           {shown && (
             <p role="status" className="text-sm">
-              <span className="text-gray-500">{formatWorkoutDate(shown.startedAt)}: </span>
+              <span className="text-muted">{formatWorkoutDate(shown.startedAt)}: </span>
               <span className="font-semibold">{formatMetric(shown.value, metric, units)}</span>
             </p>
           )}
@@ -56,16 +56,16 @@ export default function ExerciseChart({ metrics, pointsFor, units }: Props) {
             aria-label={`${METRIC_LABELS[metric]} per workout`}
             className="w-full rounded-lg border"
           >
-            <line x1={BOX.padding} y1={BOX.height - BOX.padding} x2={BOX.width - BOX.padding} y2={BOX.height - BOX.padding} className="stroke-gray-500" strokeWidth={1} />
+            <line x1={BOX.padding} y1={BOX.height - BOX.padding} x2={BOX.width - BOX.padding} y2={BOX.height - BOX.padding} className="stroke-muted" strokeWidth={1} />
             {top !== null && (
-              <text x={BOX.padding} y={BOX.padding - 4} className="fill-gray-500" fontSize={10}>
+              <text x={BOX.padding} y={BOX.padding - 4} className="fill-muted" fontSize={10}>
                 {formatMetric(top, metric, units)}
               </text>
             )}
             <polyline
               points={coordinates.map(({ x, y }) => `${x},${y}`).join(' ')}
               fill="none"
-              className="stroke-sky-600"
+              className="stroke-link"
               strokeWidth={2}
             />
             {coordinates.map(({ x, y }, index) => (
@@ -74,7 +74,7 @@ export default function ExerciseChart({ metrics, pointsFor, units }: Props) {
                 cx={x}
                 cy={y}
                 r={index === selected ? 6 : 4}
-                className="cursor-pointer fill-sky-600"
+                className="cursor-pointer fill-link"
                 onClick={() => setSelected(index)}
               />
             ))}

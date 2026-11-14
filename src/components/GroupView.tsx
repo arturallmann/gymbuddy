@@ -36,13 +36,13 @@ export default function GroupView() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <Link href="/workout" className="shrink-0 text-sky-600">
+        <Link href="/workout" className="shrink-0 text-link">
           ← Workout
         </Link>
         <h1 className="text-2xl font-bold">Superset</h1>
       </header>
       {!detail ? (
-        <p className="text-gray-500">This superset does not exist.</p>
+        <p className="text-muted">This superset does not exist.</p>
       ) : (
         <GroupLog
           detail={detail}

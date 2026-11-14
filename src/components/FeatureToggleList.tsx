@@ -13,7 +13,7 @@ export default function FeatureToggleList({
   onChange: (features: FeatureToggles) => void;
 }) {
   return (
-    <div className="flex flex-col divide-y divide-gray-400/30">
+    <div className="flex flex-col divide-y divide-line">
       {FEATURES.map((feature) => (
         <ToggleRow
           key={feature.name}

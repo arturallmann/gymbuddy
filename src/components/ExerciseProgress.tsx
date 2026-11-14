@@ -52,7 +52,7 @@ export default function ExerciseProgress({ exercise, units }: Props) {
                 type="button"
                 aria-pressed={view === option}
                 onClick={() => setView(option)}
-                className={`rounded-lg border px-3 py-1 text-sm ${view === option ? 'border-sky-600 bg-sky-600 text-white' : ''}`}
+                className={`rounded-lg border px-3 py-1 text-sm ${view === option ? 'border-primary bg-primary text-on-primary' : 'bg-surface'}`}
               >
                 {option === 'history' ? 'History' : 'Chart'}
               </button>

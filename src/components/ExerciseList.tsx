@@ -15,9 +15,9 @@ export default function ExerciseList({ items, showImages }: Props) {
     <ul className="flex flex-col">
       {items.map((exercise) => (
         <li key={exercise.id}>
-          <Link href={`/exercises/detail?id=${exercise.id}`} className="flex items-center gap-3 border-b py-2">
+          <Link href={`/exercises/detail?id=${exercise.id}`} className="flex items-center gap-3 border-b border-line py-2">
             {showImages && (
-              <span className="block h-12 w-16 shrink-0 overflow-hidden rounded bg-gray-800">
+              <span className="block h-12 w-16 shrink-0 overflow-hidden rounded bg-line">
                 {exercise.imagePath && (
                   <Image
                     src={exerciseImageUrl(exercise.imagePath)}
@@ -31,7 +31,7 @@ export default function ExerciseList({ items, showImages }: Props) {
             )}
             <span className="min-w-0 flex-1">
               <span className="block break-words">{exercise.name}</span>
-              <span className="block text-sm text-gray-500">
+              <span className="block text-sm text-muted">
                 {CATEGORY_LABELS[exercise.category]}
                 {exercise.equipment && ` · ${equipmentLabel(exercise.equipment)}`}
               </span>

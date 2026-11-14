@@ -43,17 +43,17 @@ export default function WorkoutDetail() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <Link href="/history" className="shrink-0 text-sky-600">
+        <Link href="/history" className="shrink-0 text-link">
           ← Workout history
         </Link>
       </header>
       {!loaded || !workout ? (
-        <p className="text-gray-500">This workout does not exist.</p>
+        <p className="text-muted">This workout does not exist.</p>
       ) : (
         <>
           <div>
             <h1 className="text-2xl font-bold">{formatWorkoutDate(workout.startedAt)}</h1>
-            <p className="text-gray-500">
+            <p className="text-muted">
               {workout.endedAt
                 ? formatWorkoutDuration((workout.endedAt.getTime() - workout.startedAt.getTime()) / 1000)
                 : 'Active workout'}
@@ -61,7 +61,7 @@ export default function WorkoutDetail() {
             {workout.notes && <p className="mt-2 break-words">{workout.notes}</p>}
           </div>
           {loaded.items.length === 0 ? (
-            <p className="text-gray-500">No exercises.</p>
+            <p className="text-muted">No exercises.</p>
           ) : (
             loaded.items.map((item) => <WorkoutExerciseSets key={item.id} item={item} />)
           )}

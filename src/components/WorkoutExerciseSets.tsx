@@ -24,9 +24,9 @@ export default function WorkoutExerciseSets({ item }: { item: WorkoutExerciseIte
   }, [db, item.id]);
 
   return (
-    <section aria-label={item.name} className="flex flex-col gap-2 rounded-lg border p-3">
+    <section aria-label={item.name} className="flex flex-col gap-2 rounded-lg border bg-surface p-3">
       <h2 className="break-words font-semibold">{item.name}</h2>
-      {sets && sets.length === 0 && <p className="text-sm text-gray-500">No sets</p>}
+      {sets && sets.length === 0 && <p className="text-sm text-muted">No sets</p>}
       {sets && <SetList sets={sets} loadType={item.loadType} units={units} />}
     </section>
   );

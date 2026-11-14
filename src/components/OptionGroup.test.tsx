@@ -24,3 +24,10 @@ test('report the option the user taps', async () => {
 
   expect(onChange).toHaveBeenCalledWith('lb');
 });
+
+test('hide the label on screen when a heading already says it, and keep the group name', () => {
+  render(<OptionGroup label="Theme" options={[...options]} value="kg" onChange={() => {}} hideLabel />);
+
+  expect(screen.getByRole('radiogroup', { name: 'Theme' })).toBeInTheDocument();
+  expect(screen.getByText('Theme')).toHaveClass('sr-only');
+});

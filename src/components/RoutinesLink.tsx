@@ -10,7 +10,7 @@ export default function RoutinesLink() {
     return null;
   }
   return (
-    <Link href="/routines" className="text-sky-600">
+    <Link href="/routines" className="text-link">
       Routines
     </Link>
   );

@@ -26,19 +26,19 @@ export default function SetList({ sets, loadType, units, onRemove, onEdit, editi
         const text = (
           <>
             {formatSet(set, loadType, units)}
-            {set.notes && <span className="block text-sm text-gray-500">{set.notes}</span>}
+            {set.notes && <span className="block text-sm text-muted">{set.notes}</span>}
           </>
         );
         return (
           <li key={set.id} className="flex items-start gap-3">
-            <span className="w-6 shrink-0 text-gray-500">{index + 1}</span>
+            <span className="w-6 shrink-0 text-muted">{index + 1}</span>
             {onEdit ? (
               <button
                 type="button"
                 aria-label={`Edit set ${index + 1}`}
                 aria-pressed={editingId === set.id}
                 onClick={() => onEdit(set.id)}
-                className={`min-w-0 flex-1 break-words rounded text-left ${editingId === set.id ? 'text-sky-400' : ''}`}
+                className={`min-w-0 flex-1 break-words rounded text-left ${editingId === set.id ? 'text-link' : ''}`}
               >
                 {text}
               </button>
@@ -52,7 +52,7 @@ export default function SetList({ sets, loadType, units, onRemove, onEdit, editi
                 type="button"
                 aria-label={`Remove set ${index + 1}`}
                 onClick={() => onRemove(set.id)}
-                className="shrink-0 px-2 text-sm text-red-600"
+                className="shrink-0 px-2 text-sm text-danger"
               >
                 Remove
               </button>

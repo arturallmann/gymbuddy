@@ -20,7 +20,7 @@ export default function WorkoutPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-8 p-6">
       <header className="flex items-center gap-4">
-        <Link href="/" className="text-sky-600">
+        <Link href="/" className="text-link">
           ← Back
         </Link>
         <h1 className="text-2xl font-bold">Workout</h1>
@@ -40,7 +40,7 @@ export default function WorkoutPage() {
               await end();
               router.push('/');
             }}
-            className="rounded-lg bg-sky-600 px-6 py-3 font-semibold text-white disabled:opacity-50"
+            className="rounded-lg bg-primary px-6 py-3 font-semibold text-on-primary disabled:opacity-50"
           >
             End workout
           </button>
@@ -56,7 +56,7 @@ export default function WorkoutPage() {
           />
         </>
       ) : (
-        <p className="text-gray-500">No active workout.</p>
+        <p className="text-muted">No active workout.</p>
       )}
     </main>
   );

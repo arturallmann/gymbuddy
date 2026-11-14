@@ -52,11 +52,11 @@ export default function ImportData() {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-muted">
         Reads files in the export format. Workouts that are already in the app are skipped.
       </p>
       <label
-        className={`self-start rounded-lg border px-4 py-2 font-semibold ${busy ? 'opacity-50' : 'cursor-pointer'}`}
+        className={`self-start rounded-lg border bg-surface px-4 py-2 font-semibold ${busy ? 'opacity-50' : 'cursor-pointer'}`}
       >
         Import CSV or Excel
         <input
@@ -72,10 +72,10 @@ export default function ImportData() {
         />
       </label>
       {message && (
-        <div role="status" className="flex flex-col gap-1 text-sm text-gray-400">
+        <div role="status" className="flex flex-col gap-1 text-sm text-muted">
           <p>{message}</p>
           {errors.length > 0 && (
-            <ul className="list-disc pl-5 text-red-400">
+            <ul className="list-disc pl-5 text-danger">
               {errors.slice(0, SHOWN_ERRORS).map((error) => (
                 <li key={error}>{error}</li>
               ))}

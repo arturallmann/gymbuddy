@@ -72,14 +72,14 @@ export default function WorkoutExerciseList({
             <li
               key={block.groupId}
               aria-label={`Superset: ${name}`}
-              className="flex items-center gap-2 rounded-lg border border-sky-700 p-3"
+              className="flex items-center gap-2 rounded-lg border border-primary bg-surface p-3"
             >
               <Link href={`/workout/group?id=${block.groupId}`} className="min-w-0 flex-1 break-words">
                 {renderGroup ? renderGroup(block.items) : <span className="font-semibold">{name}</span>}
               </Link>
               {arrows}
               {onUngroup && !selection && (
-                <button type="button" onClick={() => onUngroup(block.groupId)} className="shrink-0 px-2 text-sm text-sky-600">
+                <button type="button" onClick={() => onUngroup(block.groupId)} className="shrink-0 px-2 text-sm text-link">
                   Ungroup
                 </button>
               )}
@@ -90,7 +90,7 @@ export default function WorkoutExerciseList({
         const item = block.item;
         if (selection) {
           return (
-            <li key={item.id} className="rounded-lg border p-3">
+            <li key={item.id} className="rounded-lg border bg-surface p-3">
               <label className="flex items-center gap-3">
                 <input
                   type="checkbox"
@@ -105,7 +105,7 @@ export default function WorkoutExerciseList({
           );
         }
         return (
-          <li key={item.id} className="flex items-center gap-2 rounded-lg border p-3">
+          <li key={item.id} className="flex items-center gap-2 rounded-lg border bg-surface p-3">
             <Link href={`/workout/exercise?id=${item.id}`} className="min-w-0 flex-1 break-words">
               <span className="font-semibold">{item.name}</span>
               {renderBody?.(item)}
@@ -115,7 +115,7 @@ export default function WorkoutExerciseList({
               type="button"
               aria-label={`Remove ${item.name}`}
               onClick={() => onRemove(item.id)}
-              className="shrink-0 px-2 text-red-600"
+              className="shrink-0 px-2 text-danger"
             >
               Remove
             </button>
