@@ -189,11 +189,15 @@ export const exerciseImages = sqliteTable(
     position: integer('position').notNull(),
     // Path relative to the exercise image folder, such as "3_4_Sit-Up/0.jpg".
     path: text('path').notNull(),
+    // A file in the app's own storage (Filesystem plugin, data folder) that replaces the bundled
+    // image: a library image downloaded by the online library update (decision 038) or a photo of a
+    // custom exercise (decision 039). NULL = the image bundled with the app at `path`.
+    storedFile: text('storedFile'),
     license: text('license'),
     attribution: text('attribution'),
     ...timestamps,
   },
-  (t) => [uniqueIndex('exercise_images_exercise_position_idx').on(t.exerciseId, t.position)],
+  (t) => [uniqueIndex('exercise_images_exercise_position_idx').on(t.exerciseId, t.position).where(notDeleted)],
 );
 
 export const exercisePreferences = sqliteTable(

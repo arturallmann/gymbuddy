@@ -188,3 +188,40 @@ describe('seedLibraryIfChanged', () => {
     expect(custom.map((row) => row.name)).toEqual(['My exercise']);
   });
 });
+
+describe('stored files of the online library update', () => {
+  const curl = source.find((item) => item.name === 'Barbell Curl')!;
+  const imagesOf = async (db: Awaited<ReturnType<typeof createTestDatabase>>['db']) => {
+    const [row] = await db.select().from(exercises).where(eq(exercises.sourceId, curl.id));
+    return db.select().from(exerciseImages).where(eq(exerciseImages.exerciseId, row.id));
+  };
+
+  test('point downloaded images to their stored file, and the others to the bundled copy', async () => {
+    const { db } = await createTestDatabase();
+
+    await seedLibrary(db, [curl], new Map([[curl.images[0], 'library-images/Barbell_Curl/0.jpg']]));
+
+    const images = (await imagesOf(db)).sort((a, b) => a.position - b.position);
+    expect(images.map((image) => image.storedFile)).toEqual(['library-images/Barbell_Curl/0.jpg', null]);
+  });
+
+  test('go back to the bundled copies when the bundled library is seeded again', async () => {
+    const { db } = await createTestDatabase();
+    await seedLibrary(db, [curl], new Map([[curl.images[0], 'library-images/Barbell_Curl/0.jpg']]));
+
+    await seedLibrary(db, [curl]);
+
+    expect((await imagesOf(db)).every((image) => image.storedFile === null)).toBe(true);
+  });
+
+  test('forget the online update after seeding a new bundled library', async () => {
+    const { db } = await createTestDatabase();
+    await writeAppState(db, 'onlineLibraryCommit', 'abc123');
+    await writeAppState(db, 'libraryCheckedAt', '1000');
+
+    await seedLibraryIfChanged(db, 'new-bundled:1');
+
+    expect(await readAppState(db, 'onlineLibraryCommit')).toBe('');
+    expect(await readAppState(db, 'libraryCheckedAt')).toBe('');
+  });
+});

@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm';
+import { eq, isNull, sql } from 'drizzle-orm';
 import libraryData from '../../data/free-exercise-db/version.json';
 import { readAppState, writeAppState } from './appState';
 import type { AppDatabase } from './driver';
@@ -102,7 +102,9 @@ function chunks<T>(items: T[]): T[][] {
 }
 
 // Inserts or updates the library. Never touches custom exercises.
-export async function seedLibrary(db: AppDatabase, source: SourceExercise[]) {
+// `storedFiles` maps image paths to files the online library update downloaded (decision 038);
+// every other library image uses the copy bundled with the app.
+export async function seedLibrary(db: AppDatabase, source: SourceExercise[], storedFiles: Map<string, string> = new Map()) {
   const library = source.map(toLibraryExercise);
   const keys = [...new Set(library.flatMap((exercise) => exercise.muscleGroups.map((group) => group.key)))].sort();
 
@@ -185,6 +187,7 @@ export async function seedLibrary(db: AppDatabase, source: SourceExercise[]) {
         exerciseId: exerciseIds.get(exercise.sourceId)!,
         position: index + 1,
         path,
+        storedFile: storedFiles.get(path) ?? null,
         license: IMAGE_LICENSE,
         attribution: IMAGE_ATTRIBUTION,
       })),
@@ -195,7 +198,8 @@ export async function seedLibrary(db: AppDatabase, source: SourceExercise[]) {
         .values(chunk)
         .onConflictDoUpdate({
           target: [exerciseImages.exerciseId, exerciseImages.position],
-          set: { path: sql`excluded.path`, updatedAt: sql`excluded.updatedAt` },
+          targetWhere: isNull(exerciseImages.deletedAt),
+          set: { path: sql`excluded.path`, storedFile: sql`excluded.storedFile`, updatedAt: sql`excluded.updatedAt` },
         });
     }
   });
@@ -216,4 +220,7 @@ export async function seedLibraryIfChanged(db: AppDatabase, version: string = li
   await seedLibrary(db, source as SourceExercise[]);
   // Written after the seed: if the app stops in between, the next start seeds again.
   await writeAppState(db, 'libraryVersion', version);
+  // The bundled library replaced any online update, so the next online check applies it again.
+  await writeAppState(db, 'onlineLibraryCommit', '');
+  await writeAppState(db, 'libraryCheckedAt', '');
 }
