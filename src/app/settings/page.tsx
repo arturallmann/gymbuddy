@@ -1,5 +1,6 @@
 'use client';
 
+import BodySettings from '@/components/BodySettings';
 import ExportData from '@/components/ExportData';
 import FeatureSettings from '@/components/FeatureSettings';
 import ImportData from '@/components/ImportData';
@@ -17,6 +18,10 @@ export default function SettingsPage() {
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">Units</h2>
         <UnitSettings />
+      </section>
+      <section className="flex flex-col gap-4">
+        <h2 className="text-lg font-semibold">Body</h2>
+        <BodySettings />
       </section>
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">Theme</h2>

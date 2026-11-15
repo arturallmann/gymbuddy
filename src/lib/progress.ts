@@ -1,13 +1,15 @@
 // The history view and the chart view of one exercise. Pure functions: no database, no React.
 // Charts use only the fixed fields and never parse notes (decision 010).
 import type { HistoryRow } from '@/db/progress';
-import type { Exercise, WorkoutSet } from '@/db/schema';
+import type { Bodyweight, Exercise, LoadType, WorkoutSet } from '@/db/schema';
+import { bodyweightAt, estimatedOneRepMax, totalVolume } from './statistics';
 import { formatDistance, formatDuration, formatWeight, type Units } from './units';
 
-export type Metric = 'weight' | 'reps' | 'volume' | 'duration' | 'distance';
+export type Metric = 'weight' | 'e1rm' | 'reps' | 'volume' | 'duration' | 'distance';
 
 export const METRIC_LABELS: Record<Metric, string> = {
   weight: 'Heaviest weight',
+  e1rm: 'e1RM',
   reps: 'Most reps',
   volume: 'Volume',
   duration: 'Longest duration',
@@ -17,43 +19,60 @@ export const METRIC_LABELS: Record<Metric, string> = {
 type Chartable = Pick<Exercise, 'loadType' | 'tracksReps' | 'tracksDuration' | 'tracksDistance'>;
 
 // The values the chart offers for this exercise. Empty for a note-only exercise, which then
-// has the history view only.
-export function chartMetrics(exercise: Chartable): Metric[] {
+// has the history view only. The e1RM needs external load and reps (decision 043); a bodyweight
+// exercise offers volume only when the user has a bodyweight (`withBodyweight`).
+export function chartMetrics(exercise: Chartable, withBodyweight = false): Metric[] {
   const metrics: Metric[] = [];
   if (exercise.loadType !== 'none') metrics.push('weight');
+  if (exercise.loadType === 'external' && exercise.tracksReps) metrics.push('e1rm');
   if (exercise.tracksReps) metrics.push('reps');
-  if (exercise.loadType === 'external' && exercise.tracksReps) metrics.push('volume');
+  if (exercise.tracksReps && (exercise.loadType === 'external' || (exercise.loadType === 'bodyweight' && withBodyweight))) {
+    metrics.push('volume');
+  }
   if (exercise.tracksDuration) metrics.push('duration');
   if (exercise.tracksDistance) metrics.push('distance');
   return metrics;
 }
 
+// How to read the weight of the sets: the load type, and the bodyweight of the workout's day
+// for the volume of a bodyweight exercise.
+export type WeightContext = { loadType: LoadType; bodyweightGrams: number | null };
+
+const EXTERNAL: WeightContext = { loadType: 'external', bodyweightGrams: null };
+
 // The value of one metric for one workout, from its sets, or null when no set has it.
-// Weight and volume are in grams, duration in seconds, distance in meters.
-export function workoutValue(sets: WorkoutSet[], metric: Metric): number | null {
+// Weight, e1RM and volume are in grams, duration in seconds, distance in meters.
+export function workoutValue(sets: WorkoutSet[], metric: Metric, context: WeightContext = EXTERNAL): number | null {
+  if (metric === 'volume') return totalVolume(sets, context.loadType, context.bodyweightGrams);
   const values = sets.flatMap((set): number[] => {
     switch (metric) {
       case 'weight':
         return set.weightGrams === null ? [] : [set.weightGrams];
+      case 'e1rm': {
+        const value = estimatedOneRepMax(set.weightGrams, set.reps);
+        return value === null ? [] : [value];
+      }
       case 'reps':
         return set.reps === null ? [] : [set.reps];
-      case 'volume':
-        return set.weightGrams === null || set.reps === null ? [] : [set.weightGrams * set.reps];
       case 'duration':
         return set.durationSeconds === null ? [] : [set.durationSeconds];
       case 'distance':
         return set.distanceMeters === null ? [] : [set.distanceMeters];
     }
   });
-  if (values.length === 0) return null;
-  return metric === 'volume' ? values.reduce((sum, value) => sum + value, 0) : Math.max(...values);
+  return values.length === 0 ? null : Math.max(...values);
 }
 
 export type ChartPoint = { workoutId: string; startedAt: Date; value: number };
 
 // One point per workout, oldest first. Workouts without a value for the metric are left out
-// of the chart, but stay in the history.
-export function chartPoints(rows: HistoryRow[], metric: Metric): ChartPoint[] {
+// of the chart, but stay in the history. Each workout uses the bodyweight of its day.
+export function chartPoints(
+  rows: HistoryRow[],
+  metric: Metric,
+  loadType: LoadType = 'external',
+  bodyweights: Pick<Bodyweight, 'weightGrams' | 'measuredAt'>[] = [],
+): ChartPoint[] {
   const perWorkout = new Map<string, { startedAt: Date; sets: WorkoutSet[] }>();
   for (const row of rows) {
     const entry = perWorkout.get(row.workoutId) ?? { startedAt: row.startedAt, sets: [] };
@@ -61,7 +80,8 @@ export function chartPoints(rows: HistoryRow[], metric: Metric): ChartPoint[] {
     perWorkout.set(row.workoutId, entry);
   }
   return [...perWorkout.entries()].flatMap(([workoutId, entry]) => {
-    const value = workoutValue(entry.sets, metric);
+    const bodyweightGrams = loadType === 'bodyweight' ? bodyweightAt(bodyweights, entry.startedAt) : null;
+    const value = workoutValue(entry.sets, metric, { loadType, bodyweightGrams });
     return value === null ? [] : [{ workoutId, startedAt: entry.startedAt, value }];
   });
 }
@@ -70,6 +90,7 @@ export function chartPoints(rows: HistoryRow[], metric: Metric): ChartPoint[] {
 export function formatMetric(value: number, metric: Metric, units: Units): string {
   switch (metric) {
     case 'weight':
+    case 'e1rm':
     case 'volume':
       return formatWeight(value, units.weightUnit);
     case 'reps':

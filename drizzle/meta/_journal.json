@@ -50,6 +50,13 @@
       "when": 1794747381481,
       "tag": "0006_old_viper",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1794757901348,
+      "tag": "0007_chubby_colonel_america",
+      "breakpoints": true
     }
   ]
 }

@@ -63,6 +63,8 @@ src/
     preferences.ts  Queries for exercise preferences (notes and unit override)
     export.ts     Queries that build export rows
     progress.ts   The one history query for the history view and the chart view, and exercise use
+    statistics.ts Queries for the statistics page and the personal records of a workout
+    bodyweights.ts  Queries for the user's bodyweights
     libraryUpdate.ts  The online library update (decision 038)
   hooks/          React hooks, such as useSettings(), useFeatures() and useActiveWorkout()
   lib/            Pure helpers (unit conversion, formatting, CSV building)
@@ -88,6 +90,13 @@ docs/             Project documentation
 `/calendar?view=month|week&date=…&day=…` (`CalendarView`; without a place: the current week). `src/lib/calendar.ts` builds the weeks, the shown
 time span and the address; `listWorkoutHistory()` loads the workouts of that span. A workout opens
 `/history/workout?id=…&back=<calendar address>`.
+
+## Statistics (decision 043)
+
+`/statistics` (`StatisticsView`, home page menu): `listStatistics()` loads the sets of ended workouts in the
+time span with their exercises and muscle groups; `src/lib/statistics.ts` counts workouts, volume, personal
+records and muscle group sets, using `listBodyweights()` for the bodyweight of each workout's day.
+The workout detail page uses `listHistoryUpTo()` for the personal records a workout reached.
 
 ## Data flow
 

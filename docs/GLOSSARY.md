@@ -85,6 +85,7 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 | Unit override | `exercise_preferences.weightUnit`, `.distanceUnit` | A different unit for one exercise. | custom unit, exercise unit |
 | Feature toggle | type `FeatureToggles`, hook `useFeatures()` | An on/off switch that hides part of the interface. | feature flag, switch, option |
 | Preset | `preset` | A set of feature toggles: `simple`, `standard`, `advanced`, `custom`. Only for settings. | mode, profile, template |
+| Height | `heightMillimeters` | The user's height, in the settings (decision 043). | — |
 | Theme | `theme`, type `Theme` | The app's colors: `system` ("Same as phone"), `light` or `dark` (decision 030). | dark mode (as the setting), appearance, skin, color mode |
 | First-time setup | `setupCompletedAt` | The short setup at first start: units, preset, fine-tuning. | onboarding, wizard, intro |
 
@@ -97,8 +98,10 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 | History view | — | A plain list of every set of one exercise, newest workout first. | log, timeline, feed |
 | Chart view | — | A chart of weight, reps, duration or distance over time. | graph, stats, analytics |
 | Volume | derived | Sum of weight × reps. | tonnage, load, total weight |
-| Personal record | derived | The best value ever for an exercise. Short form in the interface: PR. | best, max, record (alone) |
-| Estimated one-rep max | derived | A calculated maximum for one rep. Short form: e1RM. | 1RM (that means a real tested max), max |
+| Personal record | derived, `PersonalRecord`, `personalRecords()` | The best value ever for an exercise. Short form in the interface: PR. Never includes the bodyweight (decision 043). | best, max, record (alone) |
+| Estimated one-rep max | derived, `estimatedOneRepMax()` | A calculated maximum for one rep (Epley, decision 043). Short form: e1RM. | 1RM (that means a real tested max), max |
+| Statistics | `StatisticsView`, route `/statistics` | The page with workouts, exercises, muscle groups and bodyweight over a time span (decision 043). | stats, analytics, dashboard |
+| Bodyweight | table `bodyweights`, `addBodyweight()` | The user's own weight, entered with a date. Each workout uses the bodyweight of its day. | body weight, weigh-in, BW (except in "BW + 5 kg") |
 
 ## Data words
 

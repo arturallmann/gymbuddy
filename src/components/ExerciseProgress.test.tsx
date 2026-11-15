@@ -11,10 +11,10 @@ import ExerciseProgress from './ExerciseProgress';
 
 const values = { setType: 'normal' as const, weightGrams: 20412, reps: 5, durationSeconds: null, distanceMeters: null, rpe: null, notes: 'green band' };
 
-async function setup(kind: 'weights' | 'notes', options: { charts?: boolean; lb?: boolean } = {}) {
+async function setup(kind: 'weights' | 'notes', options: { charts?: boolean; lb?: boolean; statistics?: boolean } = {}) {
   const { db } = await createTestDatabase();
   const local = await getLocalSettings(db);
-  await updateSettings(db, local.id, { features: { charts: options.charts ?? true } });
+  await updateSettings(db, local.id, { features: { charts: options.charts ?? true, statistics: options.statistics ?? true } });
   const exercise = {
     id: crypto.randomUUID(),
     source: 'custom' as const,
@@ -35,6 +35,24 @@ async function setup(kind: 'weights' | 'notes', options: { charts?: boolean; lb?
 }
 
 describe('ExerciseProgress', () => {
+  test('show personal records as tiles (decision 043)', async () => {
+    await setup('weights');
+
+    const records = await screen.findByRole('region', { name: 'Personal records' });
+    expect(within(records).getAllByRole('listitem').map((tile) => tile.textContent?.replace(/\d+ \w+ \d{4}$/, ''))).toEqual([
+      'e1RM23.8 kg',
+      'Heaviest weight20.4 kg',
+      'Most volume102.05 kg',
+    ]);
+  });
+
+  test('hide the personal records when the statistics feature toggle is off', async () => {
+    await setup('weights', { statistics: false });
+
+    expect(await screen.findByRole('list', { name: 'History' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Personal records' })).not.toBeInTheDocument();
+  });
+
   test('start with the history view and switch to the chart view', async () => {
     const { user } = await setup('weights');
 
@@ -44,6 +62,7 @@ describe('ExerciseProgress', () => {
     expect(screen.getByRole('img', { name: 'Heaviest weight per workout' })).toBeInTheDocument();
     expect(within(screen.getByRole('group', { name: 'Chart value' })).getAllByRole('button').map((b) => b.textContent)).toEqual([
       'Heaviest weight',
+      'e1RM',
       'Most reps',
       'Volume',
     ]);

@@ -1,5 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import {
+  centimetersToMillimeters,
+  feetInchesToMillimeters,
+  formatHeight,
+  millimetersToFeetInches,
   distanceToMeters,
   formatDistance,
   formatDuration,
@@ -171,5 +175,20 @@ describe('formatWorkoutDuration', () => {
     expect(formatWorkoutDuration(45 * 60 + 59)).toBe('45 min');
     expect(formatWorkoutDuration(65 * 60)).toBe('1 h 5 min');
     expect(formatWorkoutDuration(120 * 60)).toBe('2 h 0 min');
+  });
+});
+
+describe('height', () => {
+  test('show cm for metric and feet and inches for imperial', () => {
+    expect(formatHeight(1800, 'metric')).toBe('180 cm');
+    expect(formatHeight(1755, 'metric')).toBe('175.5 cm');
+    expect(formatHeight(1803, 'imperial')).toBe('5 ft 11 in');
+  });
+
+  test('round trip input through millimeters', () => {
+    expect(centimetersToMillimeters(180)).toBe(1800);
+    expect(feetInchesToMillimeters(5, 11)).toBe(1803);
+    expect(millimetersToFeetInches(feetInchesToMillimeters(6, 0))).toEqual({ feet: 6, inches: 0 });
+    expect(millimetersToFeetInches(feetInchesToMillimeters(5, 11))).toEqual({ feet: 5, inches: 11 });
   });
 });

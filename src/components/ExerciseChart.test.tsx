@@ -10,6 +10,7 @@ const data: Record<Metric, ChartPoint[]> = {
     { workoutId: 'w1', startedAt: new Date(2026, 9, 1), value: 60000 },
     { workoutId: 'w2', startedAt: new Date(2026, 9, 8), value: 65000 },
   ],
+  e1rm: [],
   reps: [{ workoutId: 'w1', startedAt: new Date(2026, 9, 1), value: 8 }],
   volume: [],
   duration: [],

@@ -73,6 +73,7 @@ export type FeatureToggles = {
   setNotes: boolean;
   exerciseImages: boolean;
   charts: boolean;
+  statistics: boolean;
 };
 
 // Same as the standard preset.
@@ -86,6 +87,7 @@ export const DEFAULT_FEATURES: FeatureToggles = {
   setNotes: true,
   exerciseImages: true,
   charts: true,
+  statistics: true,
 };
 
 export const users = sqliteTable('users', {
@@ -113,6 +115,8 @@ export const userSettings = sqliteTable(
       .default(sql`'{}'`),
     setupCompletedAt: integer('setupCompletedAt', { mode: 'timestamp_ms' }),
     theme: text('theme', { enum: THEMES }).notNull().default('system'),
+    // The user's height in whole millimeters (decision 043). NULL = not entered.
+    heightMillimeters: integer('heightMillimeters'),
     ...timestamps,
   },
   (t) => [uniqueIndex('user_settings_user_idx').on(t.userId).where(notDeleted)],
@@ -342,6 +346,22 @@ export const sets = sqliteTable(
   (t) => [index('sets_workout_exercise_idx').on(t.workoutExerciseId, t.position)],
 );
 
+// The user's bodyweight over time (decision 043). A new value is a new row, so older workouts keep
+// the bodyweight they had: a bodyweight applies to workouts from the start of the day it was measured.
+export const bodyweights = sqliteTable(
+  'bodyweights',
+  {
+    id: id(),
+    userId: text('userId')
+      .notNull()
+      .references(() => users.id),
+    weightGrams: integer('weightGrams').notNull(),
+    measuredAt: integer('measuredAt', { mode: 'timestamp_ms' }).notNull(),
+    ...timestamps,
+  },
+  (t) => [index('bodyweights_user_measured_idx').on(t.userId, t.measuredAt)],
+);
+
 export type User = typeof users.$inferSelect;
 export type AppState = typeof appState.$inferSelect;
 export type UserSettings = typeof userSettings.$inferSelect;
@@ -356,3 +376,4 @@ export type Workout = typeof workouts.$inferSelect;
 export type WorkoutGroup = typeof workoutGroups.$inferSelect;
 export type WorkoutExercise = typeof workoutExercises.$inferSelect;
 export type WorkoutSet = typeof sets.$inferSelect;
+export type Bodyweight = typeof bodyweights.$inferSelect;

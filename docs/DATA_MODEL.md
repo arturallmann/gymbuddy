@@ -20,6 +20,7 @@ The source of truth is `src/db/schema.ts`. This file explains the meaning behind
 | workout_groups | A superset, circuit or giant set inside one workout. |
 | workout_exercises | One exercise inside one workout, with order and phase. |
 | sets | One logged effort, with weight, reps, duration or distance. |
+| bodyweights | The user's bodyweight over time, one row per entry (decision 043). |
 
 ## Units
 
@@ -28,6 +29,7 @@ The source of truth is `src/db/schema.ts`. This file explains the meaning behind
 | Weight | integer grams | 12.5 kg → `12500` |
 | Duration | integer seconds | 1 min 30 s → `90` |
 | Distance | meters | 5 km → `5000` |
+| Height | integer millimeters (`user_settings.heightMillimeters`) | 180 cm → `1800` |
 | Dates | integer milliseconds (Drizzle `timestamp_ms`) | |
 
 ## Display units
@@ -74,6 +76,7 @@ A new toggle therefore needs no migration: add it to `FeatureToggles` and `DEFAU
 | `setNotes` | Notes field on each set |
 | `exerciseImages` | Images in the exercise browser |
 | `charts` | Chart view (history view stays) |
+| `statistics` | Personal records on the exercise page, the workout summary and PR badges, the statistics page |
 
 Rules:
 - A toggle hides input and controls only. It never deletes or hides stored data.
@@ -82,11 +85,11 @@ Rules:
 
 ## Presets (first-time setup)
 
-| Preset | restTimer | supersets | templates | rpe | setTypes | phases | setNotes | exerciseImages | charts |
-|---|---|---|---|---|---|---|---|---|---|
-| simple | off | off | off | off | off | off | off | on | on |
-| standard | on | on | on | off | off | off | on | on | on |
-| advanced | on | on | on | on | on | on | on | on | on |
+| Preset | restTimer | supersets | templates | rpe | setTypes | phases | setNotes | exerciseImages | charts | statistics |
+|---|---|---|---|---|---|---|---|---|---|---|
+| simple | off | off | off | off | off | off | off | on | on | off |
+| standard | on | on | on | off | off | off | on | on | on | on |
+| advanced | on | on | on | on | on | on | on | on | on | on |
 
 First-time setup has three short steps: units, preset, optional fine-tuning of single toggles.
 Changing any toggle afterwards sets `preset` to `custom`. Settings can change at any time.
@@ -174,6 +177,28 @@ Sets without a value for the charted field are left out of the chart, but stay i
 Chart values per workout (decision 029): heaviest weight (`weightGrams`, added weight on bodyweight
 exercises), most reps, volume (sum of weight × reps, external load only), longest duration and
 longest distance. The chart offers only values the exercise tracks; a note-only exercise has none.
+Decision 043 adds the e1RM (external load with reps) and the volume of bodyweight exercises (once the user
+has a bodyweight).
+
+## Statistics (decision 043)
+
+All statistics are derived at query time from the fixed fields; nothing derived is stored.
+The counting rules live in `src/lib/statistics.ts`.
+
+- **Bodyweight:** a row in `bodyweights` applies from the start of the day it was measured until the next
+  one. A new bodyweight is a new row, so earlier workouts keep their bodyweight. Before the first row a
+  workout has no bodyweight.
+- **Volume:** weight × reps per set. External load: `weightGrams`. Bodyweight exercise: bodyweight of the
+  workout's day + added weight (assisted = negative); no volume without a bodyweight. Load type none and
+  sets without reps have no volume. Totals across exercises use the global weight unit.
+- **e1RM:** Epley, weight × (1 + reps ÷ 30), from sets of 1–12 reps with external load; 1 rep = its weight.
+- **Personal records:** never include the bodyweight. External load: e1RM, heaviest weight, most volume in
+  one workout. Bodyweight exercise: heaviest added weight (above zero) and most reps. Plus longest duration
+  and longest distance when tracked. A workout reaches a personal record when its value beats every earlier
+  workout with the exercise; the first workout with an exercise reaches none.
+- **Muscle groups:** a set counts 1 for each primary muscle group and ½ for each secondary one; volume
+  is shared the same way.
+- The statistics page counts ended workouts in the chosen time span (4 weeks, 3 months, a year).
 
 ## Phases
 

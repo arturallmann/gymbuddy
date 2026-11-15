@@ -15,6 +15,7 @@ export const PRESET_FEATURES: Record<Exclude<Preset, 'custom'>, FeatureToggles> 
     setNotes: false,
     exerciseImages: true,
     charts: true,
+    statistics: false,
   },
   standard: {
     restTimer: true,
@@ -26,6 +27,7 @@ export const PRESET_FEATURES: Record<Exclude<Preset, 'custom'>, FeatureToggles> 
     setNotes: true,
     exerciseImages: true,
     charts: true,
+    statistics: true,
   },
   advanced: {
     restTimer: true,
@@ -37,6 +39,7 @@ export const PRESET_FEATURES: Record<Exclude<Preset, 'custom'>, FeatureToggles> 
     setNotes: true,
     exerciseImages: true,
     charts: true,
+    statistics: true,
   },
 };
 
@@ -63,6 +66,11 @@ export const FEATURES: { name: FeatureName; label: string; description: string }
   { name: 'setNotes', label: 'Notes on sets', description: 'Write notes on each set.' },
   { name: 'exerciseImages', label: 'Exercise images', description: 'Show images in the exercise browser.' },
   { name: 'charts', label: 'Chart view', description: 'Show progress charts. The history view stays.' },
+  {
+    name: 'statistics',
+    label: 'Statistics',
+    description: 'Show personal records, volume and the statistics page.',
+  },
 ];
 
 export const PRESET_LABELS: Record<Preset, string> = {

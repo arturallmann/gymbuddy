@@ -371,6 +371,32 @@ to it, and the inputs stand in one column.
 Tabs keep each part short, so nothing scrolls away during a set. The menu (idea A) and folded rows (idea C)
 were not chosen.
 
+## 043 — Statistics: records on the pages, a statistics page, bodyweight with a date
+Date: 2026-11-15
+Of the three statistics ideas (4b.12) the user chose a mix of A and C: the exercise page and the workout
+detail page show the most useful numbers, and a statistics page holds the rest.
+- Exercise page, "Progress" tab: personal record tiles above the chart and history view; the chart gains e1RM.
+- Workout detail page: a summary (volume, sets, exercises, PRs) and a PR badge on each exercise that beat
+  every earlier workout. The first workout with an exercise reaches no PRs, so a PR always means progress.
+- Statistics page (`/statistics`, in the book menu, not a fourth home page icon): tabs Workouts, Exercises,
+  Muscle groups and Bodyweight; the first three share a time span (4 weeks, 3 months, a year). Muscle
+  group numbers live only here.
+- All of it follows a new `statistics` feature toggle (off in the simple preset).
+Counting rules:
+- e1RM: Epley, weight × (1 + reps ÷ 30), from sets of 1–12 reps; a single rep is its weight. External load only.
+- Muscle groups: a set counts 1 for a primary and ½ for a secondary muscle group.
+- Bodyweight: the user enters height and bodyweight (Settings, "Body"; bodyweight also on the statistics page).
+  Each entry is a row in a new `bodyweights` table with the time it was measured, and applies from the start
+  of that day. A new bodyweight never changes earlier workouts; workouts before the first one have no
+  bodyweight. Storing the bodyweight on every set was rejected: the table gives the same result, keeps
+  sets unchanged, and shows the bodyweight over time.
+- Volume of a bodyweight exercise = (bodyweight + added weight) × reps, only when a bodyweight is known.
+- The bodyweight never affects personal records: 5 dips at 85 kg are no PR over 5 dips at 80 kg, because
+  bodyweight changes slowly and PRs get harder while losing weight. So a bodyweight exercise has PRs for
+  added weight and reps only, never for volume or e1RM.
+Height is stored in whole millimeters (`user_settings.heightMillimeters`), because meters would need decimals;
+it shows in cm or in feet and inches with the distance unit. Nothing uses it yet.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

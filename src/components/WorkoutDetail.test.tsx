@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { exercises, workouts } from '@/db/schema';
 import { getLocalSettings, updateSettings } from '@/db/settings';
+import { addBodyweight } from '@/db/bodyweights';
 import { addSet, addWorkoutExercise, endWorkout, startWorkout } from '@/db/workouts';
 import { createTestDatabase } from '@/testing/database';
 import { renderWithDatabase } from '@/testing/render';
@@ -94,5 +95,60 @@ describe('WorkoutDetail', () => {
   test('ignore a back address that is not the calendar', async () => {
     await setup('https://example.com/');
     expect(await screen.findByRole('link', { name: 'Back to workout history' })).toHaveAttribute('href', '/history');
+  });
+});
+
+describe('WorkoutDetail statistics (decision 043)', () => {
+  async function setupTwo(statistics = true) {
+    const { db } = await createTestDatabase();
+    const local = await getLocalSettings(db);
+    await updateSettings(db, local.id, { features: { statistics } });
+    const squatId = crypto.randomUUID();
+    const dipId = crypto.randomUUID();
+    await db.insert(exercises).values([
+      { id: squatId, source: 'custom', name: 'Squat', category: 'strength', loadType: 'external', tracksReps: true },
+      { id: dipId, source: 'custom', name: 'Dips', category: 'strength', loadType: 'bodyweight', tracksReps: true },
+    ]);
+    const earlier = await startWorkout(db, local.userId, new Date('2026-10-01T10:00:00Z'));
+    await addSet(db, await addWorkoutExercise(db, earlier.id, squatId), { ...values, weightGrams: 100000, reps: 5 });
+    await addSet(db, await addWorkoutExercise(db, earlier.id, dipId), { ...values, weightGrams: null, reps: 10 });
+    await endWorkout(db, earlier.id);
+    await addBodyweight(db, local.userId, 80000, new Date('2026-10-01T07:00:00Z'));
+    const later = await startWorkout(db, local.userId, new Date('2026-10-08T10:00:00Z'));
+    const squat = await addWorkoutExercise(db, later.id, squatId);
+    await addSet(db, squat, { ...values, weightGrams: 105000, reps: 3 });
+    await addSet(db, squat, { ...values, weightGrams: 100000, reps: 5 });
+    await addSet(db, await addWorkoutExercise(db, later.id, dipId), { ...values, weightGrams: null, reps: 10 });
+    await endWorkout(db, later.id);
+    navigation.params = new URLSearchParams({ id: later.id });
+    return renderWithDatabase(<WorkoutDetail />, { db });
+  }
+
+  test('sum up the workout and mark the personal records it reached', async () => {
+    await setupTwo();
+
+    const summary = await screen.findByRole('region', { name: 'Workout summary' });
+    // 105 × 3 + 100 × 5 + (80 bodyweight) × 10 = 1615 kg
+    expect(within(summary).getByText('Volume').nextSibling).toHaveTextContent('1615 kg');
+    expect(within(summary).getByText('Sets').nextSibling).toHaveTextContent('3');
+    expect(within(summary).getByText('Exercises').nextSibling).toHaveTextContent('2');
+    expect(within(summary).getByText('PRs').nextSibling).toHaveTextContent('2');
+    const squat = screen.getByRole('region', { name: 'Squat' });
+    // 105 × 3 has a lower e1RM than 100 × 5, so the e1RM is no record.
+    expect(within(within(squat).getByRole('list', { name: 'Personal records' })).getAllByRole('listitem').map((li) => li.textContent)).toEqual([
+      'PR · Heaviest weight 105 kg',
+      'PR · Most volume 815 kg',
+    ]);
+    // The same dips at a known bodyweight are no record.
+    const dips = screen.getByRole('region', { name: 'Dips' });
+    expect(within(dips).queryByRole('list', { name: 'Personal records' })).not.toBeInTheDocument();
+  });
+
+  test('hide the summary and records when the statistics feature toggle is off', async () => {
+    await setupTwo(false);
+
+    expect(await screen.findByRole('region', { name: 'Squat' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Workout summary' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'Personal records' })).not.toBeInTheDocument();
   });
 });
