@@ -92,6 +92,7 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 
 | Term (interface) | Code name | Meaning | Not allowed |
 |---|---|---|---|
+| Calendar | `CalendarView`, route `/calendar` | Month or week view of ended workouts by day (decision 040). | diary, planner, schedule |
 | Workout history | `workoutHistory`, `listWorkoutHistory()`, route `/history` | The list of ended workouts, newest first. Each opens its workout detail page. | log, sessions, feed, history view (that is one exercise) |
 | History view | — | A plain list of every set of one exercise, newest workout first. | log, timeline, feed |
 | Chart view | — | A chart of weight, reps, duration or distance over time. | graph, stats, analytics |

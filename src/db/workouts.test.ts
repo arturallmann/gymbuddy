@@ -481,7 +481,7 @@ describe('workout history', () => {
     return { db, userId, ids };
   }
 
-  test('list ended workouts newest first, with exercise names in order and the number of sets', async () => {
+  test('list ended workouts newest first, with exercises in order, their category and the number of sets', async () => {
     const { db, userId, ids } = await withExercises();
     const older = await startWorkout(db, userId, new Date('2026-10-01T10:00:00Z'));
     const row = await addWorkoutExercise(db, older.id, ids['Row']);
@@ -502,6 +502,10 @@ describe('workout history', () => {
         endedAt: new Date('2026-10-20T10:45:00Z'),
         exerciseNames: ['Squat', 'Row'],
         setCount: 2,
+        exercises: [
+          { name: 'Squat', category: 'strength', sets: 2 },
+          { name: 'Row', category: 'strength', sets: 0 },
+        ],
       },
       {
         id: older.id,
@@ -509,6 +513,7 @@ describe('workout history', () => {
         endedAt: new Date('2026-10-01T11:00:00Z'),
         exerciseNames: ['Row'],
         setCount: 1,
+        exercises: [{ name: 'Row', category: 'strength', sets: 1 }],
       },
     ]);
   });

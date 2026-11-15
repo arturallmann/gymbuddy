@@ -109,12 +109,11 @@ Most visual and UX overhauls happen here.
 - [x] **4b.8** Clean home page (decision 035): app name top left; a book icon with workout history, exercises,
   routines and saved supersets, and a gear icon for settings, top right; today's workouts under "Start workout".
   Trash icons instead of "Remove"; category and "Custom only" filters in the exercise browser.
-- [ ] **4b.9** Calendar view of past workouts, like FitNotes.
+- [x] **4b.9** Calendar view of past workouts, like FitNotes (idea B, plate bars, decision 040).
   - Month view and week view, with a switch between them. Arrows (and a swipe) go to the previous or
     next month or week; a "Today" button jumps back. Weeks start on the phone's first day of the week.
   - Today is marked in both views, also on days without a workout.
-  - A day with a workout shows a small mark in its cell (the design is still open, see the calendar ideas
-    page: dots, category bars or a shade by number of sets).
+  - A day with a workout shows small bars in the plate colors of its categories (idea B).
   - Tapping a day with a workout expands it: its workouts with time, duration, exercises and number of
     sets, each opening its workout detail page. Tapping again, or Android Back, closes it.
   - Reachable from the home page menu. Uses `listWorkoutHistory()` with a time span per month or week.

@@ -331,6 +331,23 @@ A removed photo is a deleted row (`deletedAt`); its file stays. The unique index
 (exercise, position) now ignores deleted rows, so a new photo can take a freed position.
 The photo section follows the `exerciseImages` feature toggle.
 
+## 040 — Calendar with plate bars (idea B)
+Date: 2026-11-15
+The calendar (4b.9, route `/calendar`, in the home page menu) follows idea B of the calendar ideas page:
+- Month view: a grid of whole weeks. A day with ended workouts shows small bars in the plate colors of their
+  categories (strength petrol, cardio yellow, stretch green, mobility grey; one grey bar when the workouts
+  have no exercises). Tapping such a day opens a panel under the grid with its workouts.
+- Week view: a list of the seven days with bars and exercise names, or "Rest day" for a past day without a
+  workout. Tapping a day opens its workouts in place.
+- Today sits on a yellow disc in both views. Arrows, a sideways swipe and "Today" (shown when today is not on
+  screen) change the month or week. Weeks start on the phone's first day of the week (`Intl.Locale` week info,
+  Monday when unknown).
+- Each workout opens its workout detail page. The place (view, shown day, open day) lives in the address,
+  and the detail page gets it as `back`, so its back arrow and Android Back return to the same place.
+The calendar loads only the shown days (`listWorkoutHistory()` with a time span), which now also returns each
+workout exercise with its category and number of sets. The dots and the shade by sets (ideas A and C) were
+not chosen.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

@@ -6,6 +6,7 @@ import {
   workoutExercises,
   workoutGroups,
   workouts,
+  type Category,
   type Exercise,
   type Phase,
   type Workout,
@@ -339,6 +340,8 @@ export async function getLastSets(db: AppDatabase, exerciseId: string, workoutId
 export type WorkoutHistoryItem = Pick<Workout, 'id' | 'startedAt' | 'endedAt'> & {
   exerciseNames: string[];
   setCount: number;
+  // The workout exercises in order, with their category and number of sets (for the calendar).
+  exercises: { name: string; category: Category; sets: number }[];
 };
 
 // Ended workouts of the user, newest first, with their exercise names and number of sets.
@@ -367,23 +370,34 @@ export async function listWorkoutHistory(
   }
   const ids = ended.map((workout) => workout.id);
   const names = await db
-    .select({ workoutId: workoutExercises.workoutId, name: exercises.name })
+    .select({
+      id: workoutExercises.id,
+      workoutId: workoutExercises.workoutId,
+      name: exercises.name,
+      category: exercises.category,
+    })
     .from(workoutExercises)
     .innerJoin(exercises, eq(exercises.id, workoutExercises.exerciseId))
     .where(and(inArray(workoutExercises.workoutId, ids), isNull(workoutExercises.deletedAt)))
     .orderBy(asc(workoutExercises.position));
   const counts = await db
-    .select({ workoutId: workoutExercises.workoutId, sets: count(sets.id).as('setCount') })
+    .select({ workoutExerciseId: sets.workoutExerciseId, sets: count(sets.id).as('setCount') })
     .from(sets)
     .innerJoin(workoutExercises, eq(workoutExercises.id, sets.workoutExerciseId))
     .where(and(inArray(workoutExercises.workoutId, ids), isNull(workoutExercises.deletedAt), isNull(sets.deletedAt)))
-    .groupBy(workoutExercises.workoutId);
-  const setCounts = new Map(counts.map((row) => [row.workoutId, row.sets]));
-  return ended.map((workout) => ({
-    ...workout,
-    exerciseNames: names.filter((row) => row.workoutId === workout.id).map((row) => row.name),
-    setCount: setCounts.get(workout.id) ?? 0,
-  }));
+    .groupBy(sets.workoutExerciseId);
+  const setCounts = new Map(counts.map((row) => [row.workoutExerciseId, row.sets]));
+  return ended.map((workout) => {
+    const items = names
+      .filter((row) => row.workoutId === workout.id)
+      .map((row) => ({ name: row.name, category: row.category, sets: setCounts.get(row.id) ?? 0 }));
+    return {
+      ...workout,
+      exerciseNames: items.map((item) => item.name),
+      setCount: items.reduce((sum, item) => sum + item.sets, 0),
+      exercises: items,
+    };
+  });
 }
 
 // One workout, or null when it does not exist or was deleted.
