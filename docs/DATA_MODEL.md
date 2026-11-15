@@ -8,11 +8,11 @@ The source of truth is `src/db/schema.ts`. This file explains the meaning behind
 |---|---|
 | users | One local user per phone. Later linked to an online account. |
 | user_settings | Units, theme, feature toggles, preset and first-time setup state. One row per user. |
-| app_state | Values the app keeps for itself, one row per key (`libraryVersion`). Not user data. |
+| app_state | Values the app keeps for itself, one row per key (`libraryVersion`, `onlineLibraryCommit`, `libraryCheckedAt`). Not user data. |
 | muscle_groups | Muscle areas such as back, biceps, hamstrings. |
 | exercises | Library exercises (`userId` is null) and custom exercises (`userId` set). |
 | exercise_muscle_groups | Links exercises to muscle groups, with role `primary` or `secondary`. |
-| exercise_images | Images for an exercise, with order, license and attribution. |
+| exercise_images | Images for an exercise, with order, license and attribution. `storedFile` points to a file in the app's storage (downloaded library image or photo); NULL = bundled image. |
 | exercise_preferences | The user's own settings for one exercise: standing notes and unit overrides. |
 | templates | A saved superset or routine. |
 | template_exercises | Exercises in a template, with order, superset key and optional targets. |
@@ -207,9 +207,19 @@ the commit in `data/free-exercise-db/version.json` or `SEED_VERSION` in `src/db/
 Raise `SEED_VERSION` when `toLibraryExercise()` maps exercises differently.
 Exercises that free-exercise-db removes stay on the phone, because workouts and exercise preferences use them.
 
+### Online library update (decision 038)
+
+When online, at most once a day, the app checks free-exercise-db for a newer commit, downloads and checks
+its library file and the images it does not bundle or that changed, then seeds the library in one
+transaction. Downloaded images live in the app's data folder; `exercise_images.storedFile` points to them.
+`app_state.onlineLibraryCommit` is the applied commit; a new bundled library clears it.
+
 ### Custom exercises
 
 A custom exercise has `source = 'custom'`, `userId` set and `sourceId` NULL.
 The user chooses name, category, equipment, load type, tracked fields and muscle groups.
 Only custom exercises can change; library exercises change only through library updates.
 Deleting a custom exercise writes `deletedAt`: search no longer finds it, but workouts that used it still show it.
+A custom exercise can have photos (decision 039): rows in `exercise_images` with `storedFile` set to a JPEG
+in the app's data folder (`exercise-photos/<uuid>.jpg`). Removing a photo writes `deletedAt`; the file stays.
+The first photo that is not deleted shows in exercise lists.

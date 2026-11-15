@@ -298,6 +298,39 @@ such as "12 workouts". `listExerciseUse()` counts active and ended workouts, wit
 The search on the "Add exercise" page no longer stops at 50 matches, so a done exercise is never cut off.
 Favourites and a curated list of common exercises were left for later; history alone covers the regular case.
 
+## 038 — Online library update: newer free-exercise-db library and images
+Date: 2026-11-15
+Until now a new library reached phones only with an app update (decision 018) (4b.4). New images mostly
+belong to new or changed exercises, so the online update brings the whole library, not only images.
+When the phone is online, 5 seconds after the start and at most once a day (`app_state.libraryCheckedAt`),
+`LibraryUpdater` asks GitHub for the newest free-exercise-db commit. When it differs from the commit on the
+phone (`app_state.onlineLibraryCommit`, otherwise the bundled one), the app:
+1. downloads `dist/exercises.json` of that commit and checks it (`parseLibrary()`: the bundled shape, at least
+   100 exercises, unique ids, image paths only like `Name_Of-Exercise/0.jpg`, so no file lands outside its folder);
+2. downloads the images the app does not bundle, plus the ones GitHub lists as changed since the bundled
+   commit, into the app's data folder (`library-images/…`);
+3. only then updates the library in one transaction, with `exercise_images.storedFile` pointing to the
+   downloaded files; all other images stay the bundled copies.
+Any failure leaves the library as it was. Logging never waits: the update runs in the background and only
+writes a console warning. A new bundled library (app update) replaces an online one and clears
+`onlineLibraryCommit`, so the next check applies the online one again if it is still newer.
+It uses no new dependency: `fetch` and the Filesystem plugin (`src/native/libraryDownload.ts`).
+The app contacts api.github.com and raw.githubusercontent.com; nothing about the user is sent.
+
+## 039 — Photos of custom exercises
+Date: 2026-11-15
+A custom exercise can have any number of photos (4b.5): "Take photo" (camera) or "Choose photo" (the phone's
+photos) on its exercise page, and remove after a confirm step. The first photo shows in exercise lists.
+Library exercises keep their library images.
+The Camera plugin (`@capacitor/camera`, MIT, from the Capacitor team) takes or picks the photo; it needs no
+Android permission. The app makes every photo smaller (at most 1080 px, JPEG) and writes it as a file to its
+data folder (`exercise-photos/<uuid>.jpg`); `exercise_images` keeps a row with the file in `storedFile`.
+Storing photos inside the database was rejected: it grows by about 200 KB per photo. A future backup or sync
+must copy these files too.
+A removed photo is a deleted row (`deletedAt`); its file stays. The unique index on `exercise_images`
+(exercise, position) now ignores deleted rows, so a new photo can take a freed position.
+The photo section follows the `exerciseImages` feature toggle.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

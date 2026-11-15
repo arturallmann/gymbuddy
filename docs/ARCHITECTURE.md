@@ -18,8 +18,20 @@ SQLite database file on the phone
 
 Native features (file save, share menu, timers in the background) go through Capacitor plugins.
 Wrap each plugin in a small module in `src/native/`, so the interface never calls plugins directly:
-`files.ts` (Filesystem), `share.ts` (Share), `alert.ts` (Haptics, plus a tone for the stretch timer) and
-`app.ts` (App: the Android Back button).
+`files.ts` (Filesystem), `share.ts` (Share), `alert.ts` (Haptics, plus a tone for the stretch timer),
+`app.ts` (App: the Android Back button), `storedImages.ts` (Filesystem: images in the app's storage),
+`photos.ts` (Camera: photos of custom exercises) and `libraryDownload.ts` (fetch: the online library update).
+
+## Images
+
+`ExerciseImage` shows every exercise image: the copy bundled under `public/exercise-images/`, or, when
+`exercise_images.storedFile` is set, a file in the app's data folder (a downloaded library image or a photo).
+
+## Online library update (decision 038)
+
+`LibraryUpdater` (root layout) runs `updateLibraryOnline()` from `src/db/libraryUpdate.ts` in the background:
+check the newest commit → download and check `exercises.json` (`src/lib/libraryUpdate.ts`) → download new
+and changed images → `seedLibrary()` with the stored files in one transaction.
 
 ## Android Back (decision 034)
 
@@ -50,7 +62,8 @@ src/
     exercises.ts  Queries for exercises, muscle groups and images, and custom exercises
     preferences.ts  Queries for exercise preferences (notes and unit override)
     export.ts     Queries that build export rows
-    progress.ts   The one history query for the history view and the chart view
+    progress.ts   The one history query for the history view and the chart view, and exercise use
+    libraryUpdate.ts  The online library update (decision 038)
   hooks/          React hooks, such as useSettings(), useFeatures() and useActiveWorkout()
   lib/            Pure helpers (unit conversion, formatting, CSV building)
   testing/        Test helpers: test database, render with providers, fake plugin

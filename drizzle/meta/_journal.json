@@ -43,6 +43,13 @@
       "when": 1794691661074,
       "tag": "0005_blue_zaran",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1794747381481,
+      "tag": "0006_old_viper",
+      "breakpoints": true
     }
   ]
 }

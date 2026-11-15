@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -8,12 +7,14 @@ import { useDatabase } from '@/db/DatabaseContext';
 import { deleteCustomExercise, getExerciseDetail, type ExerciseDetail } from '@/db/exercises';
 import { useExercisePreferences } from '@/hooks/useExercisePreferences';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
-import { CATEGORY_LABELS, equipmentLabel, exerciseImageUrl, instructionSteps } from '@/lib/exercises';
+import { CATEGORY_LABELS, equipmentLabel, instructionSteps } from '@/lib/exercises';
 import { getUnits } from '@/lib/units';
 import ConfirmAction from './ConfirmAction';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
 import ExerciseProgress from './ExerciseProgress';
 import BackLink from './BackLink';
+import ExerciseImage from './ExerciseImage';
+import ExercisePhotos from './ExercisePhotos';
 
 // One exercise: images, category, equipment, muscle groups, description and instructions.
 // The exercise id comes from the address: /exercises/detail?id=…
@@ -36,6 +37,11 @@ export default function ExerciseDetailView() {
       current = false;
     };
   }, [db, userId, id]);
+
+  // After a photo was added or deleted.
+  const reload = async () => {
+    if (id) setDetail(await getExerciseDetail(db, userId, id));
+  };
 
   if (detail === undefined) {
     return null;
@@ -61,12 +67,16 @@ export default function ExerciseDetailView() {
               {exercise.equipment && ` · ${equipmentLabel(exercise.equipment)}`}
             </p>
           </div>
-          {features.exerciseImages && detail.images.length > 0 && (
+          {features.exerciseImages && exercise.source === 'custom' && (
+            <ExercisePhotos exerciseId={exercise.id} name={exercise.name} images={detail.images} onChange={reload} />
+          )}
+          {features.exerciseImages && exercise.source !== 'custom' && detail.images.length > 0 && (
             <div className="grid grid-cols-2 gap-2">
-              {detail.images.map((path, index) => (
-                <Image
-                  key={path}
-                  src={exerciseImageUrl(path)}
+              {detail.images.map((image, index) => (
+                <ExerciseImage
+                  key={image.id}
+                  path={image.path}
+                  storedFile={image.storedFile}
                   alt={`${exercise.name}, image ${index + 1}`}
                   width={400}
                   height={300}

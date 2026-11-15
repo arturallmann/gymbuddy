@@ -36,6 +36,7 @@ describe('ExerciseDetailView', () => {
     expect(screen.getByText('Strength · Barbell')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Barbell Curl, image 1' })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Barbell Curl, image 2' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Photos' })).not.toBeInTheDocument();
     expect(screen.getByText('Primary muscle groups:').parentElement).toHaveTextContent('Biceps');
     expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
       'Stand up straight.',
@@ -90,5 +91,28 @@ describe('ExerciseDetailView', () => {
     await renderWithDatabase(<ExerciseDetailView />);
 
     expect(await screen.findByText('This exercise does not exist.')).toBeInTheDocument();
+  });
+
+  test('show Photos with take and choose for a custom exercise, but not for a library exercise', async () => {
+    const { db } = await createTestDatabase();
+    const { userId } = await getLocalSettings(db);
+    const id = await createCustomExercise(db, userId, { ...EMPTY_CUSTOM_EXERCISE, name: 'Cable Thing' });
+    navigation.params = new URLSearchParams({ id });
+    await renderWithDatabase(<ExerciseDetailView />, { db });
+
+    expect(await screen.findByRole('region', { name: 'Photos' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Take photo' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Choose photo' })).toBeInTheDocument();
+  });
+
+  test('hide Photos when exercise images are off', async () => {
+    const { db } = await createTestDatabase();
+    const { userId } = await getLocalSettings(db);
+    const id = await createCustomExercise(db, userId, { ...EMPTY_CUSTOM_EXERCISE, name: 'Cable Thing' });
+    navigation.params = new URLSearchParams({ id });
+    await renderWithDatabase(<ExerciseDetailView />, { db, settings: { features: { exerciseImages: false } } });
+
+    expect(await screen.findByRole('heading', { name: 'Cable Thing' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Photos' })).not.toBeInTheDocument();
   });
 });

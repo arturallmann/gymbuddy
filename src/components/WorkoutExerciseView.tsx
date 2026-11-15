@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -16,13 +15,14 @@ import {
 } from '@/db/workouts';
 import { useExercisePreferences } from '@/hooks/useExercisePreferences';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
-import { exerciseImageUrl, shortDescription } from '@/lib/exercises';
+import { shortDescription } from '@/lib/exercises';
 import { PHASE_LABELS, defaultPhase } from '@/lib/phases';
 import type { SetValues } from '@/lib/sets';
 import { getUnits } from '@/lib/units';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
 import SetLog, { type SetLogItem } from './SetLog';
 import BackLink from './BackLink';
+import ExerciseImage from './ExerciseImage';
 
 type Loaded = {
   // `id` is null for an exercise that is not in the workout yet.
@@ -122,8 +122,9 @@ export default function WorkoutExerciseView() {
           {detail && (
             <section aria-label="About the exercise" className="flex items-start gap-3">
               {features.exerciseImages && image && (
-                <Image
-                  src={exerciseImageUrl(image)}
+                <ExerciseImage
+                  path={image.path}
+                  storedFile={image.storedFile}
                   alt={`${item.name}, image 1`}
                   width={96}
                   height={72}

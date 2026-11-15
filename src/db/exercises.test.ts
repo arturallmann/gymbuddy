@@ -1,7 +1,9 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 import {
+  addExercisePhoto,
   createCustomExercise,
+  deleteExercisePhoto,
   deleteCustomExercise,
   getExerciseDetail,
   listEquipment,
@@ -158,7 +160,10 @@ describe('muscle groups and images', () => {
         { name: 'Biceps', role: 'primary' },
         { name: 'Forearms', role: 'secondary' },
       ],
-      images: ['Barbell_Curl/0.jpg', 'Barbell_Curl/1.jpg'],
+      images: [
+        { id: expect.any(String), path: 'Barbell_Curl/0.jpg', storedFile: null },
+        { id: expect.any(String), path: 'Barbell_Curl/1.jpg', storedFile: null },
+      ],
     });
   });
 
@@ -375,5 +380,84 @@ describe('filters for the Add exercise page', () => {
     await db.insert(users).values({ id: otherUser });
 
     expect(await listPrimaryMuscleGroups(db, otherUser, 'stretch')).toEqual([]);
+  });
+});
+
+describe('photos of custom exercises', () => {
+  async function withCustom() {
+    const { db, userId } = await setup();
+    const id = await createCustomExercise(db, userId, {
+      name: 'Cable Thing',
+      category: 'strength',
+      equipment: 'cable',
+      loadType: 'external',
+      tracksReps: true,
+      tracksDuration: false,
+      tracksDistance: false,
+      primaryMuscleGroupIds: [],
+      secondaryMuscleGroupIds: [],
+    });
+    return { db, userId, id };
+  }
+
+  test('add photos in order and show the first one in lists', async () => {
+    const { db, userId, id } = await withCustom();
+
+    await addExercisePhoto(db, userId, id, 'exercise-photos/a.jpg');
+    await addExercisePhoto(db, userId, id, 'exercise-photos/b.jpg');
+
+    const detail = await getExerciseDetail(db, userId, id);
+    expect(detail?.images.map((image) => [image.path, image.storedFile])).toEqual([
+      ['exercise-photos/a.jpg', 'exercise-photos/a.jpg'],
+      ['exercise-photos/b.jpg', 'exercise-photos/b.jpg'],
+    ]);
+    const [found] = await searchExercises(db, userId, 'Cable Thing');
+    expect(found.imageStoredFile).toBe('exercise-photos/a.jpg');
+  });
+
+  test('delete a photo; the next one becomes the first, and a new photo goes last', async () => {
+    const { db, userId, id } = await withCustom();
+    const first = await addExercisePhoto(db, userId, id, 'exercise-photos/a.jpg');
+    await addExercisePhoto(db, userId, id, 'exercise-photos/b.jpg');
+
+    await deleteExercisePhoto(db, userId, first!);
+    await addExercisePhoto(db, userId, id, 'exercise-photos/c.jpg');
+
+    const detail = await getExerciseDetail(db, userId, id);
+    expect(detail?.images.map((image) => image.storedFile)).toEqual(['exercise-photos/b.jpg', 'exercise-photos/c.jpg']);
+    const [found] = await searchExercises(db, userId, 'Cable Thing');
+    expect(found.imageStoredFile).toBe('exercise-photos/b.jpg');
+    const [row] = await db.select().from(exerciseImages).where(eq(exerciseImages.id, first!));
+    expect(row.deletedAt).not.toBeNull();
+  });
+
+  test('add or delete photos only on the user’s own custom exercises', async () => {
+    const { db, userId, id } = await withCustom();
+    await addTestLibrary(db);
+    const [library] = await searchExercises(db, userId, 'Barbell Curl');
+    const other = crypto.randomUUID();
+    await db.insert(users).values({ id: other });
+
+    expect(await addExercisePhoto(db, userId, library.id, 'exercise-photos/x.jpg')).toBeNull();
+    expect(await addExercisePhoto(db, other, id, 'exercise-photos/x.jpg')).toBeNull();
+    const libraryImage = (await getExerciseDetail(db, userId, library.id))!.images[0];
+    await deleteExercisePhoto(db, userId, libraryImage.id);
+    const photo = await addExercisePhoto(db, userId, id, 'exercise-photos/a.jpg');
+    await deleteExercisePhoto(db, other, photo!);
+
+    expect((await getExerciseDetail(db, userId, library.id))!.images).toHaveLength(2);
+    expect((await getExerciseDetail(db, userId, id))!.images).toHaveLength(1);
+  });
+
+  test('two photos at once get different positions', async () => {
+    const { db, userId, id } = await withCustom();
+
+    await Promise.all([
+      addExercisePhoto(db, userId, id, 'exercise-photos/a.jpg'),
+      addExercisePhoto(db, userId, id, 'exercise-photos/b.jpg'),
+    ]);
+
+    const rows = await db.select().from(exerciseImages).where(eq(exerciseImages.exerciseId, id));
+    expect(rows.map((row) => row.position).sort()).toEqual([1, 2]);
   });
 });

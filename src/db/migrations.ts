@@ -85,5 +85,15 @@ export const migrations: Migration[] = [
     "statements": [
       "ALTER TABLE `user_settings` ADD `theme` text DEFAULT 'system' NOT NULL;"
     ]
+  },
+  {
+    "tag": "0006_old_viper",
+    "when": 1794747381481,
+    "hash": "43ff6737c0c5167ccb07d82f117d2ff44e51aeef8fb963fc6a0614d9b631219d",
+    "statements": [
+      "DROP INDEX `exercise_images_exercise_position_idx`;",
+      "ALTER TABLE `exercise_images` ADD `storedFile` text;",
+      "CREATE UNIQUE INDEX `exercise_images_exercise_position_idx` ON `exercise_images` (`exerciseId`,`position`) WHERE \"deletedAt\" IS NULL;"
+    ]
   }
 ];

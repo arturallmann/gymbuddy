@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import BackButtonListener from '@/components/BackButtonListener'
 import DatabaseProvider from '@/components/DatabaseProvider'
+import LibraryUpdater from '@/components/LibraryUpdater'
 import SettingsProvider from '@/components/SettingsProvider'
 import SetupGate from '@/components/SetupGate'
 
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <BackButtonListener />
         <DatabaseProvider>
+          <LibraryUpdater />
           <SettingsProvider>
             <SetupGate>{children}</SetupGate>
           </SettingsProvider>

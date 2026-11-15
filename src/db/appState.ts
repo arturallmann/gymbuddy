@@ -2,7 +2,10 @@ import { and, eq, isNull, sql } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
 import { appState } from './schema';
 
-export const APP_STATE_KEYS = ['libraryVersion'] as const;
+// libraryVersion: the bundled library seeded last (decision 018). onlineLibraryCommit: the free-exercise-db
+// commit the online library update applied, '' for none. libraryCheckedAt: milliseconds of the last
+// online check (decision 038).
+export const APP_STATE_KEYS = ['libraryVersion', 'onlineLibraryCommit', 'libraryCheckedAt'] as const;
 export type AppStateKey = (typeof APP_STATE_KEYS)[number];
 
 // The stored value, or null when the app has not written it yet.

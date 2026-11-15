@@ -1,7 +1,7 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { ExerciseListItem } from '@/db/exercises';
-import { CATEGORY_LABELS, equipmentLabel, exerciseImageUrl } from '@/lib/exercises';
+import { CATEGORY_LABELS, equipmentLabel } from '@/lib/exercises';
+import ExerciseImage from './ExerciseImage';
 
 type Props = {
   items: ExerciseListItem[];
@@ -25,8 +25,9 @@ export default function ExerciseList({ items, showImages, href = detailHref, not
             {showImages && (
               <span className="block h-12 w-16 shrink-0 overflow-hidden rounded bg-line">
                 {exercise.imagePath && (
-                  <Image
-                    src={exerciseImageUrl(exercise.imagePath)}
+                  <ExerciseImage
+                    path={exercise.imagePath}
+                    storedFile={exercise.imageStoredFile}
                     alt=""
                     width={64}
                     height={48}

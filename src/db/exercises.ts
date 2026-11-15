@@ -1,4 +1,4 @@
-import { and, asc, eq, exists, getTableColumns, isNotNull, isNull, notInArray, or, sql } from 'drizzle-orm';
+import { and, asc, eq, exists, getTableColumns, isNotNull, isNull, max, notInArray, or, sql } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
 import {
   exerciseImages,
@@ -14,8 +14,12 @@ import {
 
 const SEARCH_LIMIT = 50;
 
-// An exercise in a list, with the path of its first image, if any.
-export type ExerciseListItem = Exercise & { imagePath: string | null };
+// An exercise in a list, with its first image, if any: the bundled path and, when the image is
+// in the app's storage, its stored file.
+export type ExerciseListItem = Exercise & { imagePath: string | null; imageStoredFile: string | null };
+
+// An image of an exercise: bundled at `path`, or a stored file in the app's storage.
+export type ExerciseImageItem = { id: string; path: string; storedFile: string | null };
 
 type SearchOptions = {
   // Only exercises that work this muscle group, as primary or secondary muscle group.
@@ -48,14 +52,18 @@ export async function searchExercises(
 ): Promise<ExerciseListItem[]> {
   const text = query.trim();
   return db
-    .select({ ...getTableColumns(exercises), imagePath: exerciseImages.path })
+    .select({ ...getTableColumns(exercises), imagePath: exerciseImages.path, imageStoredFile: exerciseImages.storedFile })
     .from(exercises)
     .leftJoin(
       exerciseImages,
       and(
         eq(exerciseImages.exerciseId, exercises.id),
-        eq(exerciseImages.position, 1),
         isNull(exerciseImages.deletedAt),
+        // The first image that is not deleted, so a deleted first photo hands over to the next one.
+        eq(
+          exerciseImages.position,
+          sql`(select min("first"."position") from "exercise_images" as "first" where "first"."exerciseId" = ${exercises.id} and "first"."deletedAt" is null)`,
+        ),
       ),
     )
     .where(
@@ -127,8 +135,8 @@ export type ExerciseDetail = {
   exercise: Exercise;
   // Primary muscle groups first, then by name.
   muscleGroups: { id: string; name: string; role: MuscleGroupRole }[];
-  // Image paths in order.
-  images: string[];
+  // Images in order.
+  images: ExerciseImageItem[];
 };
 
 // One exercise the user can see, with its muscle groups and images, or null.
@@ -147,11 +155,11 @@ export async function getExerciseDetail(db: AppDatabase, userId: string, id: str
     .where(and(eq(exerciseMuscleGroups.exerciseId, id), isNull(exerciseMuscleGroups.deletedAt)))
     .orderBy(asc(exerciseMuscleGroups.role), asc(muscleGroups.name));
   const images = await db
-    .select({ path: exerciseImages.path })
+    .select({ id: exerciseImages.id, path: exerciseImages.path, storedFile: exerciseImages.storedFile })
     .from(exerciseImages)
     .where(and(eq(exerciseImages.exerciseId, id), isNull(exerciseImages.deletedAt)))
     .orderBy(asc(exerciseImages.position));
-  return { exercise, muscleGroups: groups, images: images.map((image) => image.path) };
+  return { exercise, muscleGroups: groups, images };
 }
 
 // What the user fills in for a custom exercise.
@@ -244,6 +252,43 @@ export async function updateCustomExercise(db: AppDatabase, userId: string, id: 
 // Deletes a custom exercise of the user. Workouts that used it still show it.
 export async function deleteCustomExercise(db: AppDatabase, userId: string, id: string, deletedAt: Date = new Date()) {
   await db.update(exercises).set({ deletedAt }).where(ownCustom(userId, id));
+}
+
+// Adds a photo to the end of the user's custom exercise (decision 039). `storedFile` is the photo's
+// file in the app's storage. One transaction, so two photos at once get different positions.
+// Returns the new image id, or null when the exercise is not the user's custom exercise.
+export async function addExercisePhoto(db: AppDatabase, userId: string, exerciseId: string, storedFile: string): Promise<string | null> {
+  const id = crypto.randomUUID();
+  const added = await db.transaction(async (tx) => {
+    const [own] = await tx.select({ id: exercises.id }).from(exercises).where(ownCustom(userId, exerciseId));
+    if (!own) return false;
+    const [{ last }] = await tx
+      .select({ last: max(exerciseImages.position).as('last') })
+      .from(exerciseImages)
+      .where(and(eq(exerciseImages.exerciseId, exerciseId), isNull(exerciseImages.deletedAt)));
+    await tx.insert(exerciseImages).values({ id, exerciseId, position: (last ?? 0) + 1, path: storedFile, storedFile });
+    return true;
+  });
+  return added ? id : null;
+}
+
+// Deletes a photo of the user's custom exercise. Photos of library exercises cannot be deleted.
+export async function deleteExercisePhoto(db: AppDatabase, userId: string, imageId: string, deletedAt: Date = new Date()) {
+  await db
+    .update(exerciseImages)
+    .set({ deletedAt })
+    .where(
+      and(
+        eq(exerciseImages.id, imageId),
+        isNull(exerciseImages.deletedAt),
+        exists(
+          db
+            .select({ id: exercises.id })
+            .from(exercises)
+            .where(and(eq(exercises.id, exerciseImages.exerciseId), eq(exercises.userId, userId), eq(exercises.source, 'custom'))),
+        ),
+      ),
+    );
 }
 
 // Equipment names in use, sorted, so the form can suggest them.

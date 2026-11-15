@@ -54,6 +54,7 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 | Added weight | `weightGrams` on a bodyweight exercise | Weight on top of bodyweight. Shown as "BW + 5 kg". Negative = assisted. | extra weight, plus weight |
 | Tracked fields | `tracksReps`, `tracksDuration`, `tracksDistance` | Which inputs a set of this exercise has. | format, metrics, measurements, tracking flags |
 | Description | `exercises.description` | Library text about the exercise. Only library updates change it. | notes, about |
+| Photo | `exercise_images` row with `storedFile`, `addExercisePhoto()` | An image of a custom exercise that the user took or chose (decision 039). Library exercises have images, not photos. | picture, pic, image (for the user's own) |
 | Instructions | `exercises.instructions` | Library steps for doing the exercise. | how-to, guide, steps (as a name) |
 
 ## Notes and preferences

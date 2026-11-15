@@ -88,11 +88,11 @@ Most visual and UX overhauls happen here.
 - [x] **4b.3** Make "Remove" for a workout exercise and "Remove" for a set look different,
   so a tap meant for a set never removes the whole workout exercise (for example an icon, or a confirm step).
   Done with a confirm step and two different trash icons (decision 036).
-- [ ] **4b.4** Update exercise images when the phone is online.
+- [x] **4b.4** Update exercise images when the phone is online (with the whole library, decision 038).
   The app ships the images of one free-exercise-db commit (decision 021). When the phone has internet,
   the app checks for a newer library version and downloads only changed or new images.
   Offline, the bundled images stay. Logging never waits for the check.
-- [ ] **4b.5** Images for custom exercises: take a photo or pick one from the phone.
+- [x] **4b.5** Images for custom exercises: take a photo or pick one from the phone (decision 039).
   Needs the Camera plugin, wrapped in `src/native/`, and images stored on the phone.
 - [x] **4b.6** Color schemes and theme support: light, dark and "same as the phone".
   Colors come from a small set of named colors (Tailwind theme or CSS variables), not hard-coded classes,
