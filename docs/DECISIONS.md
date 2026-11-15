@@ -348,6 +348,12 @@ The calendar loads only the shown days (`listWorkoutHistory()` with a time span)
 workout exercise with its category and number of sets. The dots and the shade by sets (ideas A and C) were
 not chosen.
 
+## 041 — Calendar icon on the home page; the calendar opens on the current week
+Date: 2026-11-15
+The calendar gets its own calendar icon at the top right of the home page, left of the book icon, and leaves
+the book menu. Without a place in the address it opens the week view on the current week, the most
+useful view during training; the month view stays one tap away. This changes decision 040.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

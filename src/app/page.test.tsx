@@ -17,6 +17,7 @@ describe('home page', () => {
     expect(screen.getByRole('heading', { name: 'Gymbuddy' })).toBeInTheDocument();
     expect(await screen.findByRole('button', { name: 'Start workout' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings');
+    expect(screen.getByRole('link', { name: 'Calendar' })).toHaveAttribute('href', '/calendar');
     expect(screen.queryByRole('link', { name: 'Exercises' })).not.toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Today' })).not.toBeInTheDocument();
   });
@@ -31,7 +32,6 @@ describe('home page', () => {
     const menu = screen.getByRole('navigation', { name: 'Exercises and routines' });
     expect(within(menu).getAllByRole('link').map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
       ['Workout history', '/history'],
-      ['Calendar', '/calendar'],
       ['Exercises', '/exercises'],
       ['Routines', '/routines'],
       ['Saved supersets', '/saved-supersets'],
@@ -44,7 +44,7 @@ describe('home page', () => {
     await user.click(screen.getByRole('button', { name: 'Exercises and routines' }));
 
     const menu = screen.getByRole('navigation', { name: 'Exercises and routines' });
-    expect(within(menu).getAllByRole('link').map((link) => link.textContent)).toEqual(['Workout history', 'Calendar', 'Exercises']);
+    expect(within(menu).getAllByRole('link').map((link) => link.textContent)).toEqual(['Workout history', 'Exercises']);
   });
 
   test('close the menu with Android Back, a tap outside or a second tap', async () => {
