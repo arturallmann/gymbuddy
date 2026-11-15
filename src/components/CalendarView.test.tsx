@@ -61,6 +61,10 @@ async function setup() {
 const cell = (name: RegExp) => screen.findByRole('gridcell', { name });
 
 describe('month view', () => {
+  beforeEach(() => {
+    navigation.params = new URLSearchParams({ view: 'month' });
+  });
+
   test('mark today and the days with workouts, with a bar per category', async () => {
     await setup();
 
@@ -126,6 +130,14 @@ describe('month view', () => {
 });
 
 describe('week view', () => {
+  test('open on the current week without a place in the address', async () => {
+    await setup();
+
+    expect(screen.getByRole('radio', { name: 'Week' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByText(/^9\s?–\s?15 Nov 2026$/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
+  });
+
   test('list the seven days, with rest days, and open a day in place', async () => {
     const { user } = await setup();
 

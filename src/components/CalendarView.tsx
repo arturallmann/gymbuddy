@@ -48,7 +48,8 @@ export default function CalendarView() {
   const params = useSearchParams();
   const [today] = useState(() => new Date());
   const [firstDay] = useState(() => firstDayOfWeek());
-  const [view, setView] = useState<View>(() => (params.get('view') === 'week' ? 'week' : 'month'));
+  // Without a place in the address the calendar opens on the current week (decision 041).
+  const [view, setView] = useState<View>(() => (params.get('view') === 'month' ? 'month' : 'week'));
   const [date, setDate] = useState<Date>(() => parseDayKey(params.get('date')) ?? today);
   const [open, setOpen] = useState<Date | null>(() => parseDayKey(params.get('day')));
   const [loaded, setLoaded] = useState<{ key: string; byDay: Map<string, WorkoutHistoryItem[]> } | null>(null);

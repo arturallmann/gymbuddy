@@ -116,16 +116,31 @@ Most visual and UX overhauls happen here.
   - A day with a workout shows small bars in the plate colors of its categories (idea B).
   - Tapping a day with a workout expands it: its workouts with time, duration, exercises and number of
     sets, each opening its workout detail page. Tapping again, or Android Back, closes it.
-  - Reachable from the home page menu. Uses `listWorkoutHistory()` with a time span per month or week.
+  - A calendar icon on the home page opens it, on the current week (decision 041). Uses
+    `listWorkoutHistory()` with a time span per month or week.
   Done when: on a phone, a past workout is two taps away from the calendar, and both views work offline.
-- [ ] **4b.10** Muscle map: a front and back drawing of the body with one area per muscle group. After a workout,
-  and on a workout detail page, each area is colored by the volume its muscle group got in that workout
-  (primary muscle group counts fully, secondary for example half), with a small legend.
-  The drawing is our own SVG (one path per muscle group, matching the library's muscle groups), not
-  copied from another app. Bodyweight and duration-only sets need a rule first (for example count sets
-  instead of volume); decide it in a decision entry.
-- [x] **4b.11** "Done before" first (decision 037): search results and muscle group lists show the exercises
+- [x] **4b.10** "Done before" first (decision 037): search results and muscle group lists show the exercises
   the user did first, the most frequent first, with how many workouts; all others follow.
+- [ ] **4b.11** Exercise view visual overhaul: the exercise page (library and custom exercises) and the
+  workout exercise page get a clearer layout: images or photos, muscle groups, instructions, notes,
+  progress and the set form, in an order that suits logging at the gym. Start with a preview page of
+  layout ideas, like the color and calendar ideas, and pick one before building.
+- [ ] **4b.12** Advanced statistics for exercises, workouts and muscle groups, from the fixed fields only
+  (decision 010):
+  - Exercise: estimated one-rep max (e1RM) per workout and its highest value, personal records (heaviest weight,
+    most reps at a weight, best e1RM, most volume in one workout, longest duration or distance),
+    total volume over time.
+  - Workout: volume of the workout, number of sets and exercises, volume per muscle group, and the
+    personal records it set.
+  - Muscle group: volume and number of sets per week, and which exercises trained it.
+  Needs a decision first: the e1RM formula (for example Epley), how bodyweight and duration-only sets
+  count, and how a secondary muscle group counts (for example half).
+  Done when: the numbers match a hand count on test data, and each statistic says how it is counted.
+- [ ] **4b.13** Muscle map: a front and back drawing of the body with one area per muscle group. After a workout,
+  and on a workout detail page, each area is colored by the volume its muscle group got in that workout,
+  with a small legend. Uses the muscle group volume and the counting rules from 4b.12.
+  The drawing is our own SVG (one path per muscle group, matching the library's muscle groups), not
+  copied from another app.
 
 ## Phase 5 — Online (later)
 

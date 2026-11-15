@@ -85,7 +85,7 @@ docs/             Project documentation
 
 ## Calendar (decision 040)
 
-`/calendar?view=month|week&date=…&day=…` (`CalendarView`). `src/lib/calendar.ts` builds the weeks, the shown
+`/calendar?view=month|week&date=…&day=…` (`CalendarView`; without a place: the current week). `src/lib/calendar.ts` builds the weeks, the shown
 time span and the address; `listWorkoutHistory()` loads the workouts of that span. A workout opens
 `/history/workout?id=…&back=<calendar address>`.
 
