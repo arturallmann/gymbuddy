@@ -31,6 +31,7 @@ describe('home page', () => {
     const menu = screen.getByRole('navigation', { name: 'Exercises and routines' });
     expect(within(menu).getAllByRole('link').map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
       ['Workout history', '/history'],
+      ['Calendar', '/calendar'],
       ['Exercises', '/exercises'],
       ['Routines', '/routines'],
       ['Saved supersets', '/saved-supersets'],
@@ -43,7 +44,7 @@ describe('home page', () => {
     await user.click(screen.getByRole('button', { name: 'Exercises and routines' }));
 
     const menu = screen.getByRole('navigation', { name: 'Exercises and routines' });
-    expect(within(menu).getAllByRole('link').map((link) => link.textContent)).toEqual(['Workout history', 'Exercises']);
+    expect(within(menu).getAllByRole('link').map((link) => link.textContent)).toEqual(['Workout history', 'Calendar', 'Exercises']);
   });
 
   test('close the menu with Android Back, a tap outside or a second tap', async () => {

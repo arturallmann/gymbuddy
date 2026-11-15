@@ -20,7 +20,7 @@ beforeEach(() => {
 
 const values = { setType: 'normal' as const, weightGrams: 60000, reps: 8, durationSeconds: null, distanceMeters: null, rpe: null, notes: null };
 
-async function setup() {
+async function setup(back?: string) {
   const { db } = await createTestDatabase();
   const local = await getLocalSettings(db);
   await updateSettings(db, local.id, { features: { rpe: false, setNotes: false } });
@@ -31,7 +31,7 @@ async function setup() {
   await addSet(db, squat, values);
   await addSet(db, squat, { ...values, reps: 6, rpe: 9, notes: 'belt' });
   await endWorkout(db, workout.id, new Date('2026-10-01T10:50:00Z'));
-  navigation.params = new URLSearchParams({ id: workout.id });
+  navigation.params = new URLSearchParams(back ? { id: workout.id, back } : { id: workout.id });
   const rendered = await renderWithDatabase(<WorkoutDetail />, { db });
   return { ...rendered, workout };
 }
@@ -76,5 +76,23 @@ describe('WorkoutDetail', () => {
 
     expect(await screen.findByText('This workout does not exist.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Delete workout' })).not.toBeInTheDocument();
+  });
+
+  test('go back to the workout history, or to the calendar place it was opened from', async () => {
+    await setup();
+    expect(await screen.findByRole('link', { name: 'Back to workout history' })).toHaveAttribute('href', '/history');
+  });
+
+  test('go back to the calendar place it was opened from', async () => {
+    await setup('/calendar?view=week&date=2026-10-01&day=2026-10-01');
+    expect(await screen.findByRole('link', { name: 'Back to calendar' })).toHaveAttribute(
+      'href',
+      '/calendar?view=week&date=2026-10-01&day=2026-10-01',
+    );
+  });
+
+  test('ignore a back address that is not the calendar', async () => {
+    await setup('https://example.com/');
+    expect(await screen.findByRole('link', { name: 'Back to workout history' })).toHaveAttribute('href', '/history');
   });
 });

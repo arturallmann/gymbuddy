@@ -18,3 +18,8 @@ export function dayRange(date: Date): { from: Date; to: Date } {
   const to = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
   return { from, to };
 }
+
+// "18:05" in en-GB, "6:05 PM" in en-US. Without a locale it follows the phone.
+export function formatTime(date: Date, locale?: string): string {
+  return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(date);
+}

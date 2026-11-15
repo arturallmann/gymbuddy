@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { dayRange, formatWorkoutDate } from './dates';
+import { dayRange, formatTime, formatWorkoutDate } from './dates';
 
 // The exact punctuation depends on the ICU version, so check the parts.
 test('show weekday, date and time in the given locale', () => {
@@ -16,4 +16,8 @@ test('give the local day around a moment, from midnight to the next midnight', (
 
 test('cross the end of a month', () => {
   expect(dayRange(new Date(2026, 9, 31, 0, 0)).to).toEqual(new Date(2026, 10, 1));
+});
+
+test('show the time of day', () => {
+  expect(formatTime(new Date(2026, 10, 15, 18, 5), 'en-GB')).toBe('18:05');
 });

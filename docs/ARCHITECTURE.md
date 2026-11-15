@@ -83,6 +83,12 @@ docs/             Project documentation
 `addWorkoutExerciseWithSet()` writes the workout exercise and the set, and the address changes to
 `/workout/exercise?id=…`.
 
+## Calendar (decision 040)
+
+`/calendar?view=month|week&date=…&day=…` (`CalendarView`). `src/lib/calendar.ts` builds the weeks, the shown
+time span and the address; `listWorkoutHistory()` loads the workouts of that span. A workout opens
+`/history/workout?id=…&back=<calendar address>`.
+
 ## Data flow
 
 1. The app starts and `src/db/client.ts` opens the database.

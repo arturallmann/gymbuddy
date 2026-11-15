@@ -16,10 +16,14 @@ type Loaded = { workout: Workout; items: WorkoutExerciseItem[] } | null;
 
 // One past workout with all its workout exercises and sets.
 // The workout id comes from the address: /history/workout?id=…
+// Opened from the calendar, the address also holds `back`, the calendar place to return to.
 export default function WorkoutDetail() {
   const db = useDatabase();
   const router = useRouter();
-  const id = useSearchParams().get('id');
+  const params = useSearchParams();
+  const id = params.get('id');
+  const fromCalendar = params.get('back')?.startsWith('/calendar?') ? params.get('back')! : null;
+  const backHref = fromCalendar ?? '/history';
   const [loaded, setLoaded] = useState<Loaded | undefined>(undefined);
 
   useEffect(() => {
@@ -43,7 +47,7 @@ export default function WorkoutDetail() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <BackLink href="/history" label="Back to workout history" />
+        <BackLink href={backHref} label={fromCalendar ? 'Back to calendar' : 'Back to workout history'} />
       </header>
       {!loaded || !workout ? (
         <p className="text-muted">This workout does not exist.</p>
@@ -71,7 +75,7 @@ export default function WorkoutDetail() {
             keepLabel="Keep workout"
             onConfirm={async () => {
               await deleteWorkout(db, workout.id);
-              router.push('/history');
+              router.push(backHref);
             }}
           />
         </>
