@@ -3,7 +3,7 @@ import type { AppDatabase } from './driver';
 import { userSettings, users, type UserSettings } from './schema';
 
 export type SettingsChange = Partial<
-  Pick<UserSettings, 'weightUnit' | 'distanceUnit' | 'preset' | 'features' | 'setupCompletedAt' | 'theme'>
+  Pick<UserSettings, 'weightUnit' | 'distanceUnit' | 'preset' | 'features' | 'setupCompletedAt' | 'theme' | 'heightMillimeters'>
 >;
 
 // Returns the settings of the one local user. Creates the user and the

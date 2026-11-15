@@ -95,5 +95,15 @@ export const migrations: Migration[] = [
       "ALTER TABLE `exercise_images` ADD `storedFile` text;",
       "CREATE UNIQUE INDEX `exercise_images_exercise_position_idx` ON `exercise_images` (`exerciseId`,`position`) WHERE \"deletedAt\" IS NULL;"
     ]
+  },
+  {
+    "tag": "0007_chubby_colonel_america",
+    "when": 1794757901348,
+    "hash": "31402598efd8892bf9ad8fb620f65e87ea2dd3d561109e8789340e65c00f20c9",
+    "statements": [
+      "CREATE TABLE `bodyweights` (\n\t`id` text PRIMARY KEY NOT NULL,\n\t`userId` text NOT NULL,\n\t`weightGrams` integer NOT NULL,\n\t`measuredAt` integer NOT NULL,\n\t`createdAt` integer NOT NULL,\n\t`updatedAt` integer NOT NULL,\n\t`deletedAt` integer,\n\tFOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action\n);",
+      "CREATE INDEX `bodyweights_user_measured_idx` ON `bodyweights` (`userId`,`measuredAt`);",
+      "ALTER TABLE `user_settings` ADD `heightMillimeters` integer;"
+    ]
   }
 ];

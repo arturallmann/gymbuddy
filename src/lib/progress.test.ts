@@ -32,8 +32,10 @@ const row = (workoutId: string, day: number, values: Partial<WorkoutSet>, workou
 
 describe('chartMetrics', () => {
   test('offer the values the exercise tracks', () => {
-    expect(chartMetrics({ loadType: 'external', tracksReps: true, tracksDuration: false, tracksDistance: false })).toEqual(['weight', 'reps', 'volume']);
+    expect(chartMetrics({ loadType: 'external', tracksReps: true, tracksDuration: false, tracksDistance: false })).toEqual(['weight', 'e1rm', 'reps', 'volume']);
     expect(chartMetrics({ loadType: 'bodyweight', tracksReps: true, tracksDuration: false, tracksDistance: false })).toEqual(['weight', 'reps']);
+    // A bodyweight exercise offers volume once the user has a bodyweight (decision 043).
+    expect(chartMetrics({ loadType: 'bodyweight', tracksReps: true, tracksDuration: false, tracksDistance: false }, true)).toEqual(['weight', 'reps', 'volume']);
     expect(chartMetrics({ loadType: 'none', tracksReps: false, tracksDuration: true, tracksDistance: true })).toEqual(['duration', 'distance']);
   });
 
@@ -63,6 +65,16 @@ describe('workoutValue', () => {
   test('return null when no set has the value', () => {
     expect(workoutValue([set({ reps: 5 })], 'weight')).toBeNull();
   });
+
+  test('take the best e1RM of sets with 1 to 12 reps', () => {
+    expect(workoutValue(sets, 'e1rm')).toBe(Math.round(70000 * (1 + 5 / 30)));
+  });
+
+  test('add the bodyweight to the volume of a bodyweight exercise', () => {
+    const dips = [set({ reps: 10 }), set({ weightGrams: 10000, reps: 5 })];
+    expect(workoutValue(dips, 'volume', { loadType: 'bodyweight', bodyweightGrams: 80000 })).toBe(800000 + 450000);
+    expect(workoutValue(dips, 'volume', { loadType: 'bodyweight', bodyweightGrams: null })).toBeNull();
+  });
 });
 
 describe('chartPoints', () => {
@@ -77,6 +89,19 @@ describe('chartPoints', () => {
     expect(chartPoints(rows, 'weight')).toEqual([
       { workoutId: 'w1', startedAt: new Date(2026, 9, 1), value: 65000 },
       { workoutId: 'w3', startedAt: new Date(2026, 9, 9), value: 70000 },
+    ]);
+  });
+
+  test('use the bodyweight of each workout day for the volume of a bodyweight exercise', () => {
+    const rows = [row('w1', 1, { reps: 10 }), row('w2', 5, { reps: 10 }), row('w3', 9, { reps: 10 })];
+    const bodyweights = [
+      { weightGrams: 80000, measuredAt: new Date(2026, 9, 3) },
+      { weightGrams: 85000, measuredAt: new Date(2026, 9, 8) },
+    ];
+
+    expect(chartPoints(rows, 'volume', 'bodyweight', bodyweights).map((point) => [point.workoutId, point.value])).toEqual([
+      ['w2', 800000],
+      ['w3', 850000],
     ]);
   });
 });

@@ -32,14 +32,17 @@ describe('home page', () => {
     const menu = screen.getByRole('navigation', { name: 'Exercises and routines' });
     expect(within(menu).getAllByRole('link').map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
       ['Workout history', '/history'],
+      ['Statistics', '/statistics'],
       ['Exercises', '/exercises'],
       ['Routines', '/routines'],
       ['Saved supersets', '/saved-supersets'],
     ]);
   });
 
-  test('leave routines and saved supersets out of the menu when their feature toggles are off', async () => {
-    const { user } = await renderWithDatabase(<Home />, { settings: { features: { supersets: true, templates: false } } });
+  test('leave statistics, routines and saved supersets out of the menu when their feature toggles are off', async () => {
+    const { user } = await renderWithDatabase(<Home />, {
+      settings: { features: { supersets: true, templates: false, statistics: false } },
+    });
 
     await user.click(screen.getByRole('button', { name: 'Exercises and routines' }));
 

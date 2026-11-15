@@ -44,7 +44,7 @@ Run `npm run typecheck`, `npm run lint` and `npm test` before you call a task do
 - Never edit files in `drizzle/` (generated migrations) or `src/db/migrations.ts` by hand. Change `src/db/schema.ts` and regenerate.
 - Never delete rows from user tables. Write the current time to `deletedAt` instead. Every query filters out rows with `deletedAt`.
 - New IDs are UUIDs from `crypto.randomUUID()`. Never use auto-increment IDs.
-- Store weight in grams, durations in seconds, distance in meters. Convert only in the interface.
+- Store weight in grams, durations in seconds, distance in meters, height in millimeters. Convert only in the interface.
 - Convert units only through `src/lib/units.ts`. Never show raw grams or meters.
 - Every optional feature checks its feature toggle through `useFeatures()`. A feature toggle hides interface only; it never deletes data.
 - A new optional feature gets a new feature toggle in `FeatureToggles`, `DEFAULT_FEATURES` and the preset table in `docs/DATA_MODEL.md`.

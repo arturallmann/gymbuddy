@@ -7,8 +7,9 @@ import { useFeatures } from '@/hooks/useSettings';
 import BookIcon from './icons/BookIcon';
 
 // The book icon at the top of the home page (decision 035). It opens a menu with the workout
-// history, exercises, routines and saved supersets. Routines need the templates feature toggle;
-// saved supersets need the supersets and templates feature toggles.
+// history, statistics (statistics feature toggle, decision 043), exercises, routines and saved
+// supersets. Routines need the templates feature toggle; saved supersets need the supersets and
+// templates feature toggles.
 export default function HomeMenu() {
   const features = useFeatures();
   const [open, setOpen] = useState(false);
@@ -27,6 +28,7 @@ export default function HomeMenu() {
 
   const links = [
     { href: '/history', label: 'Workout history', shown: true },
+    { href: '/statistics', label: 'Statistics', shown: features.statistics },
     { href: '/exercises', label: 'Exercises', shown: true },
     { href: '/routines', label: 'Routines', shown: features.templates },
     { href: '/saved-supersets', label: 'Saved supersets', shown: features.supersets && features.templates },

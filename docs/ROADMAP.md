@@ -125,13 +125,15 @@ Most visual and UX overhauls happen here.
   workout exercise page get a clearer layout: images or photos, muscle groups, instructions, notes,
   progress and the set form, in an order that suits logging at the gym. Start with a preview page of
   layout ideas, like the color and calendar ideas, and pick one before building.
-- [ ] **4b.12** Advanced statistics for exercises, workouts and muscle groups, from the fixed fields only
-  (decision 010):
+- [x] **4b.12** Advanced statistics for exercises, workouts and muscle groups, from the fixed fields only
+  (decision 010; built as decision 043: personal records and an e1RM chart on the exercise page, a summary and
+  PR badges on the workout detail page, a statistics page with workouts, exercises, muscle groups and
+  bodyweight, and height and bodyweight in the settings):
   - Exercise: estimated one-rep max (e1RM) per workout and its highest value, personal records (heaviest weight,
     most reps at a weight, best e1RM, most volume in one workout, longest duration or distance),
     total volume over time.
   - Workout: volume of the workout, number of sets and exercises, volume per muscle group, and the
-    personal records it set.
+    personal records it reached.
   - Muscle group: volume and number of sets per week, and which exercises trained it.
   Needs a decision first: the e1RM formula (for example Epley), how bodyweight and duration-only sets
   count, and how a secondary muscle group counts (for example half).
