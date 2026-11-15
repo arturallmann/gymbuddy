@@ -43,7 +43,8 @@ export default function ExerciseProgress({ exercise, units }: Props) {
   return (
     <section aria-label="Progress" className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
-        <h2 className="min-w-0 flex-1 text-lg font-semibold">Progress</h2>
+        {/* The Progress tab names this section; the heading stays for screen readers only (decision 042). */}
+        <h2 className="sr-only">Progress</h2>
         {metrics.length > 0 && (
           <div role="group" aria-label="View" className="flex gap-1">
             {(['history', 'chart'] as const).map((option) => (

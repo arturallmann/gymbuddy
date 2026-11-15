@@ -21,8 +21,15 @@ import type { SetValues } from '@/lib/sets';
 import { getUnits } from '@/lib/units';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
 import SetLog, { type SetLogItem } from './SetLog';
+import Tabs, { tabPanelProps } from './Tabs';
 import BackLink from './BackLink';
 import ExerciseImage from './ExerciseImage';
+
+type Tab = 'log' | 'about';
+const TABS: { value: Tab; label: string }[] = [
+  { value: 'log', label: 'Log' },
+  { value: 'about', label: 'About' },
+];
 
 type Loaded = {
   // `id` is null for an exercise that is not in the workout yet.
@@ -31,8 +38,8 @@ type Loaded = {
   detail: ExerciseDetail | null;
 } | null;
 
-// One workout exercise on its own page: what the exercise is, the user's notes and
-// units for it, last time, the set form and the logged sets.
+// One workout exercise on its own page, in two tabs (decision 042): "Log" with the user's note, last
+// time, the set form and the logged sets; "About" with the image, description, notes and units, and phase.
 // The address holds the workout exercise (/workout/exercise?id=…) or, from the "Add exercise"
 // page, an exercise (/workout/exercise?exercise=…). An exercise joins the active workout only
 // when its first set is logged (decision 031); one already in the workout opens as it is.
@@ -46,6 +53,7 @@ export default function WorkoutExerciseView() {
   const exerciseId = params.get('exercise');
   const phasesOn = features.phases;
   const [loaded, setLoaded] = useState<Loaded | undefined>(undefined);
+  const [tab, setTab] = useState<Tab>('log');
   const { preferences, units, save } = useExercisePreferences(loaded?.item.exerciseId ?? null);
 
   useEffect(() => {
@@ -119,67 +127,74 @@ export default function WorkoutExerciseView() {
         <p className="text-muted">This exercise is not in the workout.</p>
       ) : (
         <>
-          {detail && (
-            <section aria-label="About the exercise" className="flex items-start gap-3">
-              {features.exerciseImages && image && (
-                <ExerciseImage
-                  path={image.path}
-                  storedFile={image.storedFile}
-                  alt={`${item.name}, image 1`}
-                  width={96}
-                  height={72}
-                  className="h-[72px] w-24 shrink-0 rounded object-cover"
+          <Tabs label="Exercise" tabs={TABS} value={tab} onChange={setTab} />
+          {tab === 'log' ? (
+            <div {...tabPanelProps('log')} className="flex flex-col gap-4">
+              {preferences?.notes && (
+                <p className="break-words text-sm">
+                  <span className="text-muted">Note: </span>
+                  {preferences.notes}
+                </p>
+              )}
+              {item.id === null && <p className="text-sm text-muted">Log a set to add this exercise to the workout.</p>}
+              {preferences !== undefined && (
+                <SetLog
+                  key={item.id ?? 'new'}
+                  item={item}
+                  workoutId={item.workoutId}
+                  units={units}
+                  onFirstSet={item.id === null ? addWithFirstSet : undefined}
                 />
               )}
-              <div className="min-w-0 flex-1">
-                <p className="break-words text-sm text-muted">{shortDescription(detail.exercise, primary)}</p>
-                <Link href={`/exercises/detail?id=${detail.exercise.id}`} className="text-sm text-link">
-                  Exercise details
-                </Link>
-              </div>
-            </section>
-          )}
-          {preferences?.notes && <p className="break-words rounded-lg border px-3 py-2">{preferences.notes}</p>}
-          {preferences !== undefined && (
-            <details className="rounded-lg border px-3 py-2">
-              <summary className="cursor-pointer text-sm text-muted">
-                Notes and units ({units.weightUnit})
-              </summary>
-              <div className="mt-3">
-                <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
-              </div>
-            </details>
-          )}
-          {features.phases && item.id !== null && (
-            <label className="flex items-center gap-3 text-sm">
-              <span className="shrink-0 text-muted">Phase</span>
-              <select
-                value={item.phase}
-                onChange={async (event) => {
-                  const phase = event.target.value as Phase;
-                  if (item.id === null) return;
-                  await changeWorkoutExercisePhase(db, item.id, phase);
-                  setLoaded((current) => (current ? { ...current, item: { ...current.item, phase } } : current));
-                }}
-                className="min-w-0 flex-1 rounded-lg border px-3 py-2"
-              >
-                {PHASES.map((phase) => (
-                  <option key={phase} value={phase}>
-                    {PHASE_LABELS[phase]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {item.id === null && <p className="text-sm text-muted">Log a set to add this exercise to the workout.</p>}
-          {preferences !== undefined && (
-            <SetLog
-              key={item.id ?? 'new'}
-              item={item}
-              workoutId={item.workoutId}
-              units={units}
-              onFirstSet={item.id === null ? addWithFirstSet : undefined}
-            />
+            </div>
+          ) : (
+            <div {...tabPanelProps('about')} className="flex flex-col gap-4">
+              {detail && (
+                <section aria-label="About the exercise" className="flex flex-col gap-2">
+                  {features.exerciseImages && image && (
+                    <ExerciseImage
+                      path={image.path}
+                      storedFile={image.storedFile}
+                      alt={`${item.name}, image 1`}
+                      width={400}
+                      height={300}
+                      className="aspect-[4/3] h-auto w-full rounded-lg object-cover"
+                    />
+                  )}
+                  <p className="break-words text-sm text-muted">{shortDescription(detail.exercise, primary)}</p>
+                  <Link href={`/exercises/detail?id=${detail.exercise.id}`} className="self-start text-sm text-link">
+                    Exercise details and progress ›
+                  </Link>
+                </section>
+              )}
+              {preferences !== undefined && (
+                <section aria-label="Notes and units" className="flex flex-col gap-2">
+                  <h2 className="text-sm font-semibold uppercase text-muted">Notes and units</h2>
+                  <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
+                </section>
+              )}
+              {features.phases && item.id !== null && (
+                <label className="flex items-center gap-3 text-sm">
+                  <span className="shrink-0 text-muted">Phase</span>
+                  <select
+                    value={item.phase}
+                    onChange={async (event) => {
+                      const phase = event.target.value as Phase;
+                      if (item.id === null) return;
+                      await changeWorkoutExercisePhase(db, item.id, phase);
+                      setLoaded((current) => (current ? { ...current, item: { ...current.item, phase } } : current));
+                    }}
+                    className="min-w-0 flex-1 rounded-lg border px-3 py-2"
+                  >
+                    {PHASES.map((phase) => (
+                      <option key={phase} value={phase}>
+                        {PHASE_LABELS[phase]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+            </div>
           )}
         </>
       )}

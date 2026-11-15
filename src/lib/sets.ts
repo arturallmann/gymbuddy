@@ -172,3 +172,21 @@ export function formatSet(set: SetValues, loadType: Exercise['loadType'], units:
   if (set.setType !== 'normal') parts.push(SET_TYPE_LABELS[set.setType]);
   return parts.join(' · ');
 }
+
+// How far − and + next to the weight input move it (decision 042): one pair of small plates.
+export const WEIGHT_STEP: Record<Units['weightUnit'], number> = { kg: 2.5, lb: 5 };
+
+const plainNumber = (value: number) => String(Math.round(value * 100) / 100);
+
+// The weight input after − (-1) or + (1). Text that is not a number counts as 0. Weight stops at 0,
+// except added weight on a bodyweight exercise, which may go below 0 (assisted).
+export function stepWeightText(text: string, direction: -1 | 1, unit: Units['weightUnit'], allowNegative = false): string {
+  const next = (parseDecimal(text) ?? 0) + direction * WEIGHT_STEP[unit];
+  return plainNumber(allowNegative ? next : Math.max(0, next));
+}
+
+// The reps input after − (-1) or + (1), never below 0.
+export function stepRepsText(text: string, direction: -1 | 1): string {
+  const reps = /^\d+$/.test(text.trim()) ? Number(text.trim()) : 0;
+  return String(Math.max(0, reps + direction));
+}

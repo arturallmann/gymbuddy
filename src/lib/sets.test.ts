@@ -1,6 +1,16 @@
 import { describe, expect, test } from 'vitest';
 import { DEFAULT_FEATURES, type FeatureToggles } from '@/db/schema';
-import { extraFieldsLabel, formatSet, parseSetForm, setFormFields, setFormValues, type SetFormExercise, type SetValues } from './sets';
+import {
+  extraFieldsLabel,
+  formatSet,
+  parseSetForm,
+  setFormFields,
+  setFormValues,
+  stepRepsText,
+  stepWeightText,
+  type SetFormExercise,
+  type SetValues,
+} from './sets';
 import type { Units } from './units';
 
 const kg: Units = { weightUnit: 'kg', distanceUnit: 'metric' };
@@ -178,5 +188,27 @@ describe('extraFieldsLabel', () => {
     expect(extraFieldsLabel({ rpe: false, setType: true, notes: true })).toBe('Set type and notes');
     expect(extraFieldsLabel({ rpe: false, setType: false, notes: true })).toBe('Notes');
     expect(extraFieldsLabel({ rpe: false, setType: false, notes: false })).toBeNull();
+  });
+});
+
+describe('steps for weight and reps', () => {
+  test('move the weight by one pair of small plates, in the unit shown', () => {
+    expect(stepWeightText('100', 1, 'kg')).toBe('102.5');
+    expect(stepWeightText('102,5', -1, 'kg')).toBe('100');
+    expect(stepWeightText('45', 1, 'lb')).toBe('50');
+    expect(stepWeightText('', 1, 'kg')).toBe('2.5');
+  });
+
+  test('stop at 0, except added weight on a bodyweight exercise', () => {
+    expect(stepWeightText('1', -1, 'kg')).toBe('0');
+    expect(stepWeightText('x', -1, 'kg')).toBe('0');
+    expect(stepWeightText('0', -1, 'kg', true)).toBe('-2.5');
+  });
+
+  test('move reps by one, never below 0', () => {
+    expect(stepRepsText('5', 1)).toBe('6');
+    expect(stepRepsText('5', -1)).toBe('4');
+    expect(stepRepsText('', 1)).toBe('1');
+    expect(stepRepsText('0', -1)).toBe('0');
   });
 });

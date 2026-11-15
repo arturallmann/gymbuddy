@@ -121,7 +121,7 @@ Most visual and UX overhauls happen here.
   Done when: on a phone, a past workout is two taps away from the calendar, and both views work offline.
 - [x] **4b.10** "Done before" first (decision 037): search results and muscle group lists show the exercises
   the user did first, the most frequent first, with how many workouts; all others follow.
-- [ ] **4b.11** Exercise view visual overhaul: the exercise page (library and custom exercises) and the
+- [x] **4b.11** Exercise view visual overhaul (tabs, − and + for weight and reps, decision 042): the exercise page (library and custom exercises) and the
   workout exercise page get a clearer layout: images or photos, muscle groups, instructions, notes,
   progress and the set form, in an order that suits logging at the gym. Start with a preview page of
   layout ideas, like the color and calendar ideas, and pick one before building.

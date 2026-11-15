@@ -7,11 +7,14 @@ import {
   extraFieldsLabel,
   parseSetForm,
   setFormFields,
+  stepRepsText,
+  stepWeightText,
   type SetFormExercise,
   type SetFormValues,
   type SetValues,
 } from '@/lib/sets';
 import { DISTANCE_INPUT_UNITS, type DistanceInputUnit, type Units } from '@/lib/units';
+import NumberStepper from './NumberStepper';
 
 type Props = {
   exercise: SetFormExercise;
@@ -37,9 +40,9 @@ function Field({ label, children, hint }: { label: string; children: ReactNode; 
   );
 }
 
-// Inputs for one set. Which inputs show depends on the exercise's load type,
-// its tracked fields and the feature toggles. RPE, set type and notes sit in a
-// section that opens on tap, so the main inputs stay in view.
+// Inputs for one set, one under the other (decision 042). Which inputs show depends on the exercise's
+// load type, its tracked fields and the feature toggles. Weight and reps have − and + next to the input.
+// RPE, set type and notes open on tap, so the main inputs stay in view.
 export default function SetForm({
   exercise,
   units,
@@ -81,29 +84,31 @@ export default function SetForm({
         }
       }}
     >
-      <div className="grid grid-cols-2 gap-3">
+      <div className="flex flex-col gap-3">
         {fields.weight && (
-          <Field
+          <NumberStepper
             label={`${exercise.loadType === 'bodyweight' ? 'Added weight' : 'Weight'} (${units.weightUnit})`}
             hint={exercise.loadType === 'bodyweight' ? 'Empty = bodyweight only. Negative = assisted.' : undefined}
-          >
-            <input
-              inputMode="decimal"
-              value={form.weight}
-              onChange={(event) => change({ weight: event.target.value })}
-              className={inputClass}
-            />
-          </Field>
+            inputMode="decimal"
+            value={form.weight}
+            onChange={(weight) => change({ weight })}
+            onStep={(direction) =>
+              change({ weight: stepWeightText(form.weight, direction, units.weightUnit, exercise.loadType === 'bodyweight') })
+            }
+            lessLabel="Less weight"
+            moreLabel="More weight"
+          />
         )}
         {fields.reps && (
-          <Field label="Reps">
-            <input
-              inputMode="numeric"
-              value={form.reps}
-              onChange={(event) => change({ reps: event.target.value })}
-              className={inputClass}
-            />
-          </Field>
+          <NumberStepper
+            label="Reps"
+            inputMode="numeric"
+            value={form.reps}
+            onChange={(reps) => change({ reps })}
+            onStep={(direction) => change({ reps: stepRepsText(form.reps, direction) })}
+            lessLabel="One rep less"
+            moreLabel="One rep more"
+          />
         )}
         {fields.duration && (
           <Field label="Duration">
@@ -140,13 +145,18 @@ export default function SetForm({
         )}
       </div>
       {extras && (
-        <details
-          open={showExtras}
-          onToggle={(event) => setShowExtras(event.currentTarget.open)}
-          className="rounded-lg border px-3 py-2"
+        <button
+          type="button"
+          aria-expanded={showExtras}
+          onClick={() => setShowExtras(!showExtras)}
+          className="self-start text-sm text-link"
         >
-          <summary className="cursor-pointer text-sm text-muted">{extras}</summary>
-          <div className="mt-3 flex flex-col gap-3">
+          {showExtras ? '−' : '+'} {extras}
+        </button>
+      )}
+      {extras && showExtras && (
+        <div className="flex flex-col gap-3 rounded-lg border border-dashed bg-surface p-3">
+          <div className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3">
               {fields.rpe && (
                 <Field label="RPE">
@@ -180,7 +190,7 @@ export default function SetForm({
               </Field>
             )}
           </div>
-        </details>
+        </div>
       )}
       {error && (
         <p role="alert" className="text-sm text-danger">
