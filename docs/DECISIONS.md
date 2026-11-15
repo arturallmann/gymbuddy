@@ -354,6 +354,23 @@ The calendar gets its own calendar icon at the top right of the home page, left 
 the book menu. Without a place in the address it opens the week view on the current week, the most
 useful view during training; the month view stays one tap away. This changes decision 040.
 
+## 042 — Exercise pages in tabs; weight and reps with − and +
+Date: 2026-11-15
+Most of the time the user only logs weight and reps (4b.11). Of the three layouts on the exercise view ideas
+page, the user chose idea B, tabs, with two changes: weight and reps keep their text input and get − and + next
+to it, and the inputs stand in one column.
+- Workout exercise page: tab "Log" (the user's note, "Log a set to add…", last time, stretch timer, set form,
+  logged sets) and tab "About" (image, short description, link to the exercise page, notes and units, phase).
+  It opens on "Log".
+- Exercise page: tabs "Progress" (chart and history view), "About" (images or photos, muscle groups,
+  description, instructions, edit and delete for a custom exercise) and "Notes" (notes and units). It opens
+  on "Progress".
+- Set form: inputs one under the other. − and + move weight by 2.5 kg or 5 lb and reps by 1 (`stepWeightText`,
+  `stepRepsText`); weight stops at 0 except added weight on a bodyweight exercise (assisted). RPE, set type and
+  notes open with "+ RPE, set type and notes" and start open when an edited set has one of them.
+Tabs keep each part short, so nothing scrolls away during a set. The menu (idea A) and folded rows (idea C)
+were not chosen.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

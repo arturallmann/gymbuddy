@@ -13,10 +13,20 @@ import ConfirmAction from './ConfirmAction';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
 import ExerciseProgress from './ExerciseProgress';
 import BackLink from './BackLink';
+import Tabs, { tabPanelProps } from './Tabs';
 import ExerciseImage from './ExerciseImage';
 import ExercisePhotos from './ExercisePhotos';
 
-// One exercise: images, category, equipment, muscle groups, description and instructions.
+type Tab = 'progress' | 'about' | 'notes';
+const TABS: { value: Tab; label: string }[] = [
+  { value: 'progress', label: 'Progress' },
+  { value: 'about', label: 'About' },
+  { value: 'notes', label: 'Notes' },
+];
+
+// One exercise in three tabs (decision 042): "Progress" (chart and history view), "About" (images or
+// photos, muscle groups, description, instructions, and edit or delete for a custom exercise) and
+// "Notes" (the user's notes and units for it).
 // The exercise id comes from the address: /exercises/detail?id=…
 export default function ExerciseDetailView() {
   const db = useDatabase();
@@ -26,6 +36,7 @@ export default function ExerciseDetailView() {
   const features = useFeatures();
   const id = useSearchParams().get('id');
   const [detail, setDetail] = useState<ExerciseDetail | null | undefined>(undefined);
+  const [tab, setTab] = useState<Tab>('progress');
   const { preferences, units, save } = useExercisePreferences(detail?.exercise.id ?? null);
 
   useEffect(() => {
@@ -67,69 +78,78 @@ export default function ExerciseDetailView() {
               {exercise.equipment && ` · ${equipmentLabel(exercise.equipment)}`}
             </p>
           </div>
-          {features.exerciseImages && exercise.source === 'custom' && (
-            <ExercisePhotos exerciseId={exercise.id} name={exercise.name} images={detail.images} onChange={reload} />
-          )}
-          {features.exerciseImages && exercise.source !== 'custom' && detail.images.length > 0 && (
-            <div className="grid grid-cols-2 gap-2">
-              {detail.images.map((image, index) => (
-                <ExerciseImage
-                  key={image.id}
-                  path={image.path}
-                  storedFile={image.storedFile}
-                  alt={`${exercise.name}, image ${index + 1}`}
-                  width={400}
-                  height={300}
-                  className="h-auto w-full rounded"
-                />
-              ))}
+          <Tabs label="Exercise" tabs={TABS} value={tab} onChange={setTab} />
+          {tab === 'progress' && (
+            <div {...tabPanelProps('progress')} className="flex flex-col gap-4">
+              {preferences !== undefined && <ExerciseProgress exercise={exercise} units={units} />}
             </div>
           )}
-          {primary.length > 0 && (
-            <p>
-              <span className="text-muted">Primary muscle groups: </span>
-              {primary.map((group) => group.name).join(', ')}
-            </p>
+          {tab === 'about' && (
+            <div {...tabPanelProps('about')} className="flex flex-col gap-4">
+              {features.exerciseImages && exercise.source === 'custom' && (
+                <ExercisePhotos exerciseId={exercise.id} name={exercise.name} images={detail.images} onChange={reload} />
+              )}
+              {features.exerciseImages && exercise.source !== 'custom' && detail.images.length > 0 && (
+                <div className="grid grid-cols-2 gap-2">
+                  {detail.images.map((image, index) => (
+                    <ExerciseImage
+                      key={image.id}
+                      path={image.path}
+                      storedFile={image.storedFile}
+                      alt={`${exercise.name}, image ${index + 1}`}
+                      width={400}
+                      height={300}
+                      className="h-auto w-full rounded"
+                    />
+                  ))}
+                </div>
+              )}
+              {primary.length > 0 && (
+                <p>
+                  <span className="text-muted">Primary muscle groups: </span>
+                  {primary.map((group) => group.name).join(', ')}
+                </p>
+              )}
+              {secondary.length > 0 && (
+                <p>
+                  <span className="text-muted">Secondary muscle groups: </span>
+                  {secondary.map((group) => group.name).join(', ')}
+                </p>
+              )}
+              {exercise.description && <p className="break-words">{exercise.description}</p>}
+              {steps.length > 0 && (
+                <section className="flex flex-col gap-2">
+                  <h2 className="text-lg font-semibold">Instructions</h2>
+                  <ol className="flex list-decimal flex-col gap-2 pl-5">
+                    {steps.map((step, index) => (
+                      <li key={index}>{step}</li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+              {exercise.source === 'custom' && (
+                <div className="flex flex-col items-start gap-4">
+                  <Link href={`/exercises/edit?id=${exercise.id}`} className="rounded-lg border bg-surface px-4 py-2 font-semibold">
+                    Edit
+                  </Link>
+                  <ConfirmAction
+                    label="Delete exercise"
+                    question="Delete this exercise? Workouts that used it keep their sets."
+                    confirmLabel="Delete"
+                    keepLabel="Keep exercise"
+                    onConfirm={async () => {
+                      await deleteCustomExercise(db, userId, exercise.id);
+                      router.push('/exercises');
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           )}
-          {secondary.length > 0 && (
-            <p>
-              <span className="text-muted">Secondary muscle groups: </span>
-              {secondary.map((group) => group.name).join(', ')}
-            </p>
-          )}
-          {exercise.description && <p className="break-words">{exercise.description}</p>}
-          {preferences !== undefined && <ExerciseProgress exercise={exercise} units={units} />}
-          {preferences !== undefined && (
-            <section className="flex flex-col gap-2">
-              <h2 className="text-lg font-semibold">Exercise preferences</h2>
+          {tab === 'notes' && preferences !== undefined && (
+            <section {...tabPanelProps('notes')} className="flex flex-col gap-2">
+              <h2 className="text-sm font-semibold uppercase text-muted">Notes and units</h2>
               <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
-            </section>
-          )}
-          {exercise.source === 'custom' && (
-            <div className="flex flex-col items-start gap-4">
-              <Link href={`/exercises/edit?id=${exercise.id}`} className="rounded-lg border bg-surface px-4 py-2 font-semibold">
-                Edit
-              </Link>
-              <ConfirmAction
-                label="Delete exercise"
-                question="Delete this exercise? Workouts that used it keep their sets."
-                confirmLabel="Delete"
-                keepLabel="Keep exercise"
-                onConfirm={async () => {
-                  await deleteCustomExercise(db, userId, exercise.id);
-                  router.push('/exercises');
-                }}
-              />
-            </div>
-          )}
-          {steps.length > 0 && (
-            <section className="flex flex-col gap-2">
-              <h2 className="text-lg font-semibold">Instructions</h2>
-              <ol className="flex list-decimal flex-col gap-2 pl-5">
-                {steps.map((step, index) => (
-                  <li key={index}>{step}</li>
-                ))}
-              </ol>
             </section>
           )}
         </>

@@ -68,14 +68,20 @@ describe('exercise info and preferences', () => {
     return { db, userId: local.userId, library, workout, curlId, pressId };
   }
 
-  test('show the first image, a short description and a link to the exercise page', async () => {
+  test('start on the Log tab, and show image, description and a link to the exercise page on About', async () => {
     const { db, library, curlId } = await setup();
     navigation.params = new URLSearchParams({ id: curlId });
-    await renderWithDatabase(<WorkoutExerciseView />, { db });
+    const { user } = await renderWithDatabase(<WorkoutExerciseView />, { db });
 
+    expect(await screen.findByRole('tab', { name: 'Log' })).toHaveAttribute('aria-selected', 'true');
+    expect(await screen.findByRole('button', { name: 'Log set' })).toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('tab', { name: 'About' }));
     expect(await screen.findByRole('img', { name: 'Barbell Curl, image 1' })).toBeInTheDocument();
     expect(screen.getByText('Strength · Barbell · Biceps')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Exercise details' })).toHaveAttribute(
+    expect(screen.queryByRole('button', { name: 'Log set' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Exercise details and progress/ })).toHaveAttribute(
       'href',
       `/exercises/detail?id=${library.curl}`,
     );
@@ -84,13 +90,14 @@ describe('exercise info and preferences', () => {
   test('hide the image when the exerciseImages toggle is off', async () => {
     const { db, curlId } = await setup({ exerciseImages: false });
     navigation.params = new URLSearchParams({ id: curlId });
-    await renderWithDatabase(<WorkoutExerciseView />, { db });
+    const { user } = await renderWithDatabase(<WorkoutExerciseView />, { db });
 
+    await user.click(await screen.findByRole('tab', { name: 'About' }));
     expect(await screen.findByText('Strength · Barbell · Biceps')).toBeInTheDocument();
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 
-  test('show the standing notes of the exercise', async () => {
+  test('show the standing notes of the exercise on the Log tab', async () => {
     const { db, userId, library, curlId } = await setup();
     await saveExercisePreferences(db, userId, library.curl, { notes: 'Use the EZ bar.' });
     navigation.params = new URLSearchParams({ id: curlId });
@@ -105,9 +112,10 @@ describe('exercise info and preferences', () => {
     const { user, unmount } = await renderWithDatabase(<WorkoutExerciseView />, { db });
 
     expect(await screen.findByRole('textbox', { name: 'Weight (kg)' })).toBeInTheDocument();
-    await user.click(screen.getByText(/Notes and units/));
+    await user.click(screen.getByRole('tab', { name: 'About' }));
     await user.selectOptions(screen.getByRole('combobox', { name: 'Weight unit' }), 'lb');
     await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('tab', { name: 'Log' }));
     expect(await screen.findByRole('textbox', { name: 'Weight (lb)' })).toBeInTheDocument();
     await user.type(screen.getByRole('textbox', { name: 'Weight (lb)' }), '45');
     await user.type(screen.getByRole('textbox', { name: 'Reps' }), '5');
@@ -137,6 +145,7 @@ describe('phase', () => {
   test('move the workout exercise to another phase', async () => {
     const { db, user, workout } = await withItem(true);
 
+    await user.click(await screen.findByRole('tab', { name: 'About' }));
     await user.selectOptions(await screen.findByRole('combobox', { name: 'Phase' }), 'Warm-up phase');
 
     await waitFor(async () => expect((await listWorkoutExercises(db, workout.id))[0].phase).toBe('warmup'));
@@ -144,9 +153,11 @@ describe('phase', () => {
   });
 
   test('hide the phase choice when phases are off', async () => {
-    await withItem(false);
+    const { user } = await withItem(false);
 
     expect(await screen.findByRole('button', { name: 'Log set' })).toBeInTheDocument();
+    await user.click(screen.getByRole('tab', { name: 'About' }));
+    expect(await screen.findByRole('region', { name: 'Notes and units' })).toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: 'Phase' })).not.toBeInTheDocument();
   });
 });

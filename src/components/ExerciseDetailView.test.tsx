@@ -28,12 +28,28 @@ async function setup(name: 'curl' | 'press', exerciseImages = true) {
   return renderWithDatabase(<ExerciseDetailView />, { db, settings: { features: { exerciseImages } } });
 }
 
+const openTab = async (user: { click: (element: Element) => Promise<void> }, name: string) =>
+  user.click(await screen.findByRole('tab', { name }));
+
 describe('ExerciseDetailView', () => {
-  test('show the exercise with images, muscle groups and instructions', async () => {
-    await setup('curl');
+  test('start on Progress, and show notes and units on the Notes tab', async () => {
+    const { user } = await setup('curl');
+
+    expect(await screen.findByRole('tab', { name: 'Progress' })).toHaveAttribute('aria-selected', 'true');
+    expect(await screen.findByText('No sets yet.')).toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+
+    await openTab(user, 'Notes');
+    expect(screen.getByRole('textbox', { name: 'Notes' })).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Weight unit' })).toBeInTheDocument();
+  });
+
+  test('show the exercise with images, muscle groups and instructions on About', async () => {
+    const { user } = await setup('curl');
 
     expect(await screen.findByRole('heading', { name: 'Barbell Curl' })).toBeInTheDocument();
     expect(screen.getByText('Strength · Barbell')).toBeInTheDocument();
+    await openTab(user, 'About');
     expect(screen.getByRole('img', { name: 'Barbell Curl, image 1' })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Barbell Curl, image 2' })).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Photos' })).not.toBeInTheDocument();
@@ -46,7 +62,8 @@ describe('ExerciseDetailView', () => {
   });
 
   test('show secondary muscle groups', async () => {
-    await setup('press');
+    const { user } = await setup('press');
+    await openTab(user, 'About');
 
     expect(await screen.findByText('Secondary muscle groups:')).toBeInTheDocument();
     expect(screen.getByText('Secondary muscle groups:').parentElement).toHaveTextContent('Biceps');
@@ -54,17 +71,19 @@ describe('ExerciseDetailView', () => {
   });
 
   test('hide images when the exerciseImages toggle is off', async () => {
-    await setup('curl', false);
+    const { user } = await setup('curl', false);
 
     expect(await screen.findByRole('heading', { name: 'Barbell Curl' })).toBeInTheDocument();
+    await openTab(user, 'About');
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Instructions' })).toBeInTheDocument();
   });
 
   test('offer no Edit or Delete for a library exercise', async () => {
-    await setup('curl');
+    const { user } = await setup('curl');
 
     await screen.findByRole('heading', { name: 'Barbell Curl' });
+    await openTab(user, 'About');
     expect(screen.queryByRole('link', { name: 'Edit' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Delete exercise' })).not.toBeInTheDocument();
   });
@@ -77,6 +96,7 @@ describe('ExerciseDetailView', () => {
     const { user } = await renderWithDatabase(<ExerciseDetailView />, { db });
 
     expect(await screen.findByText(/Custom exercise · Strength/)).toBeInTheDocument();
+    await openTab(user, 'About');
     expect(screen.getByRole('link', { name: 'Edit' })).toHaveAttribute('href', `/exercises/edit?id=${id}`);
     await user.click(screen.getByRole('button', { name: 'Delete exercise' }));
     await user.click(screen.getByRole('button', { name: 'Delete' }));
@@ -98,8 +118,9 @@ describe('ExerciseDetailView', () => {
     const { userId } = await getLocalSettings(db);
     const id = await createCustomExercise(db, userId, { ...EMPTY_CUSTOM_EXERCISE, name: 'Cable Thing' });
     navigation.params = new URLSearchParams({ id });
-    await renderWithDatabase(<ExerciseDetailView />, { db });
+    const { user } = await renderWithDatabase(<ExerciseDetailView />, { db });
 
+    await openTab(user, 'About');
     expect(await screen.findByRole('region', { name: 'Photos' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Take photo' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Choose photo' })).toBeInTheDocument();
@@ -110,9 +131,10 @@ describe('ExerciseDetailView', () => {
     const { userId } = await getLocalSettings(db);
     const id = await createCustomExercise(db, userId, { ...EMPTY_CUSTOM_EXERCISE, name: 'Cable Thing' });
     navigation.params = new URLSearchParams({ id });
-    await renderWithDatabase(<ExerciseDetailView />, { db, settings: { features: { exerciseImages: false } } });
+    const { user } = await renderWithDatabase(<ExerciseDetailView />, { db, settings: { features: { exerciseImages: false } } });
 
     expect(await screen.findByRole('heading', { name: 'Cable Thing' })).toBeInTheDocument();
+    await openTab(user, 'About');
     expect(screen.queryByRole('region', { name: 'Photos' })).not.toBeInTheDocument();
   });
 });
