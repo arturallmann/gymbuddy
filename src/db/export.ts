@@ -1,9 +1,21 @@
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
-import { exercises, sets, workoutExercises, workouts, type Exercise, type Workout, type WorkoutExercise, type WorkoutSet } from './schema';
+import {
+  exercises,
+  sets,
+  workoutExercises,
+  workoutGroups,
+  workouts,
+  type Exercise,
+  type Workout,
+  type WorkoutExercise,
+  type WorkoutGroup,
+  type WorkoutSet,
+} from './schema';
 
 // One set with its workout and exercise, as the export lists it.
 export type ExportRow = {
+  workoutId: Workout['id'];
   workoutStartedAt: Workout['startedAt'];
   workoutEndedAt: Workout['endedAt'];
   workoutNotes: Workout['notes'];
@@ -12,6 +24,9 @@ export type ExportRow = {
   loadType: Exercise['loadType'];
   phase: WorkoutExercise['phase'];
   workoutExerciseNotes: WorkoutExercise['notes'];
+  // The exercise group of the workout exercise, or null.
+  groupId: WorkoutExercise['groupId'];
+  groupType: WorkoutGroup['groupType'] | null;
   setPosition: WorkoutSet['position'];
   setType: WorkoutSet['setType'];
   weightGrams: WorkoutSet['weightGrams'];
@@ -27,6 +42,7 @@ export type ExportRow = {
 export async function listExportRows(db: AppDatabase, userId: string): Promise<ExportRow[]> {
   return db
     .select({
+      workoutId: workouts.id,
       workoutStartedAt: workouts.startedAt,
       workoutEndedAt: workouts.endedAt,
       workoutNotes: workouts.notes,
@@ -35,6 +51,8 @@ export async function listExportRows(db: AppDatabase, userId: string): Promise<E
       loadType: exercises.loadType,
       phase: workoutExercises.phase,
       workoutExerciseNotes: workoutExercises.notes,
+      groupId: workoutExercises.groupId,
+      groupType: workoutGroups.groupType,
       setPosition: sets.position,
       setType: sets.setType,
       weightGrams: sets.weightGrams,
@@ -48,6 +66,7 @@ export async function listExportRows(db: AppDatabase, userId: string): Promise<E
     .innerJoin(workoutExercises, eq(workoutExercises.id, sets.workoutExerciseId))
     .innerJoin(workouts, eq(workouts.id, workoutExercises.workoutId))
     .innerJoin(exercises, eq(exercises.id, workoutExercises.exerciseId))
+    .leftJoin(workoutGroups, eq(workoutGroups.id, workoutExercises.groupId))
     .where(
       and(
         eq(workouts.userId, userId),

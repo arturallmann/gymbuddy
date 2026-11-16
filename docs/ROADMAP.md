@@ -52,17 +52,17 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **3.4** Import CSV and Excel files in the export format (decision 024).
   Done when: exporting, then importing the file into an empty app, gives the same export again.
 
-## Phase 3b — Supersets and templates (current)
+## Phase 3b — Supersets and templates (done)
 
-- [ ] **3b.1** Group exercises in a workout into a superset ("Make superset" action).
+- [x] **3b.1** Group exercises in a workout into a superset ("Make superset" action). Guided rounds on the group page (decision 025).
   Done when: the superset card shows one row per round and the rest timer starts after the last member.
-- [ ] **3b.2** Save a superset from a workout as a template.
-- [ ] **3b.3** Add a saved superset to a workout in one tap.
+- [x] **3b.2** Save a superset from a workout as a template, with a "Saved supersets" page to rename and delete (decision 026).
+- [x] **3b.3** Add a saved superset to a workout in one tap ("Add saved superset" on the workout page).
   Done when: editing the template afterwards does not change the earlier workout.
-- [ ] **3b.4** Routines: save a full workout as a template and start a workout from it.
-- [ ] **3b.5** Export adds a "Group" column (for example "Superset 1").
+- [x] **3b.4** Routines: save a full workout as a template and start a workout from it (Routines page, decision 027).
+- [x] **3b.5** Export adds a "Group" column (for example "Superset 1"); the import reads it back (decision 028).
 
-## Phase 4 — Progress views
+## Phase 4 — Progress views (current)
 
 - [ ] **4.1** History view per exercise: every set in order, with notes.
 - [ ] **4.2** Chart view per exercise for weight, reps, duration and distance only.
@@ -71,6 +71,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
 ## Phase 4b — Interface polish
 
 Starts when the basic features above work, so the details can be tuned in one go.
+Most visual and UX overhauls happen here.
 
 - [ ] **4b.1** Drag to reorder workout exercises.
   A drag handle on the right of each workout exercise starts a drag right away.
@@ -92,6 +93,11 @@ Starts when the basic features above work, so the details can be tuned in one go
   Offline, the bundled images stay. Logging never waits for the check.
 - [ ] **4b.5** Images for custom exercises: take a photo or pick one from the phone.
   Needs the Camera plugin, wrapped in `src/native/`, and images stored on the phone.
+- [ ] **4b.6** Color schemes and theme support: light, dark and "same as the phone".
+  Colors come from a small set of named colors (Tailwind theme or CSS variables), not hard-coded classes,
+  so cards, borders and plain buttons stay visible in every theme. Today the light theme hides most borders
+  (for example "Add exercise", "Skip rest", "Ungroup" look like plain text).
+  Done when: every page reads well in light and dark on a phone, and the choice lives in settings.
 
 ## Phase 5 — Online (later)
 

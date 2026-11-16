@@ -127,6 +127,12 @@ Library updates never change `exercise_preferences`.
 - Inside a group, `sets.position` is the round number. Round 1 = set 1 of each member.
 - The rest timer starts after the last member of a round. Rest length: `workout_groups.restSeconds`.
 - A user can group exercises during a workout, or add a saved superset template.
+- "Make superset" needs two or more workout exercises of one phase that are not in a group yet
+  (decision 025). They move next to each other; a group moves up or down as one block, and changing
+  the phase of one member changes it for the whole group.
+- "Ungroup" clears `groupId` on the members and deletes the group. A delete that leaves one member
+  does the same.
+- The `supersets` feature toggle hides "Make superset" and "Ungroup"; stored groups still show.
 
 ## Templates
 
@@ -135,7 +141,14 @@ Library updates never change `exercise_preferences`.
   The workout never references template rows after the copy, so template edits never change history.
   `workout_groups.templateId` only records where a group came from.
 - In a routine, rows with the same `groupKey` become one group in the workout.
+- Starting a workout from a routine writes the routine's id to `workouts.templateId` (decision 027).
 - Prefill order for the set form: last workout with this exercise first, then template targets.
+- A saved superset made from a workout (decision 026) has one row per exercise, all with the same
+  `groupKey`, the group's `groupType` and `restSeconds`, and targets from the sets logged in the group.
+- Deleting a template writes `deletedAt` to it and its `template_exercises`. Workouts that used it keep their copies.
+- Template targets reach the set form through the origin of a workout exercise: its group's `templateId`,
+  otherwise its workout's `templateId` (a routine). Only the prefill reads them; the structure of the
+  workout never does.
 
 ## Charts and history
 
