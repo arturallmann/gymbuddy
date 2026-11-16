@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { createCustomExercise } from '@/db/exercises';
@@ -31,7 +31,34 @@ async function setup(name: 'curl' | 'press', exerciseImages = true) {
 const openTab = async (user: { click: (element: Element) => Promise<void> }, name: string) =>
   user.click(await screen.findByRole('tab', { name }));
 
+const swipe = (element: Element, fromX: number, toX: number) => {
+  fireEvent.touchStart(element, { touches: [{ clientX: fromX, clientY: 300 }] });
+  fireEvent.touchEnd(element, { changedTouches: [{ clientX: toX, clientY: 310 }] });
+};
+
 describe('ExerciseDetailView', () => {
+  test('change tabs with a sideways swipe, stopping at the last tab (decision 044)', async () => {
+    await setup('curl');
+    const heading = await screen.findByRole('heading', { name: 'Barbell Curl' });
+
+    swipe(heading, 300, 100);
+    expect(screen.getByRole('tab', { name: 'About' })).toHaveAttribute('aria-selected', 'true');
+    swipe(heading, 300, 100);
+    swipe(heading, 300, 100);
+    expect(screen.getByRole('tab', { name: 'Notes' })).toHaveAttribute('aria-selected', 'true');
+    swipe(heading, 100, 300);
+    expect(screen.getByRole('tab', { name: 'About' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('leave a swipe that starts in a text field to the field', async () => {
+    const { user } = await setup('curl');
+    await openTab(user, 'Notes');
+
+    swipe(await screen.findByRole('textbox', { name: /notes/i }), 100, 300);
+
+    expect(screen.getByRole('tab', { name: 'Notes' })).toHaveAttribute('aria-selected', 'true');
+  });
+
   test('start on Progress, and show notes and units on the Notes tab', async () => {
     const { user } = await setup('curl');
 

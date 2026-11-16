@@ -1,10 +1,11 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState, type TouchEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { listWorkoutHistory, type WorkoutHistoryItem } from '@/db/workouts';
 import { useBackHandler } from '@/hooks/useBackHandler';
+import { useSwipe } from '@/hooks/useSwipe';
 import { useSettings } from '@/hooks/useSettings';
 import {
   calendarHref,
@@ -32,9 +33,6 @@ const VIEW_OPTIONS: { value: View; label: string }[] = [
   { value: 'week', label: 'Week' },
 ];
 
-// A swipe this far sideways, and clearly more sideways than down, changes the month or week.
-const SWIPE_PX = 60;
-
 const dayLabel = (date: Date) => new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' }).format(date);
 
 // The calendar of ended workouts (4b.9, decision 040): a month or week view with arrows, a swipe and a
@@ -53,7 +51,6 @@ export default function CalendarView() {
   const [date, setDate] = useState<Date>(() => parseDayKey(params.get('date')) ?? today);
   const [open, setOpen] = useState<Date | null>(() => parseDayKey(params.get('day')));
   const [loaded, setLoaded] = useState<{ key: string; byDay: Map<string, WorkoutHistoryItem[]> } | null>(null);
-  const touch = useRef<{ x: number; y: number } | null>(null);
 
   const dateKey = dayKey(date);
   const spanKey = `${view}:${dateKey}`;
@@ -85,6 +82,8 @@ export default function CalendarView() {
   const move = (direction: -1 | 1) => go(view, step(view, date, direction), null);
   const toggle = (day: Date) => go(view, date, isSameDay(day, open) ? null : day);
   useBackHandler(open ? () => go(view, date, null) : null);
+  // A sideways swipe changes the month or week.
+  const swipe = useSwipe(move);
 
   const byDay = loaded?.key === spanKey ? loaded.byDay : null;
   const workoutsOn = (day: Date) => byDay?.get(dayKey(day)) ?? [];
@@ -96,16 +95,6 @@ export default function CalendarView() {
     return [dayLabel(day), isSameDay(day, today) ? 'today' : null, count ? `${count} workout${count > 1 ? 's' : ''}` : null]
       .filter(Boolean)
       .join(', ');
-  };
-
-  const onTouchEnd = (event: TouchEvent) => {
-    const start = touch.current;
-    const end = event.changedTouches[0];
-    touch.current = null;
-    if (!start || !end) return;
-    const dx = end.clientX - start.x;
-    const dy = end.clientY - start.y;
-    if (Math.abs(dx) >= SWIPE_PX && Math.abs(dx) > Math.abs(dy) * 1.5) move(dx < 0 ? 1 : -1);
   };
 
   const dayNumber = (day: Date) => (
@@ -249,14 +238,7 @@ export default function CalendarView() {
           ›
         </button>
       </div>
-      <div
-        className="flex flex-col gap-3"
-        onTouchStart={(event) => {
-          const point = event.touches[0];
-          touch.current = point ? { x: point.clientX, y: point.clientY } : null;
-        }}
-        onTouchEnd={onTouchEnd}
-      >
+      <div className="flex flex-col gap-3" {...swipe}>
         {view === 'month' ? monthGrid() : weekList()}
       </div>
     </main>
