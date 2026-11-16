@@ -2,6 +2,15 @@
 
 These ideas may get built later. They are not planned. Do not build them unless `docs/ROADMAP.md` lists them as a task.
 
+## Online features
+
+Moved here from the roadmap (it was Phase 5) after Phase 4b. The app stays fully usable offline (decision 002);
+online features stay optional.
+
+- Backups to a server. Needs sync (see "Future sync" in `docs/ARCHITECTURE.md`); photos of custom exercises
+  are files and must be copied too (decision 039).
+- Friends can view each other's history.
+
 ## Smart watch support
 
 The phone stays the source of truth. The watch acts as a remote control and a sensor.
