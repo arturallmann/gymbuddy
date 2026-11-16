@@ -162,6 +162,15 @@ Use the app at the gym, find what gets in the way, and fix it. Online features m
   Our own drawing, not copied from another app.
   Done when: the logo shows on the phone's home screen, in the app list and on the splash screen, in light
   and dark, and reads well at small sizes.
+- [ ] **5.5** Test builds for friends: a signed release APK from one command. Our own signing key, kept
+  outside git and backed up (a lost key means the app can never be updated); `versionCode` goes up with
+  every build, so a new APK installs over the old one and keeps the data. Document the steps, and how a
+  tester installs the APK. Google Play internal testing can come later.
+  Done when: a friend installs the APK, logs a workout, installs the next build over it and still has the workout.
+- [ ] **5.6** Codebase cleanup: remove unused code, files and dependencies; merge code written twice
+  (graphify helps find it, decision 017); make names follow `docs/GLOSSARY.md`; bring `docs/` in line with
+  the code; update dependencies and fix the security alerts GitHub reports (Dependabot).
+  Done when: the checks pass, the app works on a phone as before, and no docs describe code that is gone.
 
 ## Ideas (not planned)
 
