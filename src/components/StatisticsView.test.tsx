@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { addBodyweight, listBodyweights } from '@/db/bodyweights';
 import { getLocalSettings } from '@/db/settings';
@@ -110,6 +110,16 @@ describe('StatisticsView', () => {
     await user.click(within(list).getAllByRole('button')[1]);
 
     await vi.waitFor(async () => expect((await listBodyweights(db, userId)).map((b) => b.weightGrams)).toEqual([81000]));
+  });
+
+  test('change tabs with a sideways swipe (decision 044)', async () => {
+    await setup();
+    const heading = await screen.findByRole('heading', { name: 'Statistics' });
+
+    fireEvent.touchStart(heading, { touches: [{ clientX: 300, clientY: 100 }] });
+    fireEvent.touchEnd(heading, { changedTouches: [{ clientX: 100, clientY: 100 }] });
+
+    expect(screen.getByRole('tab', { name: 'Exercises' })).toHaveAttribute('aria-selected', 'true');
   });
 
   test('say when the time span has no workouts', async () => {

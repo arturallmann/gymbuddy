@@ -14,6 +14,7 @@ import ExercisePreferencesForm from './ExercisePreferencesForm';
 import ExerciseProgress from './ExerciseProgress';
 import BackLink from './BackLink';
 import Tabs, { tabPanelProps } from './Tabs';
+import { useTabSwipe } from '@/hooks/useTabSwipe';
 import ExerciseImage from './ExerciseImage';
 import ExercisePhotos from './ExercisePhotos';
 
@@ -37,6 +38,7 @@ export default function ExerciseDetailView() {
   const id = useSearchParams().get('id');
   const [detail, setDetail] = useState<ExerciseDetail | null | undefined>(undefined);
   const [tab, setTab] = useState<Tab>('progress');
+  const swipe = useTabSwipe(TABS, tab, setTab);
   const { preferences, units, save } = useExercisePreferences(detail?.exercise.id ?? null);
 
   useEffect(() => {
@@ -62,7 +64,7 @@ export default function ExerciseDetailView() {
   const secondary = detail?.muscleGroups.filter((group) => group.role === 'secondary') ?? [];
   const steps = instructionSteps(exercise?.instructions ?? null);
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
+    <main {...swipe} className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
         <BackLink href="/exercises" label="Back to exercises" />
       </header>

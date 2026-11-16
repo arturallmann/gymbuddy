@@ -25,6 +25,7 @@ import BackLink from './BackLink';
 import BodyweightSection from './BodyweightSection';
 import OptionGroup from './OptionGroup';
 import Tabs, { tabPanelProps } from './Tabs';
+import { useTabSwipe } from '@/hooks/useTabSwipe';
 import WeeklyBars from './WeeklyBars';
 
 type Tab = 'workouts' | 'exercises' | 'muscles' | 'bodyweight';
@@ -47,6 +48,7 @@ export default function StatisticsView() {
   const units = getUnits(settings);
   const { bodyweights } = useBodyweights();
   const [tab, setTab] = useState<Tab>('workouts');
+  const swipe = useTabSwipe(TABS, tab, setTab);
   const [span, setSpan] = useState<StatisticsSpan>('4w');
   const [today] = useState(() => new Date());
   const [firstDay] = useState(() => firstDayOfWeek());
@@ -162,7 +164,7 @@ export default function StatisticsView() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-4 p-6">
+    <main {...swipe} className="mx-auto flex min-h-screen max-w-xl flex-col gap-4 p-6">
       <header className="flex items-center gap-4">
         <BackLink href="/" label="Back" />
         <h1 className="text-2xl font-bold">Statistics</h1>

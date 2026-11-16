@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { saveExercisePreferences } from '@/db/preferences';
 import { exercises } from '@/db/schema';
@@ -85,6 +85,20 @@ describe('exercise info and preferences', () => {
       'href',
       `/exercises/detail?id=${library.curl}`,
     );
+  });
+
+  test('swipe left to About and right back to Log (decision 044)', async () => {
+    const { db, curlId } = await setup();
+    navigation.params = new URLSearchParams({ id: curlId });
+    await renderWithDatabase(<WorkoutExerciseView />, { db });
+    const tab = await screen.findByRole('tab', { name: 'Log' });
+
+    fireEvent.touchStart(tab, { touches: [{ clientX: 300, clientY: 100 }] });
+    fireEvent.touchEnd(tab, { changedTouches: [{ clientX: 100, clientY: 100 }] });
+    expect(screen.getByRole('tab', { name: 'About' })).toHaveAttribute('aria-selected', 'true');
+    fireEvent.touchStart(tab, { touches: [{ clientX: 100, clientY: 100 }] });
+    fireEvent.touchEnd(tab, { changedTouches: [{ clientX: 300, clientY: 100 }] });
+    expect(screen.getByRole('tab', { name: 'Log' })).toHaveAttribute('aria-selected', 'true');
   });
 
   test('hide the image when the exerciseImages toggle is off', async () => {

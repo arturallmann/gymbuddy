@@ -397,6 +397,15 @@ Counting rules:
 Height is stored in whole millimeters (`user_settings.heightMillimeters`), because meters would need decimals;
 it shows in cm or in feet and inches with the distance unit. Nothing uses it yet.
 
+## 044 — Swipe between tabs
+Date: 2026-11-16
+Pages with tabs (exercise page, workout exercise page, statistics page) change tabs with a sideways swipe
+anywhere on the page: left for the next tab, right for the one before; it stops at the first and last tab.
+A swipe counts when it moves at least 60 px sideways and clearly more sideways than down (`src/lib/swipe.ts`),
+the same rule the calendar uses for months and weeks; both use `useSwipe()`. A swipe that starts in a text
+field or in something that scrolls sideways (such as a row of chips) belongs to that element. The tabs
+change at once, without a sliding animation, so the page stays as simple as a tap on a tab.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.
