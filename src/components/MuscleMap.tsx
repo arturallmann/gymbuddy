@@ -1,7 +1,7 @@
 'use client';
 
 import type { KeyboardEvent } from 'react';
-import { BODY_AREAS, BODY_VIEW_BOX, BODY_WIDTH, HEAT_STEPS, heatLevel, muscleGroupLabel, type BodySide } from '@/lib/muscleMap';
+import { BODY_AREAS, BODY_VIEW_BOX, BODY_WIDTH, HEAT_STEPS, TAP_MARGIN, heatLevel, muscleGroupLabel, type BodySide } from '@/lib/muscleMap';
 
 type Props = {
   // The value of each muscle group, by muscle group key, such as sets per week.
@@ -58,11 +58,35 @@ export default function MuscleMap({ values, format, names, selected, onSelect }:
             />
           );
         });
+    // Wider invisible tap areas around small muscle groups, drawn last so they lie on top.
+    const tapAreas = (mirrored: boolean) =>
+      BODY_AREAS[view]
+        .filter((area) => area.muscleGroup && TAP_MARGIN[area.muscleGroup] && (!mirrored || !area.center))
+        .map((area, index) => {
+          const key = area.muscleGroup!;
+          return (
+            <path
+              key={`tap-${index}`}
+              d={area.d}
+              data-tap-area={key}
+              aria-hidden
+              fill="transparent"
+              stroke="transparent"
+              strokeWidth={TAP_MARGIN[key]}
+              strokeLinejoin="round"
+              pointerEvents="all"
+              className="cursor-pointer"
+              onClick={() => onSelect(selected === key ? null : key)}
+            />
+          );
+        });
     return (
       <figure className="flex max-w-32 flex-1 flex-col items-center gap-1">
         <svg viewBox={BODY_VIEW_BOX} role="group" aria-label={`${view === 'front' ? 'Front' : 'Back'} of the body`} className="h-auto w-full">
           <g>{draw(false)}</g>
           <g transform={MIRROR}>{draw(true)}</g>
+          <g>{tapAreas(false)}</g>
+          <g transform={MIRROR}>{tapAreas(true)}</g>
         </svg>
         <figcaption className="text-xs uppercase tracking-wide text-muted">{view === 'front' ? 'Front' : 'Back'}</figcaption>
       </figure>

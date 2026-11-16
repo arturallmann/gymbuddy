@@ -45,3 +45,19 @@ test('choose a muscle group with a tap or Enter, and clear it with a second tap'
   fireEvent.keyDown(triceps, { key: 'Enter' });
   expect(triceps).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('take taps next to small muscle groups too, through a wider invisible tap area', async () => {
+  const user = userEvent.setup();
+  const { container } = render(<Map_ values={values} />);
+  const areas = (key: string) => container.querySelectorAll(`[data-tap-area="${key}"]`);
+
+  // Front and back, each on both sides of the body (the back traps sit on the center line).
+  expect(areas('adductors')).toHaveLength(4);
+  expect(areas('abductors')).toHaveLength(4);
+  expect(areas('traps')).toHaveLength(3);
+  expect(areas('chest')).toHaveLength(0);
+  expect(areas('traps')[0]).toHaveAttribute('stroke-width', '14');
+
+  await user.click(areas('traps')[0]);
+  for (const traps of screen.getAllByRole('button', { name: 'Traps, 0 sets' })) expect(traps).toHaveAttribute('aria-pressed', 'true');
+});
