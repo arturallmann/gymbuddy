@@ -12,6 +12,7 @@ import { CATEGORY_LABELS, equipmentLabel, exerciseImageUrl, instructionSteps } f
 import { getUnits } from '@/lib/units';
 import ConfirmAction from './ConfirmAction';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
+import ExerciseProgress from './ExerciseProgress';
 
 // One exercise: images, category, equipment, muscle groups, description and instructions.
 // The exercise id comes from the address: /exercises/detail?id=…
@@ -23,7 +24,7 @@ export default function ExerciseDetailView() {
   const features = useFeatures();
   const id = useSearchParams().get('id');
   const [detail, setDetail] = useState<ExerciseDetail | null | undefined>(undefined);
-  const { preferences, save } = useExercisePreferences(detail?.exercise.id ?? null);
+  const { preferences, units, save } = useExercisePreferences(detail?.exercise.id ?? null);
 
   useEffect(() => {
     let current = true;
@@ -88,6 +89,7 @@ export default function ExerciseDetailView() {
             </p>
           )}
           {exercise.description && <p className="break-words">{exercise.description}</p>}
+          {preferences !== undefined && <ExerciseProgress exercise={exercise} units={units} />}
           {preferences !== undefined && (
             <section className="flex flex-col gap-2">
               <h2 className="text-lg font-semibold">Exercise preferences</h2>
