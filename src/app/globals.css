@@ -77,4 +77,20 @@
   ::placeholder {
     @apply text-muted;
   }
+  /* Android's tap highlight is a rectangle over the element's box, so rounded buttons lit up at their
+     corners. Buttons and links show their own pressed state instead, which follows the rounded shape. */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* A long press on a button would select its text instead. */
+  button,
+  [role='button'] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  button:not(:disabled):active,
+  a:active,
+  [role='button']:active {
+    filter: brightness(0.85);
+  }
 }
