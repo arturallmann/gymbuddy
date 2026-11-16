@@ -1,11 +1,19 @@
 import { screen, waitFor } from '@testing-library/react';
-import { describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { exercises } from '@/db/schema';
 import { getLocalSettings } from '@/db/settings';
 import { createTestDatabase } from '@/testing/database';
 import { addTestLibrary } from '@/testing/exercises';
 import { renderWithDatabase } from '@/testing/render';
 import ExerciseBrowser from './ExerciseBrowser';
+
+const navigation = vi.hoisted(() => ({ params: new URLSearchParams() }));
+vi.mock('next/navigation', () => ({ useSearchParams: () => navigation.params }));
+
+beforeEach(() => {
+  navigation.params = new URLSearchParams();
+  window.history.replaceState(null, '', '/exercises');
+});
 
 async function setup(exerciseImages = true, withCustomStretch = false) {
   const { db } = await createTestDatabase();
@@ -70,6 +78,29 @@ describe('ExerciseBrowser', () => {
     const link = await screen.findByRole('link', { name: /Barbell Curl/ });
     expect(link.querySelector('img')).toBeNull();
     expect(link).toHaveTextContent('Strength · Barbell');
+  });
+
+  test('keep the filters in the address and give it to each exercise page as back', async () => {
+    const { user } = await setup();
+    await screen.findByText('2 exercises');
+
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Muscle group' }), 'Chest');
+    expect(await screen.findByText('1 exercise')).toBeInTheDocument();
+    const address = `${window.location.pathname}${window.location.search}`;
+    expect(address).toMatch(/^\/exercises\?muscle=/);
+    expect(screen.getByRole('link', { name: /Bench Press/ })).toHaveAttribute(
+      'href',
+      expect.stringMatching(new RegExp(`&back=${encodeURIComponent(address).replace(/[?]/g, '\\?')}$`)),
+    );
+  });
+
+  test('start with the filters from the address', async () => {
+    navigation.params = new URLSearchParams({ q: 'curl', category: 'strength' });
+    await setup();
+
+    expect(await screen.findByText('1 exercise')).toBeInTheDocument();
+    expect(screen.getByRole('searchbox', { name: 'Search exercises' })).toHaveValue('curl');
+    expect(screen.getByRole('radio', { name: 'Strength' })).toBeChecked();
   });
 
   test('filter by category', async () => {

@@ -438,6 +438,18 @@ neck get an invisible band around their shape (`TAP_MARGIN` in `src/lib/muscleMa
 that takes taps too. The bands lie on top of their larger neighbors, which keep most of their area.
 The drawing itself does not change.
 
+## 048 — Back returns to the exercise list it came from
+Date: 2026-11-16
+Back from an exercise opened on a muscle group of the "Add exercise" page went to the workout, so picking
+another exercise of the same muscle group took three taps. Now a workout exercise page opened from a list of
+the "Add exercise" flow (a muscle group or the search) keeps that list in its address (`back`), and its back
+arrow and Android Back return there, also after the first set. Opened from the workout, it still goes to the
+workout. This changes rule 2 of decision 034 only for these pages: Back still matches the arrow.
+The exercise browser (`/exercises`) does the same: its search and filters (muscle group, category, custom only)
+live in the address, and each exercise page gets that address as `back`, so Back returns to the filtered list.
+Only addresses of the "Add exercise" flow and of the exercise browser count as `back`; anything else goes to the
+workout or the exercise browser.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

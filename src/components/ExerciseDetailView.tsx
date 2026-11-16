@@ -12,6 +12,7 @@ import { getUnits } from '@/lib/units';
 import ConfirmAction from './ConfirmAction';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
 import ExerciseProgress from './ExerciseProgress';
+import { exerciseDetailBack } from '@/lib/exerciseBrowser';
 import BackLink from './BackLink';
 import Tabs, { tabPanelProps } from './Tabs';
 import { useTabs } from '@/hooks/useTabs';
@@ -28,14 +29,17 @@ const TABS: { value: Tab; label: string }[] = [
 // One exercise in three tabs (decision 042): "Progress" (chart and history view), "About" (images or
 // photos, muscle groups, description, instructions, and edit or delete for a custom exercise) and
 // "Notes" (the user's notes and units for it).
-// The exercise id comes from the address: /exercises/detail?id=…
+// The exercise id comes from the address: /exercises/detail?id=…&back=… (`back`: the exercise browser
+// with its filters, where the back arrow and Android Back return).
 export default function ExerciseDetailView() {
   const db = useDatabase();
   const router = useRouter();
   const { settings } = useSettings();
   const { userId } = settings;
   const features = useFeatures();
-  const id = useSearchParams().get('id');
+  const params = useSearchParams();
+  const id = params.get('id');
+  const back = exerciseDetailBack(params.get('back'));
   const [detail, setDetail] = useState<ExerciseDetail | null | undefined>(undefined);
   const { tab, changeTab, swipe, slide } = useTabs<Tab>(TABS, 'progress');
   const { preferences, units, save } = useExercisePreferences(detail?.exercise.id ?? null);
@@ -65,7 +69,7 @@ export default function ExerciseDetailView() {
   return (
     <main {...swipe} className="mx-auto flex min-h-screen overflow-x-clip max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <BackLink href="/exercises" label="Back to exercises" />
+        <BackLink href={back} label="Back to exercises" />
       </header>
       {!detail || !exercise ? (
         <p className="text-muted">This exercise does not exist.</p>

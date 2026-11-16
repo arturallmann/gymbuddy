@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import ExerciseBrowser from '@/components/ExerciseBrowser';
 import BackLink from '@/components/BackLink';
 
@@ -8,7 +9,10 @@ export default function ExercisesPage() {
         <BackLink href="/" label="Back" />
         <h1 className="text-2xl font-bold">Exercises</h1>
       </header>
-      <ExerciseBrowser />
+      {/* The filters are in the address, which a static export only knows in the browser. */}
+      <Suspense>
+        <ExerciseBrowser />
+      </Suspense>
     </main>
   );
 }

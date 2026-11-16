@@ -84,6 +84,9 @@ docs/             Project documentation
 `src/lib/addExercise.ts` builds these addresses. That page adds nothing until the first set:
 `addWorkoutExerciseWithSet()` writes the workout exercise and the set, and the address changes to
 `/workout/exercise?id=…`.
+The list the exercise was opened from travels along as `&back=…`, so Back returns there (decision 048).
+The exercise browser keeps its filters in the address and passes it to `/exercises/detail?id=…&back=…`
+the same way (`src/lib/exerciseBrowser.ts`).
 
 ## Calendar (decision 040)
 

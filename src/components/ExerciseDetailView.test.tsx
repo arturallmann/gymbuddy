@@ -101,6 +101,24 @@ describe('ExerciseDetailView', () => {
     expect(screen.getByRole('link', { name: 'Back to exercises' })).toHaveAttribute('href', '/exercises');
   });
 
+  test('go back to the exercise browser with the filters it was opened from', async () => {
+    const { db } = await createTestDatabase();
+    const ids = await addTestLibrary(db);
+    navigation.params = new URLSearchParams({ id: ids.curl, back: '/exercises?muscle=g1' });
+    await renderWithDatabase(<ExerciseDetailView />, { db });
+
+    expect(await screen.findByRole('link', { name: 'Back to exercises' })).toHaveAttribute('href', '/exercises?muscle=g1');
+  });
+
+  test('go back to the exercise browser when the back address is somewhere else', async () => {
+    const { db } = await createTestDatabase();
+    const ids = await addTestLibrary(db);
+    navigation.params = new URLSearchParams({ id: ids.curl, back: '/settings' });
+    await renderWithDatabase(<ExerciseDetailView />, { db });
+
+    expect(await screen.findByRole('link', { name: 'Back to exercises' })).toHaveAttribute('href', '/exercises');
+  });
+
   test('show secondary muscle groups', async () => {
     const { user } = await setup('press');
     await openTab(user, 'About');
