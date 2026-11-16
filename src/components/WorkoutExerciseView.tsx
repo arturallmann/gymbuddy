@@ -22,7 +22,7 @@ import { getUnits } from '@/lib/units';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
 import SetLog, { type SetLogItem } from './SetLog';
 import Tabs, { tabPanelProps } from './Tabs';
-import { useTabSwipe } from '@/hooks/useTabSwipe';
+import { useTabs } from '@/hooks/useTabs';
 import BackLink from './BackLink';
 import ExerciseImage from './ExerciseImage';
 
@@ -54,8 +54,7 @@ export default function WorkoutExerciseView() {
   const exerciseId = params.get('exercise');
   const phasesOn = features.phases;
   const [loaded, setLoaded] = useState<Loaded | undefined>(undefined);
-  const [tab, setTab] = useState<Tab>('log');
-  const swipe = useTabSwipe(TABS, tab, setTab);
+  const { tab, changeTab, swipe, slide } = useTabs<Tab>(TABS, 'log');
   const { preferences, units, save } = useExercisePreferences(loaded?.item.exerciseId ?? null);
 
   useEffect(() => {
@@ -120,7 +119,7 @@ export default function WorkoutExerciseView() {
   const image = detail?.images[0];
   const primary = detail?.muscleGroups.filter((group) => group.role === 'primary').map((group) => group.name) ?? [];
   return (
-    <main {...swipe} className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
+    <main {...swipe} className="mx-auto flex min-h-screen overflow-x-clip max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
         <BackLink href="/workout" label="Back to workout" />
         <h1 className="min-w-0 break-words text-2xl font-bold">{item?.name ?? 'Exercise'}</h1>
@@ -129,9 +128,9 @@ export default function WorkoutExerciseView() {
         <p className="text-muted">This exercise is not in the workout.</p>
       ) : (
         <>
-          <Tabs label="Exercise" tabs={TABS} value={tab} onChange={setTab} />
+          <Tabs label="Exercise" tabs={TABS} value={tab} onChange={changeTab} />
           {tab === 'log' ? (
-            <div {...tabPanelProps('log')} className="flex flex-col gap-4">
+            <div {...tabPanelProps('log')} key={tab} className={`flex flex-col gap-4 ${slide}`}>
               {preferences?.notes && (
                 <p className="break-words text-sm">
                   <span className="text-muted">Note: </span>
@@ -150,7 +149,7 @@ export default function WorkoutExerciseView() {
               )}
             </div>
           ) : (
-            <div {...tabPanelProps('about')} className="flex flex-col gap-4">
+            <div {...tabPanelProps('about')} key={tab} className={`flex flex-col gap-4 ${slide}`}>
               {detail && (
                 <section aria-label="About the exercise" className="flex flex-col gap-2">
                   {features.exerciseImages && image && (

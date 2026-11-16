@@ -10,3 +10,9 @@ test('turn off the tap highlight and give buttons and links a pressed state inst
   expect(css).toMatch(/button,\s*\[role='button'\]\s*\{\s*-webkit-user-select:\s*none;\s*user-select:\s*none;/);
   expect(css).toMatch(/button:not\(:disabled\):active,\s*a:active,\s*\[role='button'\]:active\s*\{\s*filter:/);
 });
+
+test('slide content in from either side, and not at all with reduced motion (decision 045)', () => {
+  expect(css).toMatch(/\.slide-from-right\s*\{\s*animation: slide-from-right/);
+  expect(css).toMatch(/\.slide-from-left\s*\{\s*animation: slide-from-left/);
+  expect(css).toMatch(/prefers-reduced-motion: reduce\)\s*\{\s*\.slide-from-right,\s*\.slide-from-left\s*\{\s*animation: none/);
+});

@@ -14,7 +14,7 @@ import ExercisePreferencesForm from './ExercisePreferencesForm';
 import ExerciseProgress from './ExerciseProgress';
 import BackLink from './BackLink';
 import Tabs, { tabPanelProps } from './Tabs';
-import { useTabSwipe } from '@/hooks/useTabSwipe';
+import { useTabs } from '@/hooks/useTabs';
 import ExerciseImage from './ExerciseImage';
 import ExercisePhotos from './ExercisePhotos';
 
@@ -37,8 +37,7 @@ export default function ExerciseDetailView() {
   const features = useFeatures();
   const id = useSearchParams().get('id');
   const [detail, setDetail] = useState<ExerciseDetail | null | undefined>(undefined);
-  const [tab, setTab] = useState<Tab>('progress');
-  const swipe = useTabSwipe(TABS, tab, setTab);
+  const { tab, changeTab, swipe, slide } = useTabs<Tab>(TABS, 'progress');
   const { preferences, units, save } = useExercisePreferences(detail?.exercise.id ?? null);
 
   useEffect(() => {
@@ -64,7 +63,7 @@ export default function ExerciseDetailView() {
   const secondary = detail?.muscleGroups.filter((group) => group.role === 'secondary') ?? [];
   const steps = instructionSteps(exercise?.instructions ?? null);
   return (
-    <main {...swipe} className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
+    <main {...swipe} className="mx-auto flex min-h-screen overflow-x-clip max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
         <BackLink href="/exercises" label="Back to exercises" />
       </header>
@@ -80,14 +79,14 @@ export default function ExerciseDetailView() {
               {exercise.equipment && ` · ${equipmentLabel(exercise.equipment)}`}
             </p>
           </div>
-          <Tabs label="Exercise" tabs={TABS} value={tab} onChange={setTab} />
+          <Tabs label="Exercise" tabs={TABS} value={tab} onChange={changeTab} />
           {tab === 'progress' && (
-            <div {...tabPanelProps('progress')} className="flex flex-col gap-4">
+            <div {...tabPanelProps('progress')} key={tab} className={`flex flex-col gap-4 ${slide}`}>
               {preferences !== undefined && <ExerciseProgress exercise={exercise} units={units} />}
             </div>
           )}
           {tab === 'about' && (
-            <div {...tabPanelProps('about')} className="flex flex-col gap-4">
+            <div {...tabPanelProps('about')} key={tab} className={`flex flex-col gap-4 ${slide}`}>
               {features.exerciseImages && exercise.source === 'custom' && (
                 <ExercisePhotos exerciseId={exercise.id} name={exercise.name} images={detail.images} onChange={reload} />
               )}
@@ -149,7 +148,7 @@ export default function ExerciseDetailView() {
             </div>
           )}
           {tab === 'notes' && preferences !== undefined && (
-            <section {...tabPanelProps('notes')} className="flex flex-col gap-2">
+            <section {...tabPanelProps('notes')} key={tab} className={`flex flex-col gap-2 ${slide}`}>
               <h2 className="text-sm font-semibold uppercase text-muted">Notes and units</h2>
               <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
             </section>

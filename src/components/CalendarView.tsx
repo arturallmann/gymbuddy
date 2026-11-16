@@ -6,6 +6,7 @@ import { useDatabase } from '@/db/DatabaseContext';
 import { listWorkoutHistory, type WorkoutHistoryItem } from '@/db/workouts';
 import { useBackHandler } from '@/hooks/useBackHandler';
 import { useSwipe } from '@/hooks/useSwipe';
+import { slideClass } from '@/lib/swipe';
 import { useSettings } from '@/hooks/useSettings';
 import {
   calendarHref,
@@ -50,6 +51,8 @@ export default function CalendarView() {
   const [view, setView] = useState<View>(() => (params.get('view') === 'month' ? 'month' : 'week'));
   const [date, setDate] = useState<Date>(() => parseDayKey(params.get('date')) ?? today);
   const [open, setOpen] = useState<Date | null>(() => parseDayKey(params.get('day')));
+  // Which way the shown month or week moved last, for the slide (decision 045).
+  const [moved, setMoved] = useState<-1 | 1 | null>(null);
   const [loaded, setLoaded] = useState<{ key: string; byDay: Map<string, WorkoutHistoryItem[]> } | null>(null);
 
   const dateKey = dayKey(date);
@@ -74,6 +77,8 @@ export default function CalendarView() {
   }, [db, userId, view, dateKey, firstDay]);
 
   const go = (nextView: View, nextDate: Date, nextOpen: Date | null) => {
+    if (nextView !== view) setMoved(null);
+    else if (!showsDay(view, date, nextDate, firstDay)) setMoved(nextDate > date ? 1 : -1);
     setView(nextView);
     setDate(nextDate);
     setOpen(nextOpen);
@@ -207,7 +212,7 @@ export default function CalendarView() {
   );
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-4 p-6">
+    <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-4 overflow-x-clip p-6">
       <header className="flex items-center gap-4">
         <BackLink href="/" label="Back" />
         <h1 className="min-w-0 flex-1 text-2xl font-bold">Calendar</h1>
@@ -238,7 +243,7 @@ export default function CalendarView() {
           ›
         </button>
       </div>
-      <div className="flex flex-col gap-3" {...swipe}>
+      <div key={spanKey} className={`flex flex-col gap-3 ${slideClass(moved)}`} {...swipe}>
         {view === 'month' ? monthGrid() : weekList()}
       </div>
     </main>

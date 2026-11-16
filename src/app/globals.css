@@ -94,3 +94,30 @@
     filter: brightness(0.85);
   }
 }
+
+/* New content slides in from the side it comes from (decision 045): the next tab, month or week from the
+   right, the one before from the left. */
+@keyframes slide-from-right {
+  from {
+    transform: translateX(3rem);
+    opacity: 0;
+  }
+}
+@keyframes slide-from-left {
+  from {
+    transform: translateX(-3rem);
+    opacity: 0;
+  }
+}
+.slide-from-right {
+  animation: slide-from-right 200ms ease-out;
+}
+.slide-from-left {
+  animation: slide-from-left 200ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-from-right,
+  .slide-from-left {
+    animation: none;
+  }
+}
