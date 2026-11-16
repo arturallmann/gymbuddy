@@ -5,6 +5,9 @@ import { EXPORT_HEADER, buildExportTable } from './exportTable';
 import { parseImportTable } from './importTable';
 
 const base: ExportRow = {
+  workoutId: 'w1',
+  groupId: null,
+  groupType: null,
   workoutStartedAt: new Date(2026, 9, 29, 9, 7),
   workoutEndedAt: new Date(2026, 9, 29, 10, 2),
   workoutNotes: 'Short sleep',
@@ -48,6 +51,7 @@ describe('parseImportTable', () => {
         name: 'Squat',
         loadType: 'external',
         phase: 'main',
+        group: null,
         notes: 'Old rack',
         sets: [
           { setType: 'normal', weightGrams: 60000, reps: 8, durationSeconds: null, distanceMeters: null, rpe: 8.5, notes: 'belt' },
@@ -58,6 +62,7 @@ describe('parseImportTable', () => {
         name: 'Run',
         loadType: 'none',
         phase: 'cooldown',
+        group: null,
         notes: null,
         sets: [{ setType: 'warmup', weightGrams: null, reps: null, durationSeconds: 1500, distanceMeters: 5000, rpe: null, notes: null }],
       },
@@ -89,6 +94,22 @@ describe('parseImportTable', () => {
     );
 
     expect(parsed.ok && parsed.workouts[0].exercises.map((exercise) => exercise.sets.length)).toEqual([2, 1]);
+  });
+
+  test('keep the group label and start a new workout exercise when it changes', () => {
+    const parsed = parseImportTable(
+      table(
+        row({ Date: '2026-10-29', 'Start time': '07:00', Exercise: 'Curl', Group: 'Superset 1', Set: 1, Reps: 10 }),
+        row({ Date: '2026-10-29', 'Start time': '07:00', Exercise: 'Press', Group: 'Superset 1', Set: 1, Reps: 8 }),
+        row({ Date: '2026-10-29', 'Start time': '07:00', Exercise: 'Press', Set: 2, Reps: 8 }),
+      ),
+    );
+
+    expect(parsed.ok && parsed.workouts[0].exercises.map((exercise) => [exercise.name, exercise.group, exercise.sets.length])).toEqual([
+      ['Curl', 'Superset 1', 1],
+      ['Press', 'Superset 1', 1],
+      ['Press', null, 1],
+    ]);
   });
 
   test('let a workout that ends after midnight end on the next day', () => {

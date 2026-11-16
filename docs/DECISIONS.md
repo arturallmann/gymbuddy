@@ -146,6 +146,45 @@ an unknown name becomes a custom exercise, with its load type from the file and 
 the columns that have values. The export gained an "End time" column; without it, an imported workout
 ends at its start time.
 
+## 025 — Supersets: any number of exercises, guided rounds, rest after a round
+Date: 2026-10-30
+"Make superset" groups two or more workout exercises of one phase into one exercise group of type
+`superset`; giant set and circuit stay unused for now. The members move next to each other, where the
+first chosen one is, and from then on move up or down as one block. A group left with one member
+after a delete becomes a single workout exercise again.
+The group page guides the user through the rounds: the next exercise is the first one with the fewest
+sets (A → B → … → A), and a tap on the rounds table logs or edits any set instead.
+After the last set of a round, a rest timer counts down from `workout_groups.restSeconds`
+(default 90 s), behind the `restTimer` feature toggle.
+
+## 026 — Saved supersets keep targets from the logged sets
+Date: 2026-10-30
+"Save superset" on the group page copies the exercise group into a template of kind `superset`:
+each exercise with its order, phase, the group type and rest, and targets from the sets logged in the
+group (the number of sets as `targetSets`, the values of the last set as the other targets).
+The set form uses targets only when an exercise has no last workout yet (prefill order in DATA_MODEL).
+"Save superset" and the home page link to "Saved supersets" show only when the `supersets` and
+`templates` feature toggles are both on. The "Saved supersets" page lists, renames and deletes them;
+it still lists stored saved supersets when the toggles are off.
+
+## 027 — Routines: save any workout, start from the Routines page
+Date: 2026-10-30
+"Save as routine" on the active workout page and on a past workout's detail page copies the whole
+workout into a template of kind `routine`, with the same rules as a saved superset (decision 026):
+order, phases, each exercise group with its own `groupKey`, type and rest, and targets from the logged sets.
+The Routines page (home page link, `templates` feature toggle) lists, renames and deletes routines.
+"Start" starts a workout from a routine in one transaction: the new workout records the routine in
+`workouts.templateId` and gets a copy of its rows. While a workout is active, the page offers
+"Continue workout" instead (decision 019).
+
+## 028 — Export and import keep exercise groups
+Date: 2026-10-30
+The export has a "Group" column: the group type and a number per workout, such as "Superset 1",
+in the order the groups first appear; empty for a single workout exercise. The import reads it back:
+rows of one workout with the same label become one exercise group of that type, with the default rest
+(the file has no rest column). So exporting and importing a workout with supersets keeps them.
+This adds to decisions 022 and 024.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

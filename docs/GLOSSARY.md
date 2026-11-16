@@ -23,7 +23,8 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 | Term (interface) | Code name | Meaning | Not allowed |
 |---|---|---|---|
 | Exercise group | `workoutGroup`, table `workout_groups` | Umbrella term in code and docs for exercises done in rounds. The interface shows the group type instead. | block, cluster, combo, superset (as umbrella) |
-| Superset | group type `superset` | Two exercises done back to back, then rest. | pair, combo |
+| Superset | group type `superset` | Two or more exercises done back to back, then rest. "Make superset" always creates this type (decision 025). | pair, combo |
+| Ungroup | `ungroupWorkoutExercises()` | Takes the workout exercises out of their exercise group. They stay in the workout with their sets. | split, break up |
 | Circuit | group type `circuit` | Several exercises in a row, repeated for several rounds. | — |
 | Giant set | group type `giant_set` | Three or more exercises for the same muscle group, back to back. | tri-set (use giant set) |
 | Round | set `position` inside a group | Round N = set N of every exercise in the group. | lap, circuit (as a round) |
