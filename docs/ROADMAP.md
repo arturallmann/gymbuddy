@@ -138,7 +138,8 @@ Most visual and UX overhauls happen here.
   Needs a decision first: the e1RM formula (for example Epley), how bodyweight and duration-only sets
   count, and how a secondary muscle group counts (for example half).
   Done when: the numbers match a hand count on test data, and each statistic says how it is counted.
-- [ ] **4b.13** Muscle map: a front and back drawing of the body with one area per muscle group. After a workout,
+- [x] **4b.13** Muscle map (decision 046: warm clay shades, front and back side by side; on the statistics
+  page, the workout detail page and a new "Workout ended" page after "End workout"): a front and back drawing of the body with one area per muscle group. After a workout,
   and on a workout detail page, each area is colored by the volume its muscle group got in that workout,
   with a small legend. Uses the muscle group volume and the counting rules from 4b.12.
   The drawing is our own SVG (one path per muscle group, matching the library's muscle groups), not

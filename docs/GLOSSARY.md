@@ -101,6 +101,8 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 | Personal record | derived, `PersonalRecord`, `personalRecords()` | The best value ever for an exercise. Short form in the interface: PR. Never includes the bodyweight (decision 043). | best, max, record (alone) |
 | Estimated one-rep max | derived, `estimatedOneRepMax()` | A calculated maximum for one rep (Epley, decision 043). Short form: e1RM. | 1RM (that means a real tested max), max |
 | Statistics | `StatisticsView`, route `/statistics` | The page with workouts, exercises, muscle groups and bodyweight over a time span (decision 043). | stats, analytics, dashboard |
+| Muscle map | `MuscleMap`, `src/lib/muscleMap.ts` | The drawing of the body, front and back, with each muscle group shaded by its sets or volume (decision 046). | body map, heat map, muscle chart |
+| Workout ended page | `WorkoutEndedView`, route `/workout/ended` | The page after "End workout": summary, muscle map and personal records of that workout (decision 046). | workout summary page, recap |
 | Bodyweight | table `bodyweights`, `addBodyweight()` | The user's own weight, entered with a date. Each workout uses the bodyweight of its day. | body weight, weigh-in, BW (except in "BW + 5 kg") |
 
 ## Data words

@@ -25,6 +25,13 @@
   --color-danger: 198 61 45;        /* #c63d2d delete and errors (25 kg plate red) */
   --color-on-danger: 255 255 255;   /* text on danger */
   --color-success: 36 128 79;       /* #24804f done (10 kg plate green) */
+  /* Muscle map shades, "warm clay" (decision 046): untrained, then five steps up to the most trained. */
+  --color-heat-0: 221 227 230;      /* #dde3e6 */
+  --color-heat-1: 234 216 204;      /* #ead8cc */
+  --color-heat-2: 216 176 153;      /* #d8b099 */
+  --color-heat-3: 195 135 103;      /* #c38767 */
+  --color-heat-4: 166 97 63;        /* #a6613f */
+  --color-heat-5: 127 64 36;        /* #7f4024 */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -44,6 +51,12 @@
     --color-danger: 240 106 88;       /* #f06a58 */
     --color-on-danger: 42 10 5;       /* #2a0a05 */
     --color-success: 76 194 133;      /* #4cc285 */
+    --color-heat-0: 38 52 58;       /* #26343a */
+    --color-heat-1: 58 47 42;       /* #3a2f2a */
+    --color-heat-2: 79 56 45;       /* #4f382d */
+    --color-heat-3: 102 66 49;      /* #664231 */
+    --color-heat-4: 125 77 54;      /* #7d4d36 */
+    --color-heat-5: 148 89 60;      /* #94593c */
   }
 }
 
@@ -63,6 +76,12 @@
   --color-danger: 240 106 88;
   --color-on-danger: 42 10 5;
   --color-success: 76 194 133;
+  --color-heat-0: 38 52 58;       /* #26343a */
+  --color-heat-1: 58 47 42;       /* #3a2f2a */
+  --color-heat-2: 79 56 45;       /* #4f382d */
+  --color-heat-3: 102 66 49;      /* #664231 */
+  --color-heat-4: 125 77 54;      /* #7d4d36 */
+  --color-heat-5: 148 89 60;      /* #94593c */
 }
 
 @layer base {

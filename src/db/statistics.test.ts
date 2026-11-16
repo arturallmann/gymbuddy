@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { getLocalSettings } from './settings';
-import { listHistoryUpTo, listStatistics } from './statistics';
+import { listHistoryUpTo, listStatistics, listWorkoutStatistics } from './statistics';
 import { addSet, addWorkoutExercise, deleteSet, deleteWorkout, endWorkout, startWorkout } from './workouts';
 import { createTestDatabase } from '@/testing/database';
 import { addTestLibrary } from '@/testing/exercises';
@@ -49,8 +49,8 @@ describe('listStatistics', () => {
       name: 'Bench Press',
       loadType: 'external',
       muscleGroups: [
-        { name: 'Biceps', role: 'secondary' },
-        { name: 'Chest', role: 'primary' },
+        { key: 'biceps', name: 'Biceps', role: 'secondary' },
+        { key: 'chest', name: 'Chest', role: 'primary' },
       ],
     });
   });
@@ -85,5 +85,27 @@ describe('listHistoryUpTo', () => {
       [press, 50000],
       [press, 55000],
     ]);
+  });
+});
+
+describe('listWorkoutStatistics', () => {
+  test('list the sets of one workout with their exercises, also while it is active, without deleted sets', async () => {
+    const { db, press, curl, workout } = await setup();
+    await workout('2026-11-03T10:00:00Z', press, [[60000, 8]]);
+    const active = await workout('2026-11-05T10:00:00Z', curl, [[20000, 10], [22000, 8]], false);
+    await deleteSet(db, active.setIds[1]);
+
+    const { rows, exercises } = await listWorkoutStatistics(db, active.id);
+
+    expect(rows.map((row) => [row.exerciseId, row.set.weightGrams])).toEqual([[curl, 20000]]);
+    expect([...exercises.keys()]).toEqual([curl]);
+  });
+
+  test('list nothing for a deleted workout', async () => {
+    const { db, curl, workout } = await setup();
+    const gone = await workout('2026-11-05T10:00:00Z', curl, [[20000, 10]]);
+    await deleteWorkout(db, gone.id);
+
+    expect((await listWorkoutStatistics(db, gone.id)).rows).toEqual([]);
   });
 });

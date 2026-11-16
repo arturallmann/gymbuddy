@@ -199,6 +199,9 @@ The counting rules live in `src/lib/statistics.ts`.
 - **Muscle groups:** a set counts 1 for each primary muscle group and ½ for each secondary one; volume
   is shared the same way.
 - The statistics page counts ended workouts in the chosen time span (4 weeks, 3 months, a year).
+- **Muscle map (decision 046):** the same muscle group counts, shaded per muscle group relative to the most
+  trained one: sets per week (default) or volume per week on the statistics page, sets of one workout on the
+  workout detail page and the "Workout ended" page.
 
 ## Phases
 

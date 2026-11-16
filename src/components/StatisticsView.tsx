@@ -12,11 +12,13 @@ import {
   SPAN_LABELS,
   exerciseSummaries,
   formatPersonalRecord,
+  formatSetCount,
   formatSets,
   muscleGroupSummaries,
   spanRange,
   weeklyTotals,
   workoutTotals,
+  type MuscleGroupSummary,
   type StatisticsInput,
   type StatisticsSpan,
 } from '@/lib/statistics';
@@ -27,6 +29,9 @@ import OptionGroup from './OptionGroup';
 import Tabs, { tabPanelProps } from './Tabs';
 import { useTabs } from '@/hooks/useTabs';
 import WeeklyBars from './WeeklyBars';
+import MuscleGroupCard from './MuscleGroupCard';
+import MuscleMap from './MuscleMap';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 type Tab = 'workouts' | 'exercises' | 'muscles' | 'bodyweight';
 const TABS: { value: Tab; label: string }[] = [
@@ -34,6 +39,10 @@ const TABS: { value: Tab; label: string }[] = [
   { value: 'exercises', label: 'Exercises' },
   { value: 'muscles', label: 'Muscle groups' },
   { value: 'bodyweight', label: 'Bodyweight' },
+];
+const MUSCLE_METRICS: { value: 'sets' | 'volume'; label: string }[] = [
+  { value: 'sets', label: 'Sets per week' },
+  { value: 'volume', label: 'Volume per week' },
 ];
 const SPANS = (Object.keys(SPAN_LABELS) as StatisticsSpan[]).map((value) => ({ value, label: SPAN_LABELS[value] }));
 
@@ -49,6 +58,9 @@ export default function StatisticsView() {
   const { bodyweights } = useBodyweights();
   const { tab, changeTab, swipe, slide } = useTabs<Tab>(TABS, 'workouts');
   const [span, setSpan] = useState<StatisticsSpan>('4w');
+  const [muscleMetric, setMuscleMetric] = useState<'sets' | 'volume'>('sets');
+  const [muscle, setMuscle] = useState<string | null>(null);
+  useBackHandler(muscle ? () => setMuscle(null) : null);
   const [today] = useState(() => new Date());
   const [firstDay] = useState(() => firstDayOfWeek());
   const [loaded, setLoaded] = useState<{ span: StatisticsSpan; data: Awaited<ReturnType<typeof listStatistics>> } | null>(null);
@@ -127,37 +139,30 @@ export default function StatisticsView() {
     );
   };
 
+  // The muscle map (decision 046): sets or volume per week by muscle group, sets first.
   const musclesPanel = (data: StatisticsInput) => {
     const summaries = muscleGroupSummaries(data);
-    const top = Math.max(1, ...summaries.map((s) => s.primarySets + s.secondarySets));
+    const perWeek = (group: MuscleGroupSummary) =>
+      (muscleMetric === 'sets' ? group.primarySets + group.secondarySets : group.volume) / weeks;
+    const format = (value: number) =>
+      muscleMetric === 'sets' ? `${formatSetCount(value)} per week` : `${volume(value)} per week`;
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-sm text-muted">
-          Sets per muscle group. A set counts 1 for a primary muscle group (dark) and ½ for a secondary one (light).
-        </p>
-        <ul className="flex flex-col gap-3">
-          {summaries.map((group) => {
-            const total = group.primarySets + group.secondarySets;
-            return (
-              <li key={group.id} className="flex flex-col gap-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="flex-1 font-semibold capitalize">{group.name}</span>
-                  <span className="text-sm tabular-nums">
-                    {plural(total, 'set')} · {formatSets(Math.round((total / weeks) * 10) / 10)} per week
-                  </span>
-                </div>
-                <div aria-hidden className="flex h-2.5 overflow-hidden rounded-full bg-line">
-                  <span className="bg-primary" style={{ width: `${(group.primarySets / top) * 100}%` }} />
-                  <span className="bg-primary/40" style={{ width: `${(group.secondarySets / top) * 100}%` }} />
-                </div>
-                <span className="text-xs text-muted">
-                  {group.volume ? `${volume(group.volume)} · ` : ''}
-                  {group.exercises.join(', ')}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+        <OptionGroup label="Shade by" hideLabel options={MUSCLE_METRICS} value={muscleMetric} onChange={setMuscleMetric} />
+        <MuscleMap
+          values={new Map(summaries.map((group) => [group.key, perWeek(group)]))}
+          names={new Map(summaries.map((group) => [group.key, group.name]))}
+          format={format}
+          selected={muscle}
+          onSelect={setMuscle}
+        />
+        <MuscleGroupCard
+          muscleGroup={muscle}
+          summary={summaries.find((group) => group.key === muscle)}
+          weeks={weeks}
+          emptyText="No sets in this time span."
+        />
+        <p className="text-xs text-muted">A set counts 1 for a primary muscle group and ½ for a secondary one.</p>
       </div>
     );
   };

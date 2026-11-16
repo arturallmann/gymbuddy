@@ -202,7 +202,8 @@ export type StatisticsRow = { workoutId: string; startedAt: Date; exerciseId: st
 export type StatisticsExercise = Tracked & {
   id: string;
   name: string;
-  muscleGroups: { id: string; name: string; role: MuscleGroupRole }[];
+  // `key` is the library name, such as "lower back"; the muscle map finds its area by it.
+  muscleGroups: { id: string; key: string; name: string; role: MuscleGroupRole }[];
 };
 
 export type StatisticsInput = {
@@ -287,6 +288,7 @@ export const SECONDARY_SHARE = 0.5;
 
 export type MuscleGroupSummary = {
   id: string;
+  key: string;
   name: string;
   // Sets where the muscle group is primary (count 1) and secondary (count ½ each, already halved).
   primarySets: number;
@@ -304,7 +306,7 @@ export function muscleGroupSummaries(input: StatisticsInput): MuscleGroupSummary
     const volume = rowVolume(row, input) ?? 0;
     for (const group of exercise.muscleGroups) {
       const share = group.role === 'primary' ? 1 : SECONDARY_SHARE;
-      const entry = groups.get(group.id) ?? { id: group.id, name: group.name, primarySets: 0, secondarySets: 0, volume: 0, exercises: [] };
+      const entry = groups.get(group.id) ?? { id: group.id, key: group.key, name: group.name, primarySets: 0, secondarySets: 0, volume: 0, exercises: [] };
       if (group.role === 'primary') entry.primarySets += 1;
       else entry.secondarySets += share;
       entry.volume += volume * share;
@@ -320,4 +322,10 @@ export function muscleGroupSummaries(input: StatisticsInput): MuscleGroupSummary
 // "8", "7.5": set counts with halves.
 export function formatSets(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
+
+// "1 set", "0.5 sets", "7.5 sets": a set count rounded to 0.1.
+export function formatSetCount(value: number): string {
+  const rounded = Math.round(value * 10) / 10;
+  return `${formatSets(rounded)} ${rounded === 1 ? 'set' : 'sets'}`;
 }

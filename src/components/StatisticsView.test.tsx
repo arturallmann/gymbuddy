@@ -82,18 +82,26 @@ describe('StatisticsView', () => {
     ]);
   });
 
-  test('count sets per muscle group, secondary as half', async () => {
+  test('show sets per week on the muscle map, secondary as half (decision 046)', async () => {
     const { user } = await setup();
 
     await user.click(await screen.findByRole('tab', { name: 'Muscle groups' }));
 
-    const items = await screen.findAllByRole('listitem');
-    // Chest: 2 bench sets. Biceps: 1 curl set + 2 bench sets × ½.
-    expect(items.map((item) => within(item).getAllByText(/sets? ·/)[0].textContent)).toEqual([
-      '2 sets · 0.5 per week',
-      '2 sets · 0.5 per week',
-    ]);
-    expect(items[0]).toHaveTextContent('Biceps');
+    // Chest: 2 bench sets. Biceps: 1 curl set + 2 bench sets × ½. Both over 4 weeks.
+    const chest = await screen.findByRole('button', { name: 'Chest, 0.5 sets per week' });
+    expect(screen.getByRole('button', { name: 'Biceps, 0.5 sets per week' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Lats, 0 sets per week' })).toHaveClass('fill-heat-0');
+    expect(chest).toHaveClass('fill-heat-5');
+
+    await user.click(chest);
+    const card = screen.getByRole('region', { name: 'Chest' });
+    expect(within(card).getByText('Sets per week').nextSibling).toHaveTextContent('0.5');
+    expect(within(card).getByText('Volume per week').nextSibling).toHaveTextContent('200 kg');
+    expect(card).toHaveTextContent('Bench Press');
+
+    await user.click(screen.getByRole('radio', { name: 'Volume per week' }));
+    expect(screen.getByRole('button', { name: 'Chest, 200 kg per week' })).toHaveClass('fill-heat-5');
+    expect(screen.getByRole('button', { name: 'Biceps, 150 kg per week' })).toHaveClass('fill-heat-4');
   });
 
   test('add a bodyweight on the bodyweight tab and delete one', async () => {

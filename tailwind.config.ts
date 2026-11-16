@@ -25,6 +25,15 @@ const config: Config = {
         danger: color('danger'),
         'on-danger': color('on-danger'),
         success: color('success'),
+        // Muscle map shades (decision 046): heat-0 untrained, heat-1 to heat-5 more and more trained.
+        heat: {
+          0: color('heat-0'),
+          1: color('heat-1'),
+          2: color('heat-2'),
+          3: color('heat-3'),
+          4: color('heat-4'),
+          5: color('heat-5'),
+        },
       },
       // A plain `border` uses the strong border color, so cards and buttons stay visible.
       borderColor: {
