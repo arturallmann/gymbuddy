@@ -431,6 +431,13 @@ of the exercise library (`src/lib/muscleMap.ts`). Of the mockups the user chose:
   workouts. With the `statistics` feature toggle off, "End workout" goes home as before.
 All of it follows the `statistics` feature toggle, so it needs no toggle of its own.
 
+## 047 — Wider tap areas for small muscle groups
+Date: 2026-11-16
+On a phone, traps, adductors and abductors were hard to tap on the muscle map (decision 046). These and the
+neck get an invisible band around their shape (`TAP_MARGIN` in `src/lib/muscleMap.ts`, 10–14 drawing units)
+that takes taps too. The bands lie on top of their larger neighbors, which keep most of their area.
+The drawing itself does not change.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

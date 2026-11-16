@@ -8,6 +8,15 @@ export type BodySide = 'front' | 'back';
 // drawn again mirrored on the right; `center` areas sit on the center line and are drawn once.
 export type BodyArea = { d: string; muscleGroup?: string; center?: boolean };
 
+// Small muscle groups are hard to tap, so an invisible band this wide (in drawing units) around them
+// takes taps too. It lies on top of the neighbors, which are large enough to keep most of their area.
+export const TAP_MARGIN: Record<string, number> = {
+  neck: 10,
+  traps: 14,
+  abductors: 12,
+  adductors: 12,
+};
+
 // The drawing's coordinates; the body fills 26–134 across and 4–336 down.
 export const BODY_VIEW_BOX = '26 4 108 332';
 export const BODY_WIDTH = 160;
