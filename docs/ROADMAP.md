@@ -68,7 +68,7 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **4.2** Chart view per exercise for weight, reps, duration and distance only (own SVG chart, decision 029).
   Done when: note-only exercises show the history view and no chart.
 
-## Phase 4b — Interface polish (current)
+## Phase 4b — Interface polish (done)
 
 Starts when the basic features above work, so the details can be tuned in one go.
 Most visual and UX overhauls happen here.
@@ -145,11 +145,18 @@ Most visual and UX overhauls happen here.
   The drawing is our own SVG (one path per muscle group, matching the library's muscle groups), not
   copied from another app.
 
-## Phase 5 — Online (later)
+## Phase 5 — Testing and polish (current)
 
-- [ ] Backups to a server.
-- [ ] Friends can view each other's history.
+Use the app at the gym, find what gets in the way, and fix it. Online features moved to `docs/IDEAS.md`.
+
+- [ ] **5.1** Test every page on a phone, in light and dark, with the simple, standard and advanced presets:
+  logging a workout from start to end, supersets, routines, calendar, statistics, export and import,
+  photos, Android Back on every page. Write each problem down as a task below.
+  Done when: every page was tried on a phone and each problem found is a task in this phase.
+- [ ] **5.2** Fix the problems found in 5.1, one task each, with a test that fails without the fix.
+- [ ] **5.3** Smaller polish found while using the app, such as keeping the search text of the
+  "Add exercise" page when Back returns to it (decision 048).
 
 ## Ideas (not planned)
 
-See `docs/IDEAS.md`: smart watch support.
+See `docs/IDEAS.md`: online features (backups, friends) and smart watch support.
