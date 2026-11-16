@@ -1,6 +1,7 @@
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
+import { backStack } from '@/lib/backStack';
 import WorkoutExerciseList from './WorkoutExerciseList';
 
 const exercise = {
@@ -19,7 +20,7 @@ const items = [
 ];
 
 test('show the workout exercises in order', () => {
-  render(<WorkoutExerciseList items={items} onMove={vi.fn()} onRemove={vi.fn()} />);
+  render(<WorkoutExerciseList items={items} onMove={vi.fn()} onMoveTo={vi.fn()} onRemove={vi.fn()} />);
 
   expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
     expect.stringContaining('Squat'),
@@ -28,7 +29,7 @@ test('show the workout exercises in order', () => {
 });
 
 test('turn off moving the first up and the last down', () => {
-  render(<WorkoutExerciseList items={items} onMove={vi.fn()} onRemove={vi.fn()} />);
+  render(<WorkoutExerciseList items={items} onMove={vi.fn()} onMoveTo={vi.fn()} onRemove={vi.fn()} />);
 
   expect(screen.getByRole('button', { name: 'Move Squat up' })).toBeDisabled();
   expect(screen.getByRole('button', { name: 'Move Squat down' })).toBeEnabled();
@@ -40,17 +41,39 @@ test('report moves and removals', async () => {
   const user = userEvent.setup();
   const onMove = vi.fn();
   const onRemove = vi.fn();
-  render(<WorkoutExerciseList items={items} onMove={onMove} onRemove={onRemove} />);
+  render(<WorkoutExerciseList items={items} onMove={onMove} onMoveTo={vi.fn()} onRemove={onRemove} />);
 
   await user.click(screen.getByRole('button', { name: 'Move Row up' }));
   await user.click(screen.getByRole('button', { name: 'Remove Squat' }));
+  expect(onRemove).not.toHaveBeenCalled();
+  const confirm = screen.getByRole('group', { name: 'Remove Squat' });
+  expect(confirm).toHaveTextContent('Remove Squat and its sets from this workout?');
+  await user.click(within(confirm).getByRole('button', { name: 'Remove' }));
 
   expect(onMove).toHaveBeenCalledWith('b', 'up');
   expect(onRemove).toHaveBeenCalledWith('a');
+  expect(screen.queryByRole('group', { name: 'Remove Squat' })).not.toBeInTheDocument();
+});
+
+test('keep the workout exercise with Keep or Android Back on the confirm step', async () => {
+  const user = userEvent.setup();
+  const onRemove = vi.fn();
+  render(<WorkoutExerciseList items={items} onMove={vi.fn()} onMoveTo={vi.fn()} onRemove={onRemove} />);
+
+  await user.click(screen.getByRole('button', { name: 'Remove Squat' }));
+  await user.click(screen.getByRole('button', { name: 'Keep' }));
+  expect(screen.getByRole('link', { name: /Squat/ })).toBeInTheDocument();
+
+  await user.click(screen.getByRole('button', { name: 'Remove Row' }));
+  act(() => {
+    expect(backStack.back()).toBe(true);
+  });
+  expect(screen.getByRole('link', { name: /Row/ })).toBeInTheDocument();
+  expect(onRemove).not.toHaveBeenCalled();
 });
 
 test('link each workout exercise to its own page', () => {
-  render(<WorkoutExerciseList items={items} onMove={vi.fn()} onRemove={vi.fn()} />);
+  render(<WorkoutExerciseList items={items} onMove={vi.fn()} onMoveTo={vi.fn()} onRemove={vi.fn()} />);
 
   expect(screen.getByRole('link', { name: /Squat/ })).toHaveAttribute('href', '/workout/exercise?id=a');
   expect(screen.getByRole('link', { name: /Row/ })).toHaveAttribute('href', '/workout/exercise?id=b');
@@ -70,7 +93,7 @@ describe('exercise groups', () => {
     render(
       <WorkoutExerciseList
         items={grouped}
-        onMove={onMove}
+        onMove={onMove} onMoveTo={vi.fn()}
         onRemove={vi.fn()}
         onUngroup={onUngroup}
         renderGroup={(members) => <span>Rounds of {members.length}</span>}
@@ -88,7 +111,7 @@ describe('exercise groups', () => {
   });
 
   test('show no Ungroup without onUngroup', () => {
-    render(<WorkoutExerciseList items={grouped} onMove={vi.fn()} onRemove={vi.fn()} />);
+    render(<WorkoutExerciseList items={grouped} onMove={vi.fn()} onMoveTo={vi.fn()} onRemove={vi.fn()} />);
     expect(screen.queryByRole('button', { name: 'Ungroup' })).not.toBeInTheDocument();
   });
 
@@ -99,6 +122,7 @@ describe('exercise groups', () => {
       <WorkoutExerciseList
         items={[...grouped, { ...items[0], id: 'd', name: 'Row', groupId: null }]}
         onMove={vi.fn()}
+        onMoveTo={vi.fn()}
         onRemove={vi.fn()}
         selection={{ chosen: ['a'], onToggle, canChoose: (item) => item.id !== 'd' }}
       />,
@@ -111,4 +135,20 @@ describe('exercise groups', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Squat' }));
     expect(onToggle).toHaveBeenCalledWith('a');
   });
+});
+
+test('give every card a drag handle, but not while choosing for a superset', () => {
+  const { container, rerender } = render(<WorkoutExerciseList items={items} onMove={vi.fn()} onMoveTo={vi.fn()} onRemove={vi.fn()} />);
+  expect(container.querySelectorAll('[data-drag-handle]')).toHaveLength(2);
+
+  rerender(
+    <WorkoutExerciseList
+      items={items}
+      onMove={vi.fn()}
+      onMoveTo={vi.fn()}
+      onRemove={vi.fn()}
+      selection={{ chosen: [], onToggle: vi.fn(), canChoose: () => true }}
+    />,
+  );
+  expect(container.querySelectorAll('[data-drag-handle]')).toHaveLength(0);
 });

@@ -34,6 +34,10 @@ export type DistanceUnit = (typeof DISTANCE_UNITS)[number];
 export const PRESETS = ['simple', 'standard', 'advanced', 'custom'] as const;
 export type Preset = (typeof PRESETS)[number];
 
+// The color theme: "system" follows the phone's light or dark mode (decision 030).
+export const THEMES = ['system', 'light', 'dark'] as const;
+export type Theme = (typeof THEMES)[number];
+
 export const CATEGORIES = ['strength', 'cardio', 'stretch', 'mobility'] as const;
 export type Category = (typeof CATEGORIES)[number];
 
@@ -69,6 +73,7 @@ export type FeatureToggles = {
   setNotes: boolean;
   exerciseImages: boolean;
   charts: boolean;
+  statistics: boolean;
 };
 
 // Same as the standard preset.
@@ -82,6 +87,7 @@ export const DEFAULT_FEATURES: FeatureToggles = {
   setNotes: true,
   exerciseImages: true,
   charts: true,
+  statistics: true,
 };
 
 export const users = sqliteTable('users', {
@@ -108,6 +114,9 @@ export const userSettings = sqliteTable(
       .notNull()
       .default(sql`'{}'`),
     setupCompletedAt: integer('setupCompletedAt', { mode: 'timestamp_ms' }),
+    theme: text('theme', { enum: THEMES }).notNull().default('system'),
+    // The user's height in whole millimeters (decision 043). NULL = not entered.
+    heightMillimeters: integer('heightMillimeters'),
     ...timestamps,
   },
   (t) => [uniqueIndex('user_settings_user_idx').on(t.userId).where(notDeleted)],
@@ -184,11 +193,15 @@ export const exerciseImages = sqliteTable(
     position: integer('position').notNull(),
     // Path relative to the exercise image folder, such as "3_4_Sit-Up/0.jpg".
     path: text('path').notNull(),
+    // A file in the app's own storage (Filesystem plugin, data folder) that replaces the bundled
+    // image: a library image downloaded by the online library update (decision 038) or a photo of a
+    // custom exercise (decision 039). NULL = the image bundled with the app at `path`.
+    storedFile: text('storedFile'),
     license: text('license'),
     attribution: text('attribution'),
     ...timestamps,
   },
-  (t) => [uniqueIndex('exercise_images_exercise_position_idx').on(t.exerciseId, t.position)],
+  (t) => [uniqueIndex('exercise_images_exercise_position_idx').on(t.exerciseId, t.position).where(notDeleted)],
 );
 
 export const exercisePreferences = sqliteTable(
@@ -333,6 +346,22 @@ export const sets = sqliteTable(
   (t) => [index('sets_workout_exercise_idx').on(t.workoutExerciseId, t.position)],
 );
 
+// The user's bodyweight over time (decision 043). A new value is a new row, so older workouts keep
+// the bodyweight they had: a bodyweight applies to workouts from the start of the day it was measured.
+export const bodyweights = sqliteTable(
+  'bodyweights',
+  {
+    id: id(),
+    userId: text('userId')
+      .notNull()
+      .references(() => users.id),
+    weightGrams: integer('weightGrams').notNull(),
+    measuredAt: integer('measuredAt', { mode: 'timestamp_ms' }).notNull(),
+    ...timestamps,
+  },
+  (t) => [index('bodyweights_user_measured_idx').on(t.userId, t.measuredAt)],
+);
+
 export type User = typeof users.$inferSelect;
 export type AppState = typeof appState.$inferSelect;
 export type UserSettings = typeof userSettings.$inferSelect;
@@ -347,3 +376,4 @@ export type Workout = typeof workouts.$inferSelect;
 export type WorkoutGroup = typeof workoutGroups.$inferSelect;
 export type WorkoutExercise = typeof workoutExercises.$inferSelect;
 export type WorkoutSet = typeof sets.$inferSelect;
+export type Bodyweight = typeof bodyweights.$inferSelect;

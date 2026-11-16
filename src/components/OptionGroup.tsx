@@ -8,15 +8,18 @@ export default function OptionGroup<T extends string>({
   options,
   value,
   onChange,
+  hideLabel = false,
 }: {
   label: string;
+  // Hides the label on screen when a heading above already says it; screen readers still read it.
+  hideLabel?: boolean;
   options: Option<T>[];
   value: T;
   onChange: (value: T) => void;
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium">{label}</span>
+      <span className={hideLabel ? 'sr-only' : 'text-sm font-medium'}>{label}</span>
       <div role="radiogroup" aria-label={label} className="flex gap-2">
         {options.map((option) => (
           <button
@@ -27,8 +30,8 @@ export default function OptionGroup<T extends string>({
             onClick={() => onChange(option.value)}
             className={`flex-1 rounded-lg border px-3 py-2 text-sm ${
               option.value === value
-                ? 'border-sky-600 bg-sky-600 text-white'
-                : 'border-gray-400/50 bg-transparent'
+                ? 'border-primary bg-primary text-on-primary'
+                : 'border-line-strong bg-surface'
             }`}
           >
             {option.label}

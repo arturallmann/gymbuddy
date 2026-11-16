@@ -36,6 +36,27 @@
       "when": 1793256754443,
       "tag": "0004_greedy_lady_ursula",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1794691661074,
+      "tag": "0005_blue_zaran",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1794747381481,
+      "tag": "0006_old_viper",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1794757901348,
+      "tag": "0007_chubby_colonel_america",
+      "breakpoints": true
     }
   ]
 }

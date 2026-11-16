@@ -10,6 +10,7 @@ import type { Units } from '@/lib/units';
 import SetForm from './SetForm';
 import SetList from './SetList';
 import StretchTimer from './StretchTimer';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 const DEFAULT_STRETCH_SECONDS = 30;
 
@@ -23,20 +24,26 @@ const EMPTY_SET: SetValues = {
   notes: null,
 };
 
+// A workout exercise, or an exercise not in the workout yet (id null, decision 031).
+export type SetLogItem = Omit<WorkoutExerciseItem, 'id'> & { id: string | null };
+
 type Props = {
-  item: WorkoutExerciseItem;
+  item: SetLogItem;
   workoutId: string;
   // The units for this exercise: its unit override, otherwise the settings (getUnits).
   units: Units;
+  // Only for an exercise not in the workout yet: adds it with its first set.
+  onFirstSet?: (values: SetValues) => Promise<void>;
 };
 
 // The sets of one workout exercise: last time's sets, the stretch timer (for stretches),
 // the set form, then what was logged.
 // Tapping a logged set opens it for editing in the same form.
-export default function SetLog({ item, workoutId, units }: Props) {
+export default function SetLog({ item, workoutId, units, onFirstSet }: Props) {
   const features = useFeatures();
-  const { sets, lastSets, targets, add, update, remove } = useSets(item.id, item.exerciseId, workoutId);
+  const { sets, lastSets, targets, add, update, remove } = useSets(item.id, item.exerciseId, workoutId, onFirstSet);
   const [editingId, setEditingId] = useState<string | null>(null);
+  useBackHandler(editingId ? () => setEditingId(null) : null);
 
   if (sets === undefined || lastSets === undefined) {
     return null;
@@ -51,7 +58,7 @@ export default function SetLog({ item, workoutId, units }: Props) {
   return (
     <div className="flex flex-col gap-4">
       {lastSets.length > 0 && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           Last time:{' '}
           {lastSets
             .map((set) => formatSet(set, item.loadType, units) + (set.notes ? ` (${set.notes})` : ''))

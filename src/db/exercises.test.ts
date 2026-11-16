@@ -1,17 +1,21 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 import {
+  addExercisePhoto,
   createCustomExercise,
+  deleteExercisePhoto,
   deleteCustomExercise,
   getExerciseDetail,
   listEquipment,
   listMuscleGroups,
+  listPrimaryMuscleGroups,
   searchExercises,
   updateCustomExercise,
 } from './exercises';
 import { exerciseImages, exerciseMuscleGroups, exercises, muscleGroups, users } from './schema';
 import { getLocalSettings } from './settings';
 import { createTestDatabase } from '@/testing/database';
+import { addTestLibrary } from '@/testing/exercises';
 
 async function setup() {
   const { db } = await createTestDatabase();
@@ -156,7 +160,10 @@ describe('muscle groups and images', () => {
         { name: 'Biceps', role: 'primary' },
         { name: 'Forearms', role: 'secondary' },
       ],
-      images: ['Barbell_Curl/0.jpg', 'Barbell_Curl/1.jpg'],
+      images: [
+        { id: expect.any(String), path: 'Barbell_Curl/0.jpg', storedFile: null },
+        { id: expect.any(String), path: 'Barbell_Curl/1.jpg', storedFile: null },
+      ],
     });
   });
 
@@ -295,5 +302,162 @@ describe('custom exercises', () => {
     await createCustomExercise(db, userId, { ...input, equipment: null });
 
     expect(await listEquipment(db)).toEqual(['bands', 'barbell']);
+  });
+});
+
+describe('filters for the Add exercise page', () => {
+  // Library: Barbell Curl (biceps primary), Bench Press (chest primary, biceps secondary),
+  // plus a deleted custom stretch for chest and a hamstring stretch.
+  async function withLibrary() {
+    const { db, userId } = await setup();
+    await addTestLibrary(db);
+    const groups = await listMuscleGroups(db);
+    const id = (key: string) => groups.find((group) => group.key === key)!.id;
+    await db.insert(muscleGroups).values({ key: 'hamstrings', name: 'Hamstrings' });
+    const hamstrings = (await listMuscleGroups(db)).find((group) => group.key === 'hamstrings')!.id;
+    const stretch = await createCustomExercise(db, userId, {
+      name: 'Hamstring Stretch',
+      category: 'stretch',
+      equipment: null,
+      loadType: 'none',
+      tracksReps: false,
+      tracksDuration: true,
+      tracksDistance: false,
+      primaryMuscleGroupIds: [hamstrings],
+      secondaryMuscleGroupIds: [],
+    });
+    const deleted = await createCustomExercise(db, userId, {
+      name: 'Chest Stretch',
+      category: 'stretch',
+      equipment: null,
+      loadType: 'none',
+      tracksReps: false,
+      tracksDuration: true,
+      tracksDistance: false,
+      primaryMuscleGroupIds: [id('chest')],
+      secondaryMuscleGroupIds: [],
+    });
+    await deleteCustomExercise(db, userId, deleted);
+    return { db, userId, biceps: id('biceps'), stretch };
+  }
+
+  test('find only exercises where the muscle group is primary', async () => {
+    const { db, userId, biceps } = await withLibrary();
+
+    const any = await searchExercises(db, userId, '', { muscleGroupId: biceps });
+    const primary = await searchExercises(db, userId, '', { muscleGroupId: biceps, role: 'primary' });
+
+    expect(any.map((exercise) => exercise.name)).toEqual(['Barbell Curl', 'Bench Press']);
+    expect(primary.map((exercise) => exercise.name)).toEqual(['Barbell Curl']);
+  });
+
+  test('find only the user’s custom exercises', async () => {
+    const { db, userId } = await withLibrary();
+
+    const found = await searchExercises(db, userId, '', { customOnly: true });
+
+    expect(found.map((exercise) => exercise.name)).toEqual(['Hamstring Stretch']);
+  });
+
+  test('find only exercises of one category', async () => {
+    const { db, userId } = await withLibrary();
+
+    const found = await searchExercises(db, userId, '', { category: 'stretch' });
+
+    expect(found.map((exercise) => exercise.name)).toEqual(['Hamstring Stretch']);
+  });
+
+  test('list muscle groups that are primary for a visible exercise, of a category when given', async () => {
+    const { db, userId } = await withLibrary();
+
+    expect((await listPrimaryMuscleGroups(db, userId)).map((group) => group.name)).toEqual(['Biceps', 'Chest', 'Hamstrings']);
+    expect((await listPrimaryMuscleGroups(db, userId, 'stretch')).map((group) => group.name)).toEqual(['Hamstrings']);
+  });
+
+  test('leave out custom exercises of other users', async () => {
+    const { db } = await withLibrary();
+    const otherUser = crypto.randomUUID();
+    await db.insert(users).values({ id: otherUser });
+
+    expect(await listPrimaryMuscleGroups(db, otherUser, 'stretch')).toEqual([]);
+  });
+});
+
+describe('photos of custom exercises', () => {
+  async function withCustom() {
+    const { db, userId } = await setup();
+    const id = await createCustomExercise(db, userId, {
+      name: 'Cable Thing',
+      category: 'strength',
+      equipment: 'cable',
+      loadType: 'external',
+      tracksReps: true,
+      tracksDuration: false,
+      tracksDistance: false,
+      primaryMuscleGroupIds: [],
+      secondaryMuscleGroupIds: [],
+    });
+    return { db, userId, id };
+  }
+
+  test('add photos in order and show the first one in lists', async () => {
+    const { db, userId, id } = await withCustom();
+
+    await addExercisePhoto(db, userId, id, 'exercise-photos/a.jpg');
+    await addExercisePhoto(db, userId, id, 'exercise-photos/b.jpg');
+
+    const detail = await getExerciseDetail(db, userId, id);
+    expect(detail?.images.map((image) => [image.path, image.storedFile])).toEqual([
+      ['exercise-photos/a.jpg', 'exercise-photos/a.jpg'],
+      ['exercise-photos/b.jpg', 'exercise-photos/b.jpg'],
+    ]);
+    const [found] = await searchExercises(db, userId, 'Cable Thing');
+    expect(found.imageStoredFile).toBe('exercise-photos/a.jpg');
+  });
+
+  test('delete a photo; the next one becomes the first, and a new photo goes last', async () => {
+    const { db, userId, id } = await withCustom();
+    const first = await addExercisePhoto(db, userId, id, 'exercise-photos/a.jpg');
+    await addExercisePhoto(db, userId, id, 'exercise-photos/b.jpg');
+
+    await deleteExercisePhoto(db, userId, first!);
+    await addExercisePhoto(db, userId, id, 'exercise-photos/c.jpg');
+
+    const detail = await getExerciseDetail(db, userId, id);
+    expect(detail?.images.map((image) => image.storedFile)).toEqual(['exercise-photos/b.jpg', 'exercise-photos/c.jpg']);
+    const [found] = await searchExercises(db, userId, 'Cable Thing');
+    expect(found.imageStoredFile).toBe('exercise-photos/b.jpg');
+    const [row] = await db.select().from(exerciseImages).where(eq(exerciseImages.id, first!));
+    expect(row.deletedAt).not.toBeNull();
+  });
+
+  test('add or delete photos only on the user’s own custom exercises', async () => {
+    const { db, userId, id } = await withCustom();
+    await addTestLibrary(db);
+    const [library] = await searchExercises(db, userId, 'Barbell Curl');
+    const other = crypto.randomUUID();
+    await db.insert(users).values({ id: other });
+
+    expect(await addExercisePhoto(db, userId, library.id, 'exercise-photos/x.jpg')).toBeNull();
+    expect(await addExercisePhoto(db, other, id, 'exercise-photos/x.jpg')).toBeNull();
+    const libraryImage = (await getExerciseDetail(db, userId, library.id))!.images[0];
+    await deleteExercisePhoto(db, userId, libraryImage.id);
+    const photo = await addExercisePhoto(db, userId, id, 'exercise-photos/a.jpg');
+    await deleteExercisePhoto(db, other, photo!);
+
+    expect((await getExerciseDetail(db, userId, library.id))!.images).toHaveLength(2);
+    expect((await getExerciseDetail(db, userId, id))!.images).toHaveLength(1);
+  });
+
+  test('two photos at once get different positions', async () => {
+    const { db, userId, id } = await withCustom();
+
+    await Promise.all([
+      addExercisePhoto(db, userId, id, 'exercise-photos/a.jpg'),
+      addExercisePhoto(db, userId, id, 'exercise-photos/b.jpg'),
+    ]);
+
+    const rows = await db.select().from(exerciseImages).where(eq(exerciseImages.exerciseId, id));
+    expect(rows.map((row) => row.position).sort()).toEqual([1, 2]);
   });
 });

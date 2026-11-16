@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, test, vi } from 'vitest';
 import SaveTemplate from './SaveTemplate';
+import { backStack } from '@/lib/backStack';
 
 test('suggest the default name, save it and confirm with a link to the list', async () => {
   const user = userEvent.setup();
@@ -32,4 +33,19 @@ test('refuse an empty name and cancel without saving', async () => {
 
   expect(onSave).not.toHaveBeenCalled();
   expect(screen.getByRole('button', { name: 'Save superset' })).toBeInTheDocument();
+});
+
+test('close the name form with Android Back, without saving', async () => {
+  const user = userEvent.setup();
+  const onSave = vi.fn();
+  render(<SaveTemplate label="Save as routine" defaultName="Monday" listHref="/routines" listLabel="Routines" onSave={onSave} />);
+  await user.click(screen.getByRole('button', { name: 'Save as routine' }));
+
+  act(() => {
+    backStack.back();
+  });
+
+  expect(screen.queryByRole('textbox', { name: 'Name' })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Save as routine' })).toBeInTheDocument();
+  expect(onSave).not.toHaveBeenCalled();
 });

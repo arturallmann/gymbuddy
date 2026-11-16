@@ -7,12 +7,12 @@ The source of truth is `src/db/schema.ts`. This file explains the meaning behind
 | Table | Holds |
 |---|---|
 | users | One local user per phone. Later linked to an online account. |
-| user_settings | Units, feature toggles, preset and first-time setup state. One row per user. |
-| app_state | Values the app keeps for itself, one row per key (`libraryVersion`). Not user data. |
+| user_settings | Units, theme, feature toggles, preset and first-time setup state. One row per user. |
+| app_state | Values the app keeps for itself, one row per key (`libraryVersion`, `onlineLibraryCommit`, `libraryCheckedAt`). Not user data. |
 | muscle_groups | Muscle areas such as back, biceps, hamstrings. |
 | exercises | Library exercises (`userId` is null) and custom exercises (`userId` set). |
 | exercise_muscle_groups | Links exercises to muscle groups, with role `primary` or `secondary`. |
-| exercise_images | Images for an exercise, with order, license and attribution. |
+| exercise_images | Images for an exercise, with order, license and attribution. `storedFile` points to a file in the app's storage (downloaded library image or photo); NULL = bundled image. |
 | exercise_preferences | The user's own settings for one exercise: standing notes and unit overrides. |
 | templates | A saved superset or routine. |
 | template_exercises | Exercises in a template, with order, superset key and optional targets. |
@@ -20,6 +20,7 @@ The source of truth is `src/db/schema.ts`. This file explains the meaning behind
 | workout_groups | A superset, circuit or giant set inside one workout. |
 | workout_exercises | One exercise inside one workout, with order and phase. |
 | sets | One logged effort, with weight, reps, duration or distance. |
+| bodyweights | The user's bodyweight over time, one row per entry (decision 043). |
 
 ## Units
 
@@ -28,6 +29,7 @@ The source of truth is `src/db/schema.ts`. This file explains the meaning behind
 | Weight | integer grams | 12.5 kg → `12500` |
 | Duration | integer seconds | 1 min 30 s → `90` |
 | Distance | meters | 5 km → `5000` |
+| Height | integer millimeters (`user_settings.heightMillimeters`) | 180 cm → `1800` |
 | Dates | integer milliseconds (Drizzle `timestamp_ms`) | |
 
 ## Display units
@@ -53,6 +55,11 @@ A user can choose a different unit for one exercise in `exercise_preferences` (f
 - The set form shows the active unit next to the input, so the user always sees which unit applies.
 - First-time setup suggests units from the phone's region (for example `en-US` → lb and imperial).
 
+## Theme
+
+`user_settings.theme` is `system` (default), `light` or `dark` (decision 030). It changes only colors.
+`system` follows the phone's light or dark mode.
+
 ## Feature toggles
 
 `user_settings.features` is a JSON object. Code merges it over `DEFAULT_FEATURES` from the schema file.
@@ -69,6 +76,7 @@ A new toggle therefore needs no migration: add it to `FeatureToggles` and `DEFAU
 | `setNotes` | Notes field on each set |
 | `exerciseImages` | Images in the exercise browser |
 | `charts` | Chart view (history view stays) |
+| `statistics` | Personal records on the exercise page, the workout summary and PR badges, the statistics page |
 
 Rules:
 - A toggle hides input and controls only. It never deletes or hides stored data.
@@ -77,11 +85,11 @@ Rules:
 
 ## Presets (first-time setup)
 
-| Preset | restTimer | supersets | templates | rpe | setTypes | phases | setNotes | exerciseImages | charts |
-|---|---|---|---|---|---|---|---|---|---|
-| simple | off | off | off | off | off | off | off | on | on |
-| standard | on | on | on | off | off | off | on | on | on |
-| advanced | on | on | on | on | on | on | on | on | on |
+| Preset | restTimer | supersets | templates | rpe | setTypes | phases | setNotes | exerciseImages | charts | statistics |
+|---|---|---|---|---|---|---|---|---|---|---|
+| simple | off | off | off | off | off | off | off | on | on | off |
+| standard | on | on | on | off | off | off | on | on | on | on |
+| advanced | on | on | on | on | on | on | on | on | on | on |
 
 First-time setup has three short steps: units, preset, optional fine-tuning of single toggles.
 Changing any toggle afterwards sets `preset` to `custom`. Settings can change at any time.
@@ -166,6 +174,35 @@ Both views use one query: sets → workout_exercises (by `exerciseId`) → worko
 `workouts.startedAt`, then `workout_exercises.position`, then `sets.position`.
 Sets without a value for the charted field are left out of the chart, but stay in the history.
 
+Chart values per workout (decision 029): heaviest weight (`weightGrams`, added weight on bodyweight
+exercises), most reps, volume (sum of weight × reps, external load only), longest duration and
+longest distance. The chart offers only values the exercise tracks; a note-only exercise has none.
+Decision 043 adds the e1RM (external load with reps) and the volume of bodyweight exercises (once the user
+has a bodyweight).
+
+## Statistics (decision 043)
+
+All statistics are derived at query time from the fixed fields; nothing derived is stored.
+The counting rules live in `src/lib/statistics.ts`.
+
+- **Bodyweight:** a row in `bodyweights` applies from the start of the day it was measured until the next
+  one. A new bodyweight is a new row, so earlier workouts keep their bodyweight. Before the first row a
+  workout has no bodyweight.
+- **Volume:** weight × reps per set. External load: `weightGrams`. Bodyweight exercise: bodyweight of the
+  workout's day + added weight (assisted = negative); no volume without a bodyweight. Load type none and
+  sets without reps have no volume. Totals across exercises use the global weight unit.
+- **e1RM:** Epley, weight × (1 + reps ÷ 30), from sets of 1–12 reps with external load; 1 rep = its weight.
+- **Personal records:** never include the bodyweight. External load: e1RM, heaviest weight, most volume in
+  one workout. Bodyweight exercise: heaviest added weight (above zero) and most reps. Plus longest duration
+  and longest distance when tracked. A workout reaches a personal record when its value beats every earlier
+  workout with the exercise; the first workout with an exercise reaches none.
+- **Muscle groups:** a set counts 1 for each primary muscle group and ½ for each secondary one; volume
+  is shared the same way.
+- The statistics page counts ended workouts in the chosen time span (4 weeks, 3 months, a year).
+- **Muscle map (decision 046):** the same muscle group counts, shaded per muscle group relative to the most
+  trained one: sets per week (default) or volume per week on the statistics page, sets of one workout on the
+  workout detail page and the "Workout ended" page.
+
 ## Phases
 
 `workout_exercises.phase` is `warmup`, `main` or `cooldown`.
@@ -198,9 +235,19 @@ the commit in `data/free-exercise-db/version.json` or `SEED_VERSION` in `src/db/
 Raise `SEED_VERSION` when `toLibraryExercise()` maps exercises differently.
 Exercises that free-exercise-db removes stay on the phone, because workouts and exercise preferences use them.
 
+### Online library update (decision 038)
+
+When online, at most once a day, the app checks free-exercise-db for a newer commit, downloads and checks
+its library file and the images it does not bundle or that changed, then seeds the library in one
+transaction. Downloaded images live in the app's data folder; `exercise_images.storedFile` points to them.
+`app_state.onlineLibraryCommit` is the applied commit; a new bundled library clears it.
+
 ### Custom exercises
 
 A custom exercise has `source = 'custom'`, `userId` set and `sourceId` NULL.
 The user chooses name, category, equipment, load type, tracked fields and muscle groups.
 Only custom exercises can change; library exercises change only through library updates.
 Deleting a custom exercise writes `deletedAt`: search no longer finds it, but workouts that used it still show it.
+A custom exercise can have photos (decision 039): rows in `exercise_images` with `storedFile` set to a JPEG
+in the app's data folder (`exercise-photos/<uuid>.jpg`). Removing a photo writes `deletedAt`; the file stays.
+The first photo that is not deleted shows in exercise lists.

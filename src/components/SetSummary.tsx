@@ -29,7 +29,7 @@ export default function SetSummary({ workoutExerciseId, exerciseId, loadType }: 
     return null;
   }
   return (
-    <span className="block text-sm text-gray-500">
+    <span className="block text-sm text-muted">
       {sets.length === 0 ? 'No sets yet' : sets.map((set) => formatSet(set, loadType, units)).join(', ')}
     </span>
   );

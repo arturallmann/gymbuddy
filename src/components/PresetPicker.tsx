@@ -23,12 +23,12 @@ export default function PresetPicker({
           role="radio"
           aria-checked={preset === value}
           onClick={() => onChange(preset)}
-          className={`flex flex-col items-start rounded-lg border p-4 text-left ${
-            preset === value ? 'border-sky-600 ring-2 ring-sky-600' : 'border-gray-400/50'
+          className={`flex flex-col items-start rounded-lg border bg-surface p-4 text-left ${
+            preset === value ? 'border-primary ring-2 ring-primary' : 'border-line-strong'
           }`}
         >
           <span className="font-semibold">{PRESET_LABELS[preset]}</span>
-          <span className="text-sm text-gray-500">{PRESET_DESCRIPTIONS[preset]}</span>
+          <span className="text-sm text-muted">{PRESET_DESCRIPTIONS[preset]}</span>
         </button>
       ))}
     </div>

@@ -62,48 +62,107 @@ Each task is small enough for one branch. Each task lists how to check that it i
 - [x] **3b.4** Routines: save a full workout as a template and start a workout from it (Routines page, decision 027).
 - [x] **3b.5** Export adds a "Group" column (for example "Superset 1"); the import reads it back (decision 028).
 
-## Phase 4 — Progress views (current)
+## Phase 4 — Progress views (done)
 
-- [ ] **4.1** History view per exercise: every set in order, with notes.
-- [ ] **4.2** Chart view per exercise for weight, reps, duration and distance only.
+- [x] **4.1** History view per exercise: every set in order, with notes.
+- [x] **4.2** Chart view per exercise for weight, reps, duration and distance only (own SVG chart, decision 029).
   Done when: note-only exercises show the history view and no chart.
 
-## Phase 4b — Interface polish
+## Phase 4b — Interface polish (done)
 
 Starts when the basic features above work, so the details can be tuned in one go.
 Most visual and UX overhauls happen here.
 
-- [ ] **4b.1** Drag to reorder workout exercises.
+- [x] **4b.1** Drag to reorder workout exercises (dnd-kit, decision 033).
   A drag handle on the right of each workout exercise starts a drag right away.
   A short hold anywhere on the workout exercise also starts a drag from where the finger is.
   The ↑ and ↓ buttons from 2.2 go away, or stay only for screen readers.
   Probably needs a drag library (for example dnd-kit); say why in the task summary.
   Done when: reordering by drag works on a phone, and scrolling the page does not start a drag.
-- [ ] **4b.2** Fix every Android Back action: today the Back button and the Back gesture close the app on every page.
+- [x] **4b.2** Fix every Android Back action (decision 034): today the Back button and the Back gesture close the app on every page.
   Back first closes what is open on the page (the exercise picker, a confirm step, a set being edited),
   then goes back one page. Only on the home page does it close the app.
   Needs the Capacitor App plugin (`backButton` event), wrapped in `src/native/`.
   Done when: on a phone, Back never closes the app outside the home page, for example
   workout exercise page → workout → home, exercise detail → exercises → home, workout detail → workout history → home.
-- [ ] **4b.3** Make "Remove" for a workout exercise and "Remove" for a set look different,
+- [x] **4b.3** Make "Remove" for a workout exercise and "Remove" for a set look different,
   so a tap meant for a set never removes the whole workout exercise (for example an icon, or a confirm step).
-- [ ] **4b.4** Update exercise images when the phone is online.
+  Done with a confirm step and two different trash icons (decision 036).
+- [x] **4b.4** Update exercise images when the phone is online (with the whole library, decision 038).
   The app ships the images of one free-exercise-db commit (decision 021). When the phone has internet,
   the app checks for a newer library version and downloads only changed or new images.
   Offline, the bundled images stay. Logging never waits for the check.
-- [ ] **4b.5** Images for custom exercises: take a photo or pick one from the phone.
+- [x] **4b.5** Images for custom exercises: take a photo or pick one from the phone (decision 039).
   Needs the Camera plugin, wrapped in `src/native/`, and images stored on the phone.
-- [ ] **4b.6** Color schemes and theme support: light, dark and "same as the phone".
+- [x] **4b.6** Color schemes and theme support: light, dark and "same as the phone".
   Colors come from a small set of named colors (Tailwind theme or CSS variables), not hard-coded classes,
   so cards, borders and plain buttons stay visible in every theme. Today the light theme hides most borders
   (for example "Add exercise", "Skip rest", "Ungroup" look like plain text).
   Done when: every page reads well in light and dark on a phone, and the choice lives in settings.
+  Done with the "Bumper Plate" colors (decision 030).
+- [x] **4b.7** Adding exercises (decision 031): a + button on the workout page opens an "Add exercise" page
+  with a search field and the muscle groups, each opening its exercises; saved supersets in its top bar.
+  Tapping an exercise opens its page right away; the first logged set adds it to the workout.
+  "Discard workout" goes away; the elapsed time gets smaller.
+  Then (decision 032): "End workout" and + in a bottom bar, "Save as routine" in the top bar, muscle groups
+  list only exercises where they are primary, a category filter, and arrow-only back links.
+- [x] **4b.8** Clean home page (decision 035): app name top left; a book icon with workout history, exercises,
+  routines and saved supersets, and a gear icon for settings, top right; today's workouts under "Start workout".
+  Trash icons instead of "Remove"; category and "Custom only" filters in the exercise browser.
+- [x] **4b.9** Calendar view of past workouts, like FitNotes (idea B, plate bars, decision 040).
+  - Month view and week view, with a switch between them. Arrows (and a swipe) go to the previous or
+    next month or week; a "Today" button jumps back. Weeks start on the phone's first day of the week.
+  - Today is marked in both views, also on days without a workout.
+  - A day with a workout shows small bars in the plate colors of its categories (idea B).
+  - Tapping a day with a workout expands it: its workouts with time, duration, exercises and number of
+    sets, each opening its workout detail page. Tapping again, or Android Back, closes it.
+  - A calendar icon on the home page opens it, on the current week (decision 041). Uses
+    `listWorkoutHistory()` with a time span per month or week.
+  Done when: on a phone, a past workout is two taps away from the calendar, and both views work offline.
+- [x] **4b.10** "Done before" first (decision 037): search results and muscle group lists show the exercises
+  the user did first, the most frequent first, with how many workouts; all others follow.
+- [x] **4b.11** Exercise view visual overhaul (tabs, − and + for weight and reps, decision 042): the exercise page (library and custom exercises) and the
+  workout exercise page get a clearer layout: images or photos, muscle groups, instructions, notes,
+  progress and the set form, in an order that suits logging at the gym. Start with a preview page of
+  layout ideas, like the color and calendar ideas, and pick one before building.
+- [x] **4b.12** Advanced statistics for exercises, workouts and muscle groups, from the fixed fields only
+  (decision 010; built as decision 043: personal records and an e1RM chart on the exercise page, a summary and
+  PR badges on the workout detail page, a statistics page with workouts, exercises, muscle groups and
+  bodyweight, and height and bodyweight in the settings):
+  - Exercise: estimated one-rep max (e1RM) per workout and its highest value, personal records (heaviest weight,
+    most reps at a weight, best e1RM, most volume in one workout, longest duration or distance),
+    total volume over time.
+  - Workout: volume of the workout, number of sets and exercises, volume per muscle group, and the
+    personal records it reached.
+  - Muscle group: volume and number of sets per week, and which exercises trained it.
+  Needs a decision first: the e1RM formula (for example Epley), how bodyweight and duration-only sets
+  count, and how a secondary muscle group counts (for example half).
+  Done when: the numbers match a hand count on test data, and each statistic says how it is counted.
+- [x] **4b.13** Muscle map (decision 046: warm clay shades, front and back side by side; on the statistics
+  page, the workout detail page and a new "Workout ended" page after "End workout"): a front and back drawing of the body with one area per muscle group. After a workout,
+  and on a workout detail page, each area is colored by the volume its muscle group got in that workout,
+  with a small legend. Uses the muscle group volume and the counting rules from 4b.12.
+  The drawing is our own SVG (one path per muscle group, matching the library's muscle groups), not
+  copied from another app.
 
-## Phase 5 — Online (later)
+## Phase 5 — Testing and polish (current)
 
-- [ ] Backups to a server.
-- [ ] Friends can view each other's history.
+Use the app at the gym, find what gets in the way, and fix it. Online features moved to `docs/IDEAS.md`.
+
+- [ ] **5.1** Test every page on a phone, in light and dark, with the simple, standard and advanced presets:
+  logging a workout from start to end, supersets, routines, calendar, statistics, export and import,
+  photos, Android Back on every page. Write each problem down as a task below.
+  Done when: every page was tried on a phone and each problem found is a task in this phase.
+- [ ] **5.2** Fix the problems found in 5.1, one task each, with a test that fails without the fix.
+- [ ] **5.3** Smaller polish found while using the app, such as keeping the search text of the
+  "Add exercise" page when Back returns to it (decision 048).
+- [ ] **5.4** App logo. Start with a preview page of logo ideas in the "Bumper Plate" colors (decision 030)
+  and pick one before building. Then the Android launcher icon (adaptive icon: foreground and background
+  layers, plus a round icon), the splash screen, the browser favicon and the dumbbell mark on the home page.
+  Our own drawing, not copied from another app.
+  Done when: the logo shows on the phone's home screen, in the app list and on the splash screen, in light
+  and dark, and reads well at small sizes.
 
 ## Ideas (not planned)
 
-See `docs/IDEAS.md`: smart watch support.
+See `docs/IDEAS.md`: online features (backups, friends) and smart watch support.

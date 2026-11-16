@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import type { Workout } from '@/db/schema';
-import { deleteWorkout, endWorkout, getActiveWorkout, startWorkout } from '@/db/workouts';
+import { endWorkout, getActiveWorkout, startWorkout } from '@/db/workouts';
 import { useSettings } from './useSettings';
 
 // The active workout of the local user. `workout` is undefined while it loads
@@ -35,11 +35,5 @@ export function useActiveWorkout() {
     setWorkout(null);
   }, [db, workout]);
 
-  const discard = useCallback(async () => {
-    if (!workout) return;
-    await deleteWorkout(db, workout.id);
-    setWorkout(null);
-  }, [db, workout]);
-
-  return { workout, start, end, discard };
+  return { workout, start, end };
 }

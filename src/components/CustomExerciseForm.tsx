@@ -20,7 +20,7 @@ const TRACKED_FIELDS = [
   { key: 'tracksDistance', label: 'Distance' },
 ] as const;
 
-const inputClass = 'w-full min-w-0 rounded-lg border px-3 py-2 text-black';
+const inputClass = 'w-full min-w-0 rounded-lg border px-3 py-2';
 
 // Name, category, equipment, load type, tracked fields and muscle groups of a custom exercise.
 export default function CustomExerciseForm({ initial, muscleGroups, equipment, submitLabel, onSave }: Props) {
@@ -110,7 +110,7 @@ export default function CustomExerciseForm({ initial, muscleGroups, equipment, s
             {field.label}
           </label>
         ))}
-        <span className="text-xs text-gray-500">Without tracked fields, sets hold notes only.</span>
+        <span className="text-xs text-muted">Without tracked fields, sets hold notes only.</span>
       </fieldset>
       {(['primaryMuscleGroupIds', 'secondaryMuscleGroupIds'] as const).map((list) => (
         <fieldset key={list} className="flex flex-col gap-2">
@@ -132,14 +132,14 @@ export default function CustomExerciseForm({ initial, muscleGroups, equipment, s
         </fieldset>
       ))}
       {error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
       <button
         type="submit"
         disabled={saving}
-        className="rounded-lg bg-sky-600 px-4 py-2 font-semibold text-white disabled:opacity-50"
+        className="rounded-lg bg-primary px-4 py-2 font-semibold text-on-primary disabled:opacity-50"
       >
         {submitLabel}
       </button>

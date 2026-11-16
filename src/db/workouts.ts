@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, isNotNull, isNull, max, ne } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, lt, max, ne } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
 import {
   exercises,
@@ -6,12 +6,13 @@ import {
   workoutExercises,
   workoutGroups,
   workouts,
+  type Category,
   type Exercise,
   type Phase,
   type Workout,
   type WorkoutSet,
 } from './schema';
-import { moveBlock } from '@/lib/blocks';
+import { moveBlock, moveBlockTo } from '@/lib/blocks';
 import type { SetValues } from '@/lib/sets';
 
 const active = (userId: string) =>
@@ -53,7 +54,7 @@ export async function endWorkout(db: AppDatabase, id: string, endedAt: Date = ne
 }
 
 // Deletes the workout with its workout exercises, sets and exercise groups, in one transaction.
-// "Discard workout" uses it for the active workout, "Delete workout" for a past one.
+// "Delete workout" on a past workout uses it.
 export async function deleteWorkout(db: AppDatabase, id: string, deletedAt: Date = new Date()) {
   await db.transaction(async (tx) => {
     const exerciseIds = tx
@@ -151,10 +152,35 @@ export async function addWorkoutExercise(
   return id;
 }
 
-// Moves the workout exercise one block up or down inside its phase. A block is one workout
-// exercise or a whole exercise group, so group members stay together. Does nothing at the
-// top or bottom of the phase.
-export async function moveWorkoutExercise(db: AppDatabase, id: string, direction: 'up' | 'down') {
+// Adds an exercise to the end of the workout together with its first set, in one transaction.
+// An exercise opened from the "Add exercise" page joins the workout only when its first set is
+// logged (decision 031), so the workout never gets a workout exercise without sets this way.
+export async function addWorkoutExerciseWithSet(
+  db: AppDatabase,
+  workoutId: string,
+  exerciseId: string,
+  phase: Phase,
+  values: SetValues,
+  completedAt: Date = new Date(),
+): Promise<string> {
+  const id = crypto.randomUUID();
+  await db.transaction(async (tx) => {
+    const [{ last }] = await tx
+      .select({ last: max(workoutExercises.position).as('last') })
+      .from(workoutExercises)
+      .where(notDeletedIn(workoutId));
+    await tx.insert(workoutExercises).values({ id, workoutId, exerciseId, phase, position: (last ?? 0) + 1 });
+    await tx.insert(sets).values({ ...values, id: crypto.randomUUID(), workoutExerciseId: id, position: 1, completedAt });
+  });
+  return id;
+}
+
+type PhaseItem = { id: string; position: number; groupId: string | null };
+
+// Gives the workout exercises of one phase a new order, in one transaction. `reorder` gets the
+// phase in position order and returns the new id order. The phase keeps its positions; only who
+// holds which position changes.
+async function reorderPhase(db: AppDatabase, id: string, reorder: (list: PhaseItem[]) => string[]) {
   await db.transaction(async (tx) => {
     const [row] = await tx
       .select({ workoutId: workoutExercises.workoutId, phase: workoutExercises.phase })
@@ -168,15 +194,27 @@ export async function moveWorkoutExercise(db: AppDatabase, id: string, direction
       .from(workoutExercises)
       .where(and(notDeletedIn(row.workoutId), eq(workoutExercises.phase, row.phase)))
       .orderBy(asc(workoutExercises.position));
-    // The phase keeps its positions; only who holds which position changes.
     const positions = list.map((item) => item.position);
-    const order = moveBlock(list, id, direction);
+    const order = reorder(list);
     for (const [index, itemId] of order.entries()) {
       if (list[index].id !== itemId) {
         await tx.update(workoutExercises).set({ position: positions[index] }).where(eq(workoutExercises.id, itemId));
       }
     }
   });
+}
+
+// Moves the workout exercise one block up or down inside its phase. A block is one workout
+// exercise or a whole exercise group, so group members stay together. Does nothing at the
+// top or bottom of the phase.
+export async function moveWorkoutExercise(db: AppDatabase, id: string, direction: 'up' | 'down') {
+  await reorderPhase(db, id, (list) => moveBlock(list, id, direction));
+}
+
+// Moves the block of the workout exercise to block index `to` inside its phase (0 is the top),
+// such as after a drag (4b.1). A group moves as a whole.
+export async function moveWorkoutExerciseTo(db: AppDatabase, id: string, to: number) {
+  await reorderPhase(db, id, (list) => moveBlockTo(list, id, to));
 }
 
 // Moves a workout exercise to another phase. Its position stays, so it keeps its
@@ -302,37 +340,64 @@ export async function getLastSets(db: AppDatabase, exerciseId: string, workoutId
 export type WorkoutHistoryItem = Pick<Workout, 'id' | 'startedAt' | 'endedAt'> & {
   exerciseNames: string[];
   setCount: number;
+  // The workout exercises in order, with their category and number of sets (for the calendar).
+  exercises: { name: string; category: Category; sets: number }[];
 };
 
 // Ended workouts of the user, newest first, with their exercise names and number of sets.
-export async function listWorkoutHistory(db: AppDatabase, userId: string): Promise<WorkoutHistoryItem[]> {
+// With `startedIn`, only workouts that started in that time span (from included, to not),
+// such as today for the home page.
+export async function listWorkoutHistory(
+  db: AppDatabase,
+  userId: string,
+  startedIn?: { from: Date; to: Date },
+): Promise<WorkoutHistoryItem[]> {
   const ended = await db
     .select({ id: workouts.id, startedAt: workouts.startedAt, endedAt: workouts.endedAt })
     .from(workouts)
-    .where(and(eq(workouts.userId, userId), isNotNull(workouts.endedAt), isNull(workouts.deletedAt)))
+    .where(
+      and(
+        eq(workouts.userId, userId),
+        isNotNull(workouts.endedAt),
+        isNull(workouts.deletedAt),
+        startedIn ? gte(workouts.startedAt, startedIn.from) : undefined,
+        startedIn ? lt(workouts.startedAt, startedIn.to) : undefined,
+      ),
+    )
     .orderBy(desc(workouts.startedAt));
   if (ended.length === 0) {
     return [];
   }
   const ids = ended.map((workout) => workout.id);
   const names = await db
-    .select({ workoutId: workoutExercises.workoutId, name: exercises.name })
+    .select({
+      id: workoutExercises.id,
+      workoutId: workoutExercises.workoutId,
+      name: exercises.name,
+      category: exercises.category,
+    })
     .from(workoutExercises)
     .innerJoin(exercises, eq(exercises.id, workoutExercises.exerciseId))
     .where(and(inArray(workoutExercises.workoutId, ids), isNull(workoutExercises.deletedAt)))
     .orderBy(asc(workoutExercises.position));
   const counts = await db
-    .select({ workoutId: workoutExercises.workoutId, sets: count(sets.id).as('setCount') })
+    .select({ workoutExerciseId: sets.workoutExerciseId, sets: count(sets.id).as('setCount') })
     .from(sets)
     .innerJoin(workoutExercises, eq(workoutExercises.id, sets.workoutExerciseId))
     .where(and(inArray(workoutExercises.workoutId, ids), isNull(workoutExercises.deletedAt), isNull(sets.deletedAt)))
-    .groupBy(workoutExercises.workoutId);
-  const setCounts = new Map(counts.map((row) => [row.workoutId, row.sets]));
-  return ended.map((workout) => ({
-    ...workout,
-    exerciseNames: names.filter((row) => row.workoutId === workout.id).map((row) => row.name),
-    setCount: setCounts.get(workout.id) ?? 0,
-  }));
+    .groupBy(sets.workoutExerciseId);
+  const setCounts = new Map(counts.map((row) => [row.workoutExerciseId, row.sets]));
+  return ended.map((workout) => {
+    const items = names
+      .filter((row) => row.workoutId === workout.id)
+      .map((row) => ({ name: row.name, category: row.category, sets: setCounts.get(row.id) ?? 0 }));
+    return {
+      ...workout,
+      exerciseNames: items.map((item) => item.name),
+      setCount: items.reduce((sum, item) => sum + item.sets, 0),
+      exercises: items,
+    };
+  });
 }
 
 // One workout, or null when it does not exist or was deleted.

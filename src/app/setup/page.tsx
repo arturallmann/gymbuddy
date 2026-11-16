@@ -10,6 +10,7 @@ import { useSettings } from '@/hooks/useSettings';
 import { PRESET_FEATURES } from '@/lib/features';
 import { suggestUnits } from '@/lib/region';
 import type { Units } from '@/lib/units';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 type Step = 'units' | 'preset' | 'features';
 
@@ -18,6 +19,8 @@ export default function SetupPage() {
   const { updateSettings } = useSettings();
   const router = useRouter();
   const [step, setStep] = useState<Step>('units');
+  // Android Back goes one step back; on the first step it closes the app.
+  useBackHandler(step === 'units' ? null : () => setStep(step === 'features' ? 'preset' : 'units'));
   const [units, setUnits] = useState<Units>(() =>
     suggestUnits(typeof navigator === 'undefined' ? 'en' : navigator.language),
   );
@@ -36,19 +39,19 @@ export default function SetupPage() {
     router.replace('/');
   }
 
-  const primary = 'flex-1 rounded-lg bg-sky-600 px-4 py-3 font-semibold text-white disabled:opacity-50';
-  const secondary = 'flex-1 rounded-lg border border-gray-400/50 px-4 py-3';
+  const primary = 'flex-1 rounded-lg bg-primary px-4 py-3 font-semibold text-on-primary disabled:opacity-50';
+  const secondary = 'flex-1 rounded-lg border border-line-strong bg-surface px-4 py-3';
 
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex flex-col gap-1">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           Step {step === 'units' ? 1 : step === 'preset' ? 2 : 3} of 3
         </p>
         <h1 className="text-2xl font-bold">
           {step === 'units' ? 'Units' : step === 'preset' ? 'Preset' : 'Fine-tune features'}
         </h1>
-        <p className="text-gray-500">You can change all of this later in Settings.</p>
+        <p className="text-muted">You can change all of this later in Settings.</p>
       </header>
 
       {step === 'units' && (

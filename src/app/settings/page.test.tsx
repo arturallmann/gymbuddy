@@ -1,9 +1,11 @@
 import { screen, within } from '@testing-library/react';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { DEFAULT_FEATURES } from '@/db/schema';
 import { PRESET_FEATURES } from '@/lib/features';
 import { renderWithDatabase, savedSettings } from '@/testing/render';
 import SettingsPage from './page';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 const done = { settings: { setupCompletedAt: new Date() } };
 

@@ -10,7 +10,7 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 |---|---|---|---|
 | Workout | `workout`, table `workouts` | One training occasion with a start and end time. | session, day, training, workout log |
 | Active workout | `activeWorkout`, `getActiveWorkout()` | The workout the user has started and not ended (`endedAt` and `deletedAt` are NULL). One per user. | current session, open workout, running workout |
-| Discard workout | `deleteWorkout()` on the active workout | Deletes the active workout with its workout exercises, sets and exercise groups, after a confirm step. A past workout uses "Delete workout" with the same function. | cancel workout, abort |
+| Delete workout | `deleteWorkout()` | Deletes a past workout with its workout exercises, sets and exercise groups, after a confirm step. The active workout has no discard; the user ends it first (decision 031). | discard workout, cancel workout, abort |
 | Exercise | `exercise`, table `exercises` | A type of movement in the library, such as Bench Press. | movement, lift, activity, drill |
 | Workout exercise | `workoutExercise`, table `workout_exercises` | One exercise inside one workout, together with its sets. The interface shows only the exercise name; docs and code always use the full term. | entry, slot, session exercise, exercise log |
 | Set | `set`, table `sets`, type `WorkoutSet` | One logged effort: weight, reps, duration and/or distance. The type is `WorkoutSet` because `Set` is a JavaScript built-in. | entry, log, round |
@@ -54,6 +54,7 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 | Added weight | `weightGrams` on a bodyweight exercise | Weight on top of bodyweight. Shown as "BW + 5 kg". Negative = assisted. | extra weight, plus weight |
 | Tracked fields | `tracksReps`, `tracksDuration`, `tracksDistance` | Which inputs a set of this exercise has. | format, metrics, measurements, tracking flags |
 | Description | `exercises.description` | Library text about the exercise. Only library updates change it. | notes, about |
+| Photo | `exercise_images` row with `storedFile`, `addExercisePhoto()` | An image of a custom exercise that the user took or chose (decision 039). Library exercises have images, not photos. | picture, pic, image (for the user's own) |
 | Instructions | `exercises.instructions` | Library steps for doing the exercise. | how-to, guide, steps (as a name) |
 
 ## Notes and preferences
@@ -84,18 +85,25 @@ Names follow common gym apps (Hevy, Strong, wger) where possible, so users recog
 | Unit override | `exercise_preferences.weightUnit`, `.distanceUnit` | A different unit for one exercise. | custom unit, exercise unit |
 | Feature toggle | type `FeatureToggles`, hook `useFeatures()` | An on/off switch that hides part of the interface. | feature flag, switch, option |
 | Preset | `preset` | A set of feature toggles: `simple`, `standard`, `advanced`, `custom`. Only for settings. | mode, profile, template |
+| Height | `heightMillimeters` | The user's height, in the settings (decision 043). | — |
+| Theme | `theme`, type `Theme` | The app's colors: `system` ("Same as phone"), `light` or `dark` (decision 030). | dark mode (as the setting), appearance, skin, color mode |
 | First-time setup | `setupCompletedAt` | The short setup at first start: units, preset, fine-tuning. | onboarding, wizard, intro |
 
 ## Progress
 
 | Term (interface) | Code name | Meaning | Not allowed |
 |---|---|---|---|
+| Calendar | `CalendarView`, route `/calendar` | Month or week view of ended workouts by day (decision 040). | diary, planner, schedule |
 | Workout history | `workoutHistory`, `listWorkoutHistory()`, route `/history` | The list of ended workouts, newest first. Each opens its workout detail page. | log, sessions, feed, history view (that is one exercise) |
 | History view | — | A plain list of every set of one exercise, newest workout first. | log, timeline, feed |
 | Chart view | — | A chart of weight, reps, duration or distance over time. | graph, stats, analytics |
 | Volume | derived | Sum of weight × reps. | tonnage, load, total weight |
-| Personal record | derived | The best value ever for an exercise. Short form in the interface: PR. | best, max, record (alone) |
-| Estimated one-rep max | derived | A calculated maximum for one rep. Short form: e1RM. | 1RM (that means a real tested max), max |
+| Personal record | derived, `PersonalRecord`, `personalRecords()` | The best value ever for an exercise. Short form in the interface: PR. Never includes the bodyweight (decision 043). | best, max, record (alone) |
+| Estimated one-rep max | derived, `estimatedOneRepMax()` | A calculated maximum for one rep (Epley, decision 043). Short form: e1RM. | 1RM (that means a real tested max), max |
+| Statistics | `StatisticsView`, route `/statistics` | The page with workouts, exercises, muscle groups and bodyweight over a time span (decision 043). | stats, analytics, dashboard |
+| Muscle map | `MuscleMap`, `src/lib/muscleMap.ts` | The drawing of the body, front and back, with each muscle group shaded by its sets or volume (decision 046). | body map, heat map, muscle chart |
+| Workout ended page | `WorkoutEndedView`, route `/workout/ended` | The page after "End workout": summary, muscle map and personal records of that workout (decision 046). | workout summary page, recap |
+| Bodyweight | table `bodyweights`, `addBodyweight()` | The user's own weight, entered with a date. Each workout uses the bodyweight of its day. | body weight, weigh-in, BW (except in "BW + 5 kg") |
 
 ## Data words
 

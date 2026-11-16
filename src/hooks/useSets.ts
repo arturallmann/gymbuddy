@@ -10,7 +10,14 @@ import type { SetValues } from '@/lib/sets';
 // The sets of one workout exercise, the sets of this exercise in the last workout, and the
 // template targets when it came from a template.
 // Both are undefined while they load.
-export function useSets(workoutExerciseId: string, exerciseId: string, workoutId: string) {
+// `workoutExerciseId` is null for an exercise that is not in the workout yet: it has no sets,
+// and `add` calls `onFirstSet`, which adds the exercise to the workout with that set.
+export function useSets(
+  workoutExerciseId: string | null,
+  exerciseId: string,
+  workoutId: string,
+  onFirstSet?: (values: SetValues) => Promise<void>,
+) {
   const db = useDatabase();
   const [sets, setSets] = useState<WorkoutSet[] | undefined>(undefined);
   const [lastSets, setLastSets] = useState<WorkoutSet[] | undefined>(undefined);
@@ -19,9 +26,9 @@ export function useSets(workoutExerciseId: string, exerciseId: string, workoutId
   useEffect(() => {
     let current = true;
     Promise.all([
-      listSets(db, workoutExerciseId),
+      workoutExerciseId ? listSets(db, workoutExerciseId) : [],
       getLastSets(db, exerciseId, workoutId),
-      getTemplateTargets(db, workoutExerciseId),
+      workoutExerciseId ? getTemplateTargets(db, workoutExerciseId) : null,
     ])
       .then(([loaded, last, fromTemplate]) => {
         if (!current) return;
@@ -37,16 +44,20 @@ export function useSets(workoutExerciseId: string, exerciseId: string, workoutId
 
   const add = useCallback(
     async (values: SetValues) => {
+      if (!workoutExerciseId) {
+        await onFirstSet?.(values);
+        return;
+      }
       await addSet(db, workoutExerciseId, values);
       setSets(await listSets(db, workoutExerciseId));
     },
-    [db, workoutExerciseId],
+    [db, workoutExerciseId, onFirstSet],
   );
 
   const update = useCallback(
     async (id: string, values: SetValues) => {
       await updateSet(db, id, values);
-      setSets(await listSets(db, workoutExerciseId));
+      if (workoutExerciseId) setSets(await listSets(db, workoutExerciseId));
     },
     [db, workoutExerciseId],
   );
@@ -54,7 +65,7 @@ export function useSets(workoutExerciseId: string, exerciseId: string, workoutId
   const remove = useCallback(
     async (id: string) => {
       await deleteSet(db, id);
-      setSets(await listSets(db, workoutExerciseId));
+      if (workoutExerciseId) setSets(await listSets(db, workoutExerciseId));
     },
     [db, workoutExerciseId],
   );

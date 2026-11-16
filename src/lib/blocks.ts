@@ -37,6 +37,18 @@ export function moveBlock<T extends Groupable>(items: T[], id: string, direction
   return blocks.flatMap(idsOf);
 }
 
+// The new id order after moving the block that holds `id` to block index `to` (0 is the top),
+// such as after a drag. The other blocks keep their order. Unchanged when `id` is unknown.
+export function moveBlockTo<T extends Groupable>(items: T[], id: string, to: number): string[] {
+  const blocks = toBlocks(items);
+  const index = blocks.findIndex((block) => idsOf(block).includes(id));
+  if (index >= 0) {
+    const [block] = blocks.splice(index, 1);
+    blocks.splice(Math.max(0, Math.min(to, blocks.length)), 0, block);
+  }
+  return blocks.flatMap(idsOf);
+}
+
 // The new id order when the chosen items become one group: they move to where the first
 // chosen item is, in their current order, and everything else keeps its order.
 export function gatherIds<T extends Groupable>(items: T[], chosen: string[]): string[] {
