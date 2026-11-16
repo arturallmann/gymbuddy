@@ -61,3 +61,19 @@ test('take taps next to small muscle groups too, through a wider invisible tap a
   await user.click(areas('traps')[0]);
   for (const traps of screen.getAllByRole('button', { name: 'Traps, 0 sets' })) expect(traps).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('draw the outline of the chosen muscle group last, so no other area covers it', async () => {
+  const user = userEvent.setup();
+  const { container } = render(<Map_ values={values} />);
+
+  await user.click(screen.getAllByRole('button', { name: 'Neck, 0 sets' })[1]);
+
+  const back = screen.getByRole('group', { name: 'Back of the body' });
+  const paths: Element[] = [...back.querySelectorAll('path')];
+  const outline = back.querySelector('[data-outline="neck"]');
+  expect(outline).not.toBeNull();
+  expect(paths.at(-1)).toBe(outline);
+  // Every muscle group drawn later than the neck (such as the traps) comes before the outline.
+  expect(paths.indexOf(back.querySelector('[aria-label="Traps, 0 sets"]')!)).toBeLessThan(paths.indexOf(outline!));
+  expect(container.querySelectorAll('[data-outline="shoulders"]')).toHaveLength(0);
+});
