@@ -152,8 +152,27 @@ Use the app at the gym, find what gets in the way, and fix it. Online features m
 - [ ] **5.1** Test every page on a phone, in light and dark, with the simple, standard and advanced presets:
   logging a workout from start to end, supersets, routines, calendar, statistics, export and import,
   photos, Android Back on every page. Write each problem down as a task below.
+  On every page, also press and hold each link, button and image: nothing may turn into something
+  draggable or open the phone's link menu.
   Done when: every page was tried on a phone and each problem found is a task in this phase.
 - [ ] **5.2** Fix the problems found in 5.1, one task each, with a test that fails without the fix.
+  Found so far (first round on a phone, 2026-11-16):
+  - [ ] **5.2.1** Exercise page of a custom exercise, "About" tab: the phase choice stands below the save
+    button; it belongs above it.
+  - [ ] **5.2.2** "Save superset" when a saved superset with the same exercises already exists: change that
+    saved superset instead of creating a second one. Needs a decision first: what counts as "the same"
+    (same exercises, same order?) and whether the user is asked.
+  - [ ] **5.2.3** Muscle map, back side: an area of the lower back covers part of the lats. Fix the shapes in
+    `src/lib/muscleMap.ts` so no area overlaps another.
+  - [ ] **5.2.4** Muscle map on the "Workout ended" page and the statistics page: the box with the chosen
+    muscle group's sets, volume and exercises opens below the map, often off screen, and a larger box
+    reaches further down. Bring it into view when a muscle group is chosen (for example scroll it into view,
+    or show it in a panel at the bottom of the screen).
+  - [ ] **5.2.5** Press and hold on the + button of the workout page turns it into a draggable link. Stop this
+    for every link and image in the app (see the check in 5.1). Also: the + sits slightly too low inside its
+    round button; center it.
+  - [ ] **5.2.6** Calendar, week view: a past day without a workout stays empty instead of showing "Rest day".
+    This changes decision 040.
 - [ ] **5.3** Smaller polish found while using the app, such as keeping the search text of the
   "Add exercise" page when Back returns to it (decision 048).
 - [ ] **5.4** App logo. Start with a preview page of logo ideas in the "Bumper Plate" colors (decision 030)
