@@ -166,6 +166,10 @@ Both views use one query: sets → workout_exercises (by `exerciseId`) → worko
 `workouts.startedAt`, then `workout_exercises.position`, then `sets.position`.
 Sets without a value for the charted field are left out of the chart, but stay in the history.
 
+Chart values per workout (decision 029): heaviest weight (`weightGrams`, added weight on bodyweight
+exercises), most reps, volume (sum of weight × reps, external load only), longest duration and
+longest distance. The chart offers only values the exercise tracks; a note-only exercise has none.
+
 ## Phases
 
 `workout_exercises.phase` is `warmup`, `main` or `cooldown`.
