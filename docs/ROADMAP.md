@@ -156,6 +156,12 @@ Use the app at the gym, find what gets in the way, and fix it. Online features m
 - [ ] **5.2** Fix the problems found in 5.1, one task each, with a test that fails without the fix.
 - [ ] **5.3** Smaller polish found while using the app, such as keeping the search text of the
   "Add exercise" page when Back returns to it (decision 048).
+- [ ] **5.4** App logo. Start with a preview page of logo ideas in the "Bumper Plate" colors (decision 030)
+  and pick one before building. Then the Android launcher icon (adaptive icon: foreground and background
+  layers, plus a round icon), the splash screen, the browser favicon and the dumbbell mark on the home page.
+  Our own drawing, not copied from another app.
+  Done when: the logo shows on the phone's home screen, in the app list and on the splash screen, in light
+  and dark, and reads well at small sizes.
 
 ## Ideas (not planned)
 
