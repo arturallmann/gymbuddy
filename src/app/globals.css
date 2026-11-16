@@ -2,26 +2,141 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Color theme "Bumper Plate" (decision 030): petrol #0b3f57 for actions, competition plate
+ * colors for states. Each color is an RGB triple, so Tailwind can add opacity (bg-primary/50).
+ * Components use only the named colors from tailwind.config.ts, never fixed colors.
+ * The light colors apply by default. The dark colors apply when the theme is "dark", or when
+ * it is "system" (no data-theme on <html>) and the phone is in dark mode.
+ */
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  color-scheme: light;
+  --color-page: 242 244 245;        /* #f2f4f5 page background */
+  --color-surface: 255 255 255;     /* #ffffff cards and inputs */
+  --color-line: 213 219 222;        /* #d5dbde dividers */
+  --color-line-strong: 158 171 177; /* #9eabb1 borders of cards, buttons and inputs */
+  --color-ink: 20 34 42;            /* #14222a text */
+  --color-muted: 93 108 116;        /* #5d6c74 secondary text */
+  --color-primary: 11 63 87;        /* #0b3f57 main buttons, chosen options, superset borders */
+  --color-on-primary: 255 255 255;  /* text on primary */
+  --color-link: 11 90 124;          /* #0b5a7c links, text buttons, labels, chart line */
+  --color-accent: 242 194 48;       /* #f2c230 timers (15 kg plate yellow) */
+  --color-on-accent: 42 32 0;       /* text on accent */
+  --color-danger: 198 61 45;        /* #c63d2d delete and errors (25 kg plate red) */
+  --color-on-danger: 255 255 255;   /* text on danger */
+  --color-success: 36 128 79;       /* #24804f done (10 kg plate green) */
+  /* Muscle map shades, "warm clay" (decision 046): untrained, then five steps up to the most trained. */
+  --color-heat-0: 221 227 230;      /* #dde3e6 */
+  --color-heat-1: 234 216 204;      /* #ead8cc */
+  --color-heat-2: 216 176 153;      /* #d8b099 */
+  --color-heat-3: 195 135 103;      /* #c38767 */
+  --color-heat-4: 166 97 63;        /* #a6613f */
+  --color-heat-5: 127 64 36;        /* #7f4024 */
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --color-page: 13 20 24;           /* #0d1418 */
+    --color-surface: 23 35 41;        /* #172329 */
+    --color-line: 39 54 61;           /* #27363d */
+    --color-line-strong: 75 95 104;   /* #4b5f68 */
+    --color-ink: 232 237 239;         /* #e8edef */
+    --color-muted: 147 163 171;       /* #93a3ab */
+    --color-primary: 35 111 147;      /* #236f93 */
+    --color-on-primary: 255 255 255;
+    --color-link: 124 192 220;        /* #7cc0dc */
+    --color-accent: 245 205 69;       /* #f5cd45 */
+    --color-on-accent: 42 32 0;
+    --color-danger: 240 106 88;       /* #f06a58 */
+    --color-on-danger: 42 10 5;       /* #2a0a05 */
+    --color-success: 76 194 133;      /* #4cc285 */
+    --color-heat-0: 38 52 58;       /* #26343a */
+    --color-heat-1: 58 47 42;       /* #3a2f2a */
+    --color-heat-2: 79 56 45;       /* #4f382d */
+    --color-heat-3: 102 66 49;      /* #664231 */
+    --color-heat-4: 125 77 54;      /* #7d4d36 */
+    --color-heat-5: 148 89 60;      /* #94593c */
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-page: 13 20 24;
+  --color-surface: 23 35 41;
+  --color-line: 39 54 61;
+  --color-line-strong: 75 95 104;
+  --color-ink: 232 237 239;
+  --color-muted: 147 163 171;
+  --color-primary: 35 111 147;
+  --color-on-primary: 255 255 255;
+  --color-link: 124 192 220;
+  --color-accent: 245 205 69;
+  --color-on-accent: 42 32 0;
+  --color-danger: 240 106 88;
+  --color-on-danger: 42 10 5;
+  --color-success: 76 194 133;
+  --color-heat-0: 38 52 58;       /* #26343a */
+  --color-heat-1: 58 47 42;       /* #3a2f2a */
+  --color-heat-2: 79 56 45;       /* #4f382d */
+  --color-heat-3: 102 66 49;      /* #664231 */
+  --color-heat-4: 125 77 54;      /* #7d4d36 */
+  --color-heat-5: 148 89 60;      /* #94593c */
+}
+
+@layer base {
+  body {
+    @apply bg-page text-ink;
+  }
+  input,
+  select,
+  textarea {
+    @apply bg-surface text-ink;
+  }
+  ::placeholder {
+    @apply text-muted;
+  }
+  /* Android's tap highlight is a rectangle over the element's box, so rounded buttons lit up at their
+     corners. Buttons and links show their own pressed state instead, which follows the rounded shape. */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* A long press on a button would select its text instead. */
+  button,
+  [role='button'] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  button:not(:disabled):active,
+  a:active,
+  [role='button']:active {
+    filter: brightness(0.85);
+  }
+}
+
+/* New content slides in from the side it comes from (decision 045): the next tab, month or week from the
+   right, the one before from the left. */
+@keyframes slide-from-right {
+  from {
+    transform: translateX(3rem);
+    opacity: 0;
+  }
+}
+@keyframes slide-from-left {
+  from {
+    transform: translateX(-3rem);
+    opacity: 0;
+  }
+}
+.slide-from-right {
+  animation: slide-from-right 200ms ease-out;
+}
+.slide-from-left {
+  animation: slide-from-left 200ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-from-right,
+  .slide-from-left {
+    animation: none;
+  }
 }

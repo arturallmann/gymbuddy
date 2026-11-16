@@ -1,40 +1,32 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
-import type { Workout } from '@/db/schema';
-import { deleteWorkout, getWorkout, listWorkoutExercises, type WorkoutExerciseItem } from '@/db/workouts';
+import { deleteWorkout } from '@/db/workouts';
+import { useFeatures } from '@/hooks/useSettings';
+import { useWorkoutSummary } from '@/hooks/useWorkoutSummary';
 import { formatWorkoutDate } from '@/lib/dates';
 import { formatWorkoutDuration } from '@/lib/units';
 import ConfirmAction from './ConfirmAction';
 import SaveRoutine from './SaveRoutine';
 import WorkoutExerciseSets from './WorkoutExerciseSets';
+import BackLink from './BackLink';
+import WorkoutMuscleMap from './WorkoutMuscleMap';
+import WorkoutSummary from './WorkoutSummary';
 
-type Loaded = { workout: Workout; items: WorkoutExerciseItem[] } | null;
-
-// One past workout with all its workout exercises and sets.
+// One past workout with all its workout exercises and sets. With the statistics feature toggle it
+// starts with a summary and the muscle map, and marks the personal records the workout reached
+// (decisions 043 and 046).
 // The workout id comes from the address: /history/workout?id=…
+// Opened from the calendar, the address also holds `back`, the calendar place to return to.
 export default function WorkoutDetail() {
   const db = useDatabase();
   const router = useRouter();
-  const id = useSearchParams().get('id');
-  const [loaded, setLoaded] = useState<Loaded | undefined>(undefined);
-
-  useEffect(() => {
-    let current = true;
-    const load = async (): Promise<Loaded> => {
-      const workout = id ? await getWorkout(db, id) : null;
-      return workout ? { workout, items: await listWorkoutExercises(db, workout.id) } : null;
-    };
-    load()
-      .then((result) => current && setLoaded(result))
-      .catch((reason: unknown) => console.error(reason));
-    return () => {
-      current = false;
-    };
-  }, [db, id]);
+  const features = useFeatures();
+  const params = useSearchParams();
+  const fromCalendar = params.get('back')?.startsWith('/calendar?') ? params.get('back')! : null;
+  const backHref = fromCalendar ?? '/history';
+  const loaded = useWorkoutSummary(params.get('id'));
 
   if (loaded === undefined) {
     return null;
@@ -43,27 +35,45 @@ export default function WorkoutDetail() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <Link href="/history" className="shrink-0 text-sky-600">
-          ← Workout history
-        </Link>
+        <BackLink href={backHref} label={fromCalendar ? 'Back to calendar' : 'Back to workout history'} />
       </header>
       {!loaded || !workout ? (
-        <p className="text-gray-500">This workout does not exist.</p>
+        <p className="text-muted">This workout does not exist.</p>
       ) : (
         <>
           <div>
             <h1 className="text-2xl font-bold">{formatWorkoutDate(workout.startedAt)}</h1>
-            <p className="text-gray-500">
+            <p className="text-muted">
               {workout.endedAt
                 ? formatWorkoutDuration((workout.endedAt.getTime() - workout.startedAt.getTime()) / 1000)
                 : 'Active workout'}
             </p>
             {workout.notes && <p className="mt-2 break-words">{workout.notes}</p>}
           </div>
+          {features.statistics && loaded.items.length > 0 && (
+            <WorkoutSummary
+              volume={loaded.stats.volume}
+              sets={loaded.stats.sets}
+              exercises={new Set(loaded.items.map((item) => item.exerciseId)).size}
+              records={[...loaded.stats.records.values()].reduce((sum, list) => sum + list.length, 0)}
+            />
+          )}
+          {features.statistics && loaded.stats.muscleGroups.length > 0 && <WorkoutMuscleMap muscleGroups={loaded.stats.muscleGroups} />}
           {loaded.items.length === 0 ? (
-            <p className="text-gray-500">No exercises.</p>
+            <p className="text-muted">No exercises.</p>
           ) : (
-            loaded.items.map((item) => <WorkoutExerciseSets key={item.id} item={item} />)
+            loaded.items.map((item, index) => (
+              <WorkoutExerciseSets
+                key={item.id}
+                item={item}
+                // An exercise twice in one workout shows its records once, on its first workout exercise.
+                records={
+                  features.statistics && loaded.items.findIndex((other) => other.exerciseId === item.exerciseId) === index
+                    ? loaded.stats.records.get(item.exerciseId)
+                    : undefined
+                }
+              />
+            ))
           )}
           <SaveRoutine workoutId={workout.id} startedAt={workout.startedAt} />
           <ConfirmAction
@@ -73,7 +83,7 @@ export default function WorkoutDetail() {
             keepLabel="Keep workout"
             onConfirm={async () => {
               await deleteWorkout(db, workout.id);
-              router.push('/history');
+              router.push(backHref);
             }}
           />
         </>

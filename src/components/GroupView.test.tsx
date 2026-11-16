@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { getWorkoutGroup, makeSuperset } from '@/db/groups';
 import { saveExercisePreferences } from '@/db/preferences';
@@ -9,6 +9,7 @@ import { addSet, addWorkoutExercise, deleteWorkout, listSets, listWorkoutExercis
 import { createTestDatabase } from '@/testing/database';
 import { renderWithDatabase } from '@/testing/render';
 import GroupView from './GroupView';
+import { backStack } from '@/lib/backStack';
 
 const navigation = vi.hoisted(() => ({ params: new URLSearchParams(), push: vi.fn() }));
 vi.mock('next/navigation', () => ({
@@ -117,6 +118,21 @@ describe('GroupView', () => {
 
     expect(await screen.findByRole('region', { name: 'Next set' })).toBeInTheDocument();
     expect((await listSets(db, ids[0]))[0].reps).toBe(12);
+  });
+
+
+  test('stop editing a set with Android Back', async () => {
+    const { db, ids, groupId } = await setup();
+    await addSet(db, ids[0], values);
+    const { user } = await open(db, groupId);
+    await user.click(await screen.findByRole('button', { name: 'Edit round 1, Curl' }));
+
+    act(() => {
+      backStack.back();
+    });
+
+    expect(await screen.findByRole('region', { name: 'Next set' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Edit set' })).not.toBeInTheDocument();
   });
 
   test('use each exercise’s unit override', async () => {

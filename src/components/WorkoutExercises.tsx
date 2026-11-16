@@ -4,22 +4,22 @@ import { useState } from 'react';
 import type { WorkoutExerciseItem } from '@/db/workouts';
 import { useFeatures } from '@/hooks/useSettings';
 import { useWorkoutExercises } from '@/hooks/useWorkoutExercises';
-import { PHASE_LABELS, defaultPhase, groupByPhase } from '@/lib/phases';
-import ExercisePicker from './ExercisePicker';
+import { PHASE_LABELS, groupByPhase } from '@/lib/phases';
 import GroupRounds from './GroupRounds';
-import SavedSupersetPicker from './SavedSupersetPicker';
 import SetSummary from './SetSummary';
 import WorkoutExerciseList from './WorkoutExerciseList';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
-// The exercises of one workout: list with set summaries, reorder, remove and add.
+// The exercises of one workout: list with set summaries, reorder (drag, 4b.1) and remove.
+// Adding happens on the "Add exercise" page (decision 031).
 // With the phases feature toggle, the list shows one section per workout phase.
 // With the supersets feature toggle, workout exercises can become a superset and back.
 export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
-  const { items, rests, add, addTemplate, move, remove, group, ungroup } = useWorkoutExercises(workoutId);
+  const { items, rests, move, moveTo, remove, group, ungroup } = useWorkoutExercises(workoutId);
   const features = useFeatures();
-  const [picking, setPicking] = useState<'exercise' | 'superset' | null>(null);
   // The workout exercises chosen for a new superset, or null when not choosing.
   const [chosen, setChosen] = useState<string[] | null>(null);
+  useBackHandler(chosen ? () => setChosen(null) : null);
 
   if (items === undefined) {
     return null;
@@ -31,6 +31,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
     <WorkoutExerciseList
       items={list}
       onMove={move}
+      onMoveTo={moveTo}
       onRemove={remove}
       onUngroup={features.supersets ? ungroup : undefined}
       selection={
@@ -51,7 +52,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
           <SetSummary workoutExerciseId={item.id} exerciseId={item.exerciseId} loadType={item.loadType} />
           {/* A toggle hides controls only: a stored phase still shows. */}
           {!features.phases && item.phase !== 'main' && (
-            <span className="block text-xs text-gray-500">{PHASE_LABELS[item.phase]}</span>
+            <span className="block text-xs text-muted">{PHASE_LABELS[item.phase]}</span>
           )}
         </>
       )}
@@ -60,11 +61,11 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
   return (
     <section className="flex flex-col gap-4">
       {items.length === 0 ? (
-        <p className="text-gray-500">No exercises yet.</p>
+        <p className="text-muted">No exercises yet.</p>
       ) : features.phases ? (
         groupByPhase(items).map((phaseGroup) => (
           <section key={phaseGroup.phase} aria-label={PHASE_LABELS[phaseGroup.phase]} className="flex flex-col gap-2">
-            <h2 className="text-sm font-semibold uppercase text-gray-400">{PHASE_LABELS[phaseGroup.phase]}</h2>
+            <h2 className="text-sm font-semibold uppercase text-muted">{PHASE_LABELS[phaseGroup.phase]}</h2>
             {renderList(phaseGroup.items)}
           </section>
         ))
@@ -73,7 +74,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
       )}
       {chosen ? (
         <div className="flex flex-col gap-2">
-          <p className="text-sm text-gray-400">Choose two or more exercises of one phase.</p>
+          <p className="text-sm text-muted">Choose two or more exercises of one phase.</p>
           <div className="flex gap-3">
             <button
               type="button"
@@ -82,47 +83,21 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
                 await group(chosen);
                 setChosen(null);
               }}
-              className="flex-1 rounded-lg bg-sky-600 px-4 py-2 font-semibold text-white disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2 font-semibold text-on-primary disabled:opacity-50"
             >
               Make superset ({chosen.length})
             </button>
-            <button type="button" onClick={() => setChosen(null)} className="rounded-lg border px-4 py-2">
+            <button type="button" onClick={() => setChosen(null)} className="rounded-lg border bg-surface px-4 py-2">
               Cancel
             </button>
           </div>
         </div>
-      ) : picking === 'exercise' ? (
-        <ExercisePicker
-          onPick={async (exercise) => {
-            setPicking(null);
-            await add(exercise.id, defaultPhase(exercise.category, features.phases));
-          }}
-          onClose={() => setPicking(null)}
-        />
-      ) : picking === 'superset' ? (
-        <SavedSupersetPicker
-          onPick={async (templateId) => {
-            setPicking(null);
-            await addTemplate(templateId);
-          }}
-          onClose={() => setPicking(null)}
-        />
       ) : (
-        <div className="flex flex-col gap-3">
-          <button type="button" onClick={() => setPicking('exercise')} className="rounded-lg border px-6 py-3 font-semibold">
-            Add exercise
+        canGroup && (
+          <button type="button" onClick={() => setChosen([])} className="rounded-lg border bg-surface px-6 py-3 font-semibold">
+            Make superset
           </button>
-          {features.supersets && features.templates && (
-            <button type="button" onClick={() => setPicking('superset')} className="rounded-lg border px-6 py-3 font-semibold">
-              Add saved superset
-            </button>
-          )}
-          {canGroup && (
-            <button type="button" onClick={() => setChosen([])} className="rounded-lg border px-6 py-3 font-semibold">
-              Make superset
-            </button>
-          )}
-        </div>
+        )
       )}
     </section>
   );

@@ -23,13 +23,13 @@ export default function DatabaseProvider({ children }: { children: ReactNode }) 
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-2 p-6 text-center">
         <p className="font-bold">The database could not open.</p>
-        <p className="text-sm text-gray-500">{error}</p>
+        <p className="text-sm text-muted">{error}</p>
       </main>
     );
   }
   if (!db) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-6 text-gray-500">
+      <main className="flex min-h-screen items-center justify-center p-6 text-muted">
         Loading…
       </main>
     );

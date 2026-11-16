@@ -13,6 +13,7 @@ import { formatDuration } from '@/lib/units';
 import RestTimer from './RestTimer';
 import SaveTemplate from './SaveTemplate';
 import SetForm from './SetForm';
+import { useBackHandler } from '@/hooks/useBackHandler';
 
 type Props = {
   detail: GroupDetail;
@@ -32,6 +33,7 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
   // The member the user picked by tapping an empty cell; otherwise the next one in turn.
   const [picked, setPicked] = useState<number | null>(null);
   const [editing, setEditing] = useState<{ setId: string; member: number } | null>(null);
+  useBackHandler(editing ? () => setEditing(null) : null);
   const [resting, setResting] = useState(false);
 
   if (!data) {
@@ -58,7 +60,7 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
       <ul className="flex flex-col gap-1">
         {members.map((item) => (
           <li key={item.id}>
-            <Link href={`/workout/exercise?id=${item.id}`} className="text-sky-600">
+            <Link href={`/workout/exercise?id=${item.id}`} className="text-link">
               {item.name}
             </Link>
           </li>
@@ -67,12 +69,12 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
 
       {restTimer && (
         <div className="flex items-center gap-3 text-sm">
-          <span className="text-gray-400">Rest after each round</span>
-          <button type="button" aria-label="Less rest" onClick={() => onRest(stepDuration(rest, -1))} className="rounded border px-2">
+          <span className="text-muted">Rest after each round</span>
+          <button type="button" aria-label="Less rest" onClick={() => onRest(stepDuration(rest, -1))} className="rounded border bg-surface px-2">
             −
           </button>
           <span className="tabular-nums">{formatDuration(rest)}</span>
-          <button type="button" aria-label="More rest" onClick={() => onRest(stepDuration(rest, 1))} className="rounded border px-2">
+          <button type="button" aria-label="More rest" onClick={() => onRest(stepDuration(rest, 1))} className="rounded border bg-surface px-2">
             +
           </button>
         </div>
@@ -124,7 +126,7 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
           <caption className="sr-only">Rounds</caption>
           <thead>
             <tr>
-              <th className="w-10 text-left text-gray-500">#</th>
+              <th className="w-10 text-left text-muted">#</th>
               {members.map((item) => (
                 <th key={item.id} className="break-words text-left font-semibold">
                   {item.name}
@@ -134,8 +136,8 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
           </thead>
           <tbody>
             {rows.map((row, index) => (
-              <tr key={index} className="border-t">
-                <td className="py-2 text-gray-500">{index + 1}</td>
+              <tr key={index} className="border-t border-line">
+                <td className="py-2 text-muted">{index + 1}</td>
                 {row.map((set, memberIndex) => (
                   <td key={members[memberIndex].id} className="py-2">
                     {set ? (
@@ -155,7 +157,7 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
                           setEditing(null);
                           setPicked(memberIndex);
                         }}
-                        className="text-gray-500"
+                        className="text-muted"
                       >
                         —
                       </button>
@@ -179,7 +181,7 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
       )}
 
       {onUngroup && (
-        <button type="button" onClick={onUngroup} className="self-start text-sky-600">
+        <button type="button" onClick={onUngroup} className="self-start text-link">
           Ungroup
         </button>
       )}

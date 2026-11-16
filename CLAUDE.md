@@ -44,7 +44,7 @@ Run `npm run typecheck`, `npm run lint` and `npm test` before you call a task do
 - Never edit files in `drizzle/` (generated migrations) or `src/db/migrations.ts` by hand. Change `src/db/schema.ts` and regenerate.
 - Never delete rows from user tables. Write the current time to `deletedAt` instead. Every query filters out rows with `deletedAt`.
 - New IDs are UUIDs from `crypto.randomUUID()`. Never use auto-increment IDs.
-- Store weight in grams, durations in seconds, distance in meters. Convert only in the interface.
+- Store weight in grams, durations in seconds, distance in meters, height in millimeters. Convert only in the interface.
 - Convert units only through `src/lib/units.ts`. Never show raw grams or meters.
 - Every optional feature checks its feature toggle through `useFeatures()`. A feature toggle hides interface only; it never deletes data.
 - A new optional feature gets a new feature toggle in `FeatureToggles`, `DEFAULT_FEATURES` and the preset table in `docs/DATA_MODEL.md`.
@@ -61,8 +61,11 @@ If a needed term is missing, stop and ask before inventing one.
 
 - TypeScript strict mode. No `any`.
 - Function components and hooks only.
-- Tailwind for styling.
+- Tailwind for styling. Use only the named colors from `tailwind.config.ts` (`bg-primary`, `text-muted`,
+  `border-line` and so on), never fixed colors such as `text-sky-600` (decision 030).
 - One component per file. File name matches the component name.
+- Back links at the top of a page use `BackLink` (an arrow with a label for screen readers, decision 032).
+- Anything a page opens (a confirm step, a form, an edit mode) closes on Android Back: `useBackHandler()` (decision 034).
 - Small pure functions for unit conversion and formatting live in `src/lib/`.
 
 ## Workflow

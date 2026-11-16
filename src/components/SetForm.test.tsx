@@ -59,6 +59,7 @@ describe('SetForm', () => {
 
     await user.type(screen.getByRole('textbox', { name: 'Weight (kg)' }), '60');
     await user.type(screen.getByRole('textbox', { name: 'Reps' }), '8');
+    await user.click(screen.getByRole('button', { name: /RPE, set type and notes/ }));
     await user.type(screen.getByRole('textbox', { name: 'RPE' }), '8,5');
     await user.selectOptions(screen.getByRole('combobox', { name: 'Set type' }), 'Warm-up set');
     await user.type(screen.getByRole('textbox', { name: 'Notes' }), 'slow');
@@ -108,14 +109,16 @@ test('use another button label and offer Cancel', async () => {
 });
 
 describe('extra inputs', () => {
-  const section = () => screen.getByText('RPE, set type and notes').closest('details');
+  const toggle = () => screen.getByRole('button', { name: /RPE, set type and notes/ });
 
   test('start closed for a new set and open on tap', async () => {
     const { user } = renderForm(curl, on);
 
-    expect(section()).not.toHaveAttribute('open');
-    await user.click(screen.getByText('RPE, set type and notes'));
-    expect(section()).toHaveAttribute('open');
+    expect(toggle()).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('textbox', { name: 'RPE' })).not.toBeInTheDocument();
+    await user.click(toggle());
+    expect(toggle()).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('textbox', { name: 'RPE' })).toBeInTheDocument();
   });
 
   test('start open when the set has notes, RPE or a set type', () => {
@@ -129,13 +132,37 @@ describe('extra inputs', () => {
       />,
     );
 
-    expect(section()).toHaveAttribute('open');
+    expect(toggle()).toHaveAttribute('aria-expanded', 'true');
   });
 
   test('leave the section out when the feature toggles hide all extra inputs', () => {
     renderForm(curl, off);
 
     expect(screen.queryByText(/set type/i)).not.toBeInTheDocument();
-    expect(document.querySelector('details')).toBeNull();
+    expect(screen.queryByRole('button', { name: /set type/i })).not.toBeInTheDocument();
+  });
+});
+
+describe('− and + next to weight and reps', () => {
+  test('change weight by 2.5 kg and reps by one, then log the set', async () => {
+    const { user, onLog } = renderForm(curl);
+    await user.type(screen.getByRole('textbox', { name: 'Weight (kg)' }), '100');
+    await user.type(screen.getByRole('textbox', { name: 'Reps' }), '5');
+
+    await user.click(screen.getByRole('button', { name: 'More weight' }));
+    await user.click(screen.getByRole('button', { name: 'One rep less' }));
+
+    expect(screen.getByRole('textbox', { name: 'Weight (kg)' })).toHaveValue('102.5');
+    expect(screen.getByRole('textbox', { name: 'Reps' })).toHaveValue('4');
+    await user.click(screen.getByRole('button', { name: 'Log set' }));
+    expect(onLog).toHaveBeenCalledWith(expect.objectContaining({ weightGrams: 102500, reps: 4 }));
+  });
+
+  test('change weight by 5 lb, and let added weight go below 0 for assisted sets', async () => {
+    const pullUp: SetFormExercise = { loadType: 'bodyweight', tracksReps: true, tracksDuration: false, tracksDistance: false };
+    const { user } = renderForm(pullUp, off, { weightUnit: 'lb', distanceUnit: 'imperial' });
+
+    await user.click(screen.getByRole('button', { name: 'Less weight' }));
+    expect(screen.getByRole('textbox', { name: 'Added weight (lb)' })).toHaveValue('-5');
   });
 });

@@ -18,7 +18,27 @@ SQLite database file on the phone
 
 Native features (file save, share menu, timers in the background) go through Capacitor plugins.
 Wrap each plugin in a small module in `src/native/`, so the interface never calls plugins directly:
-`files.ts` (Filesystem), `share.ts` (Share) and `alert.ts` (Haptics, plus a tone for the stretch timer).
+`files.ts` (Filesystem), `share.ts` (Share), `alert.ts` (Haptics, plus a tone for the stretch timer),
+`app.ts` (App: the Android Back button), `storedImages.ts` (Filesystem: images in the app's storage),
+`photos.ts` (Camera: photos of custom exercises) and `libraryDownload.ts` (fetch: the online library update).
+
+## Images
+
+`ExerciseImage` shows every exercise image: the copy bundled under `public/exercise-images/`, or, when
+`exercise_images.storedFile` is set, a file in the app's data folder (a downloaded library image or a photo).
+
+## Online library update (decision 038)
+
+`LibraryUpdater` (root layout) runs `updateLibraryOnline()` from `src/db/libraryUpdate.ts` in the background:
+check the newest commit → download and check `exercises.json` (`src/lib/libraryUpdate.ts`) → download new
+and changed images → `seedLibrary()` with the stored files in one transaction.
+
+## Android Back (decision 034)
+
+`BackButtonListener` (in the root layout) catches Back once. `src/lib/backStack.ts` runs the newest
+"close" handler (something open on the page), otherwise the newest "page" handler (registered by
+`BackLink`), otherwise the app closes. A component that opens something calls
+`useBackHandler(open ? close : null)`.
 
 ## Folder layout (target)
 
@@ -42,6 +62,10 @@ src/
     exercises.ts  Queries for exercises, muscle groups and images, and custom exercises
     preferences.ts  Queries for exercise preferences (notes and unit override)
     export.ts     Queries that build export rows
+    progress.ts   The one history query for the history view and the chart view, and exercise use
+    statistics.ts Queries for the statistics page and the personal records of a workout
+    bodyweights.ts  Queries for the user's bodyweights
+    libraryUpdate.ts  The online library update (decision 038)
   hooks/          React hooks, such as useSettings(), useFeatures() and useActiveWorkout()
   lib/            Pure helpers (unit conversion, formatting, CSV building)
   testing/        Test helpers: test database, render with providers, fake plugin
@@ -52,6 +76,33 @@ scripts/          Build helpers: bundling migrations, copying the SQLite WebAsse
 data/             Seed data (exercise library from free-exercise-db)
 docs/             Project documentation
 ```
+
+## Adding an exercise to a workout (decision 031)
+
+`/workout` (+) → `/workout/add?category=…` (search, category filter, muscle groups; top bar:
+`/workout/add/superset`) → `/workout/add/muscle?id=…&category=…` → `/workout/exercise?exercise=…`.
+`src/lib/addExercise.ts` builds these addresses. That page adds nothing until the first set:
+`addWorkoutExerciseWithSet()` writes the workout exercise and the set, and the address changes to
+`/workout/exercise?id=…`.
+The list the exercise was opened from travels along as `&back=…`, so Back returns there (decision 048).
+The exercise browser keeps its filters in the address and passes it to `/exercises/detail?id=…&back=…`
+the same way (`src/lib/exerciseBrowser.ts`).
+
+## Calendar (decision 040)
+
+`/calendar?view=month|week&date=…&day=…` (`CalendarView`; without a place: the current week). `src/lib/calendar.ts` builds the weeks, the shown
+time span and the address; `listWorkoutHistory()` loads the workouts of that span. A workout opens
+`/history/workout?id=…&back=<calendar address>`.
+
+## Statistics (decision 043)
+
+`/statistics` (`StatisticsView`, home page menu): `listStatistics()` loads the sets of ended workouts in the
+time span with their exercises and muscle groups; `src/lib/statistics.ts` counts workouts, volume, personal
+records and muscle group sets, using `listBodyweights()` for the bodyweight of each workout's day.
+The workout detail page uses `listHistoryUpTo()` for the personal records a workout reached.
+The muscle map (decision 046) draws the shapes from `src/lib/muscleMap.ts` with `MuscleMap`; one workout's
+muscle groups come from `listWorkoutStatistics()`. `useWorkoutSummary()` loads everything the workout detail
+page and the "Workout ended" page (`/workout/ended?id=…`, opened by "End workout") show.
 
 ## Data flow
 

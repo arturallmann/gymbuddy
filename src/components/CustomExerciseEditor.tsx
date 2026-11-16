@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
@@ -15,6 +14,7 @@ import {
 import type { MuscleGroup } from '@/db/schema';
 import { useSettings } from '@/hooks/useSettings';
 import { EMPTY_CUSTOM_EXERCISE } from '@/lib/exercises';
+import BackLink from './BackLink';
 import CustomExerciseForm from './CustomExerciseForm';
 
 type Loaded = {
@@ -75,9 +75,7 @@ export default function CustomExerciseEditor() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <Link href={id ? `/exercises/detail?id=${id}` : '/exercises'} className="shrink-0 text-sky-600">
-          ← Back
-        </Link>
+        <BackLink href={id ? `/exercises/detail?id=${id}` : '/exercises'} label="Back" />
         <h1 className="text-2xl font-bold">{id ? 'Edit exercise' : 'New custom exercise'}</h1>
       </header>
       {loaded.initial ? (
@@ -97,7 +95,7 @@ export default function CustomExerciseEditor() {
           }}
         />
       ) : (
-        <p className="text-gray-500">Only custom exercises can change.</p>
+        <p className="text-muted">Only custom exercises can change.</p>
       )}
     </main>
   );

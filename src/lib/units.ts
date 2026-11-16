@@ -149,3 +149,30 @@ export function formatWorkoutDuration(seconds: number): string {
   const hours = Math.floor(minutes / 60);
   return hours > 0 ? `${hours} h ${minutes % 60} min` : `${minutes} min`;
 }
+
+// --- Height ---
+
+export const MILLIMETERS_PER_INCH = 25.4;
+
+// Height in the distance unit: metric in cm, imperial in feet and inches.
+// 1800 mm → "180 cm" or "5 ft 11 in".
+export function formatHeight(millimeters: number, unit: DistanceUnit): string {
+  if (unit === 'metric') return `${formatNumber(millimeters / 10, 1)} cm`;
+  const { feet, inches } = millimetersToFeetInches(millimeters);
+  return `${feet} ft ${inches} in`;
+}
+
+// Whole feet and whole inches, rounded to the nearest inch.
+export function millimetersToFeetInches(millimeters: number): { feet: number; inches: number } {
+  const total = Math.round(millimeters / MILLIMETERS_PER_INCH);
+  return { feet: Math.floor(total / 12), inches: total % 12 };
+}
+
+// Converts height input to whole millimeters for saving.
+export function centimetersToMillimeters(centimeters: number): number {
+  return Math.round(centimeters * 10);
+}
+
+export function feetInchesToMillimeters(feet: number, inches: number): number {
+  return Math.round((feet * 12 + inches) * MILLIMETERS_PER_INCH);
+}

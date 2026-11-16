@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import type { AppDatabase } from '@/db/driver';
 import { exercises, sets } from '@/db/schema';
@@ -10,6 +10,7 @@ import { getUnits } from '@/lib/units';
 import { createTestDatabase } from '@/testing/database';
 import { renderWithDatabase } from '@/testing/render';
 import SetLog from './SetLog';
+import { backStack } from '@/lib/backStack';
 
 const values: SetValues = {
   setType: 'normal',
@@ -161,6 +162,20 @@ describe('SetLog', () => {
     expect(await screen.findByRole('button', { name: 'Log set' })).toBeInTheDocument();
     const [set] = await savedSets(db);
     expect(set.reps).toBe(8);
+  });
+
+
+  test('stop editing with Android Back, without changes', async () => {
+    const { db, user } = await setup({ logged: [values] });
+    await user.click(await screen.findByRole('button', { name: 'Edit set 1' }));
+    await user.clear(screen.getByRole('textbox', { name: 'Reps' }));
+
+    act(() => {
+      backStack.back();
+    });
+
+    expect(await screen.findByRole('button', { name: 'Log set' })).toBeInTheDocument();
+    expect((await savedSets(db))[0].reps).toBe(8);
   });
 
   test('remove a set', async () => {

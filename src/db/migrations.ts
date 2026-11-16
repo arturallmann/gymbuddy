@@ -77,5 +77,33 @@ export const migrations: Migration[] = [
     "statements": [
       "CREATE UNIQUE INDEX `workouts_user_active_idx` ON `workouts` (`userId`) WHERE \"endedAt\" IS NULL AND \"deletedAt\" IS NULL;"
     ]
+  },
+  {
+    "tag": "0005_blue_zaran",
+    "when": 1794691661074,
+    "hash": "404ca17f02a4c66775590a39973c0f14bc4ce5029d1797afd4898b0ee3772c9f",
+    "statements": [
+      "ALTER TABLE `user_settings` ADD `theme` text DEFAULT 'system' NOT NULL;"
+    ]
+  },
+  {
+    "tag": "0006_old_viper",
+    "when": 1794747381481,
+    "hash": "43ff6737c0c5167ccb07d82f117d2ff44e51aeef8fb963fc6a0614d9b631219d",
+    "statements": [
+      "DROP INDEX `exercise_images_exercise_position_idx`;",
+      "ALTER TABLE `exercise_images` ADD `storedFile` text;",
+      "CREATE UNIQUE INDEX `exercise_images_exercise_position_idx` ON `exercise_images` (`exerciseId`,`position`) WHERE \"deletedAt\" IS NULL;"
+    ]
+  },
+  {
+    "tag": "0007_chubby_colonel_america",
+    "when": 1794757901348,
+    "hash": "31402598efd8892bf9ad8fb620f65e87ea2dd3d561109e8789340e65c00f20c9",
+    "statements": [
+      "CREATE TABLE `bodyweights` (\n\t`id` text PRIMARY KEY NOT NULL,\n\t`userId` text NOT NULL,\n\t`weightGrams` integer NOT NULL,\n\t`measuredAt` integer NOT NULL,\n\t`createdAt` integer NOT NULL,\n\t`updatedAt` integer NOT NULL,\n\t`deletedAt` integer,\n\tFOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action\n);",
+      "CREATE INDEX `bodyweights_user_measured_idx` ON `bodyweights` (`userId`,`measuredAt`);",
+      "ALTER TABLE `user_settings` ADD `heightMillimeters` integer;"
+    ]
   }
 ];

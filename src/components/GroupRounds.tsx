@@ -18,14 +18,14 @@ export default function GroupRounds({ members, workoutId, restSeconds }: Props) 
   const rows = data ? roundRows(data.sets) : [];
   return (
     <span className="flex flex-col gap-1">
-      <span className="text-xs font-semibold uppercase text-sky-500">
+      <span className="text-xs font-semibold uppercase text-link">
         Superset{restSeconds !== null && ` · Rest ${formatDuration(restSeconds)}`}
       </span>
       <span className="font-semibold">{members.map((member) => member.name).join(' + ')}</span>
-      {data && rows.length === 0 && <span className="text-sm text-gray-500">No rounds yet</span>}
+      {data && rows.length === 0 && <span className="text-sm text-muted">No rounds yet</span>}
       {data &&
         rows.map((row, round) => (
-          <span key={round} className="block text-sm text-gray-500">
+          <span key={round} className="block text-sm text-muted">
             Round {round + 1}:{' '}
             {row
               .map((set, index) => (set ? formatSet(set, members[index].loadType, data.units[index]) : '—'))

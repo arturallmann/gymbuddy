@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
@@ -8,6 +7,7 @@ import { changeGroupRest, getWorkoutGroup, ungroupWorkoutExercises, type GroupDe
 import { saveGroupAsTemplate } from '@/db/templates';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
 import GroupLog from './GroupLog';
+import BackLink from './BackLink';
 
 // One exercise group: a rounds table and the set form for the next exercise in turn
 // (A → B → … → rest → A). The group id comes from the address: /workout/group?id=…
@@ -36,13 +36,11 @@ export default function GroupView() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <Link href="/workout" className="shrink-0 text-sky-600">
-          ← Workout
-        </Link>
+        <BackLink href="/workout" label="Back to workout" />
         <h1 className="text-2xl font-bold">Superset</h1>
       </header>
       {!detail ? (
-        <p className="text-gray-500">This superset does not exist.</p>
+        <p className="text-muted">This superset does not exist.</p>
       ) : (
         <GroupLog
           detail={detail}
