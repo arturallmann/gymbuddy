@@ -414,6 +414,23 @@ The slide plays after the change; the content does not follow the finger during 
 with scrolling up and down. Phones that ask for reduced motion get no slide. `useTabs()` keeps the chosen tab
 and the direction; the classes `slide-from-right` and `slide-from-left` live in `globals.css`.
 
+## 046 — Muscle map: warm clay shades, front and back, a page after End workout
+Date: 2026-11-16
+The muscle map (4b.13) is our own SVG of the body, front and back side by side, with one area per muscle group
+of the exercise library (`src/lib/muscleMap.ts`). Of the mockups the user chose:
+- Shades of one color, "warm clay" (muted orange-brown), from untrained (grey) through five steps; the most
+  trained muscle group always gets the darkest step (`heatLevel()`). Petrol was rejected because its bright
+  steps glared in the dark theme; numbers on the body and a weekly range of sets were not chosen.
+  The colors are named colors `heat-0` to `heat-5` (this adds to decision 030).
+- On the statistics page the muscle map replaces the muscle group list. It shades by sets per week by default
+  (a set counts 1 for a primary and ½ for a secondary muscle group, decision 043), with volume per week one
+  tap away. A tap on a muscle group shows its sets, volume and exercises; Android Back clears the choice.
+- The workout detail page shows the map of that workout under its summary.
+- "End workout" opens a new "Workout ended" page (`/workout/ended?id=…`): the summary, the muscle map and the
+  personal records the workout reached. "Done" and Android Back go to the home page, which lists today's
+  workouts. With the `statistics` feature toggle off, "End workout" goes home as before.
+All of it follows the `statistics` feature toggle, so it needs no toggle of its own.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

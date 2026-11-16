@@ -5,6 +5,7 @@ import { getLocalSettings, updateSettings } from '@/db/settings';
 import { addBodyweight } from '@/db/bodyweights';
 import { addSet, addWorkoutExercise, endWorkout, startWorkout } from '@/db/workouts';
 import { createTestDatabase } from '@/testing/database';
+import { addTestLibrary } from '@/testing/exercises';
 import { renderWithDatabase } from '@/testing/render';
 import WorkoutDetail from './WorkoutDetail';
 
@@ -144,11 +145,34 @@ describe('WorkoutDetail statistics (decision 043)', () => {
     expect(within(dips).queryByRole('list', { name: 'Personal records' })).not.toBeInTheDocument();
   });
 
+  test('show the muscle map of the workout (decision 046)', async () => {
+    const { db } = await createTestDatabase();
+    const local = await getLocalSettings(db);
+    const { press } = await addTestLibrary(db);
+    const workout = await startWorkout(db, local.userId, new Date('2026-10-08T10:00:00Z'));
+    await addSet(db, await addWorkoutExercise(db, workout.id, press), values);
+    await endWorkout(db, workout.id);
+    navigation.params = new URLSearchParams({ id: workout.id });
+    await renderWithDatabase(<WorkoutDetail />, { db });
+
+    const map = await screen.findByRole('region', { name: 'Muscle map' });
+    expect(within(map).getByRole('button', { name: 'Chest, 1 set' })).toHaveClass('fill-heat-5');
+    expect(within(map).getByRole('button', { name: 'Biceps, 0.5 sets' })).toHaveClass('fill-heat-3');
+  });
+
+  test('leave the muscle map out when the exercises have no muscle groups', async () => {
+    await setupTwo();
+
+    expect(await screen.findByRole('region', { name: 'Workout summary' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Muscle map' })).not.toBeInTheDocument();
+  });
+
   test('hide the summary and records when the statistics feature toggle is off', async () => {
     await setupTwo(false);
 
     expect(await screen.findByRole('region', { name: 'Squat' })).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Workout summary' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Muscle map' })).not.toBeInTheDocument();
     expect(screen.queryByRole('list', { name: 'Personal records' })).not.toBeInTheDocument();
   });
 });

@@ -97,6 +97,9 @@ time span and the address; `listWorkoutHistory()` loads the workouts of that spa
 time span with their exercises and muscle groups; `src/lib/statistics.ts` counts workouts, volume, personal
 records and muscle group sets, using `listBodyweights()` for the bodyweight of each workout's day.
 The workout detail page uses `listHistoryUpTo()` for the personal records a workout reached.
+The muscle map (decision 046) draws the shapes from `src/lib/muscleMap.ts` with `MuscleMap`; one workout's
+muscle groups come from `listWorkoutStatistics()`. `useWorkoutSummary()` loads everything the workout detail
+page and the "Workout ended" page (`/workout/ended?id=…`, opened by "End workout") show.
 
 ## Data flow
 

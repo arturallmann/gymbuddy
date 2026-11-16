@@ -8,12 +8,14 @@ import ElapsedTime from '@/components/ElapsedTime';
 import SaveRoutine from '@/components/SaveRoutine';
 import WorkoutExercises from '@/components/WorkoutExercises';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
+import { useFeatures } from '@/hooks/useSettings';
 
 // The active workout. "Save as routine" sits in the top bar; "End workout" and the + button,
 // which opens the "Add exercise" page, sit in a bar at the bottom (decision 032). There is no
 // discard: an ended workout can be deleted from its workout history page (decision 031).
 export default function WorkoutPage() {
   const { workout, end } = useActiveWorkout();
+  const features = useFeatures();
   const router = useRouter();
   const [ending, setEnding] = useState(false);
 
@@ -45,7 +47,8 @@ export default function WorkoutPage() {
                 onClick={async () => {
                   setEnding(true);
                   await end();
-                  router.push('/');
+                  // With the statistics feature toggle the "Workout ended" page shows what it did (decision 046).
+                  router.push(features.statistics ? `/workout/ended?id=${workout.id}` : '/');
                 }}
                 className="flex-1 rounded-lg border bg-surface px-6 py-3 font-semibold disabled:opacity-50"
               >

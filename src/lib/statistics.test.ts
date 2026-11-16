@@ -5,6 +5,7 @@ import {
   estimatedOneRepMax,
   exerciseSummaries,
   formatPersonalRecord,
+  formatSetCount,
   muscleGroupSummaries,
   personalRecords,
   personalRecordKinds,
@@ -175,7 +176,7 @@ describe('spanRange', () => {
 });
 
 describe('span statistics', () => {
-  const muscle = (id: string, role: 'primary' | 'secondary') => ({ id, name: id, role });
+  const muscle = (id: string, role: 'primary' | 'secondary') => ({ id, key: id, name: id, role });
   const exercises = new Map<string, StatisticsExercise>([
     ['bench', { id: 'bench', name: 'Bench Press', ...external, muscleGroups: [muscle('chest', 'primary'), muscle('triceps', 'secondary')] }],
     ['dip', { id: 'dip', name: 'Dips', ...bodyweight, muscleGroups: [muscle('triceps', 'primary'), muscle('chest', 'secondary')] }],
@@ -200,8 +201,8 @@ describe('span statistics', () => {
 
   test('count sets per muscle group: 1 for primary, ½ for secondary', () => {
     expect(muscleGroupSummaries(input)).toEqual([
-      { id: 'chest', name: 'chest', primarySets: 2, secondarySets: 1, volume: 1000000 + 720000 / 2, exercises: ['Bench Press', 'Dips'] },
-      { id: 'triceps', name: 'triceps', primarySets: 2, secondarySets: 1, volume: 500000 + 720000, exercises: ['Bench Press', 'Dips'] },
+      { id: 'chest', key: 'chest', name: 'chest', primarySets: 2, secondarySets: 1, volume: 1000000 + 720000 / 2, exercises: ['Bench Press', 'Dips'] },
+      { id: 'triceps', key: 'triceps', name: 'triceps', primarySets: 2, secondarySets: 1, volume: 500000 + 720000, exercises: ['Bench Press', 'Dips'] },
     ]);
   });
 
@@ -218,5 +219,14 @@ describe('span statistics', () => {
       [new Date(2026, 10, 2), 1, 3, 1000000],
       [new Date(2026, 10, 9), 1, 1, 720000],
     ]);
+  });
+});
+
+describe('formatSetCount', () => {
+  test('write set counts with halves and the right plural', () => {
+    expect(formatSetCount(1)).toBe('1 set');
+    expect(formatSetCount(0.5)).toBe('0.5 sets');
+    expect(formatSetCount(7.25)).toBe('7.3 sets');
+    expect(formatSetCount(0)).toBe('0 sets');
   });
 });

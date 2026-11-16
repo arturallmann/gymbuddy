@@ -1,4 +1,4 @@
-import { and, asc, eq, gte, inArray, isNotNull, isNull, lt, lte } from 'drizzle-orm';
+import { and, asc, eq, gte, inArray, isNotNull, isNull, lt, lte, type SQL } from 'drizzle-orm';
 import type { StatisticsExercise, StatisticsRow } from '@/lib/statistics';
 import type { AppDatabase } from './driver';
 import type { HistoryRow } from './progress';
@@ -11,21 +11,29 @@ const setColumns = {
   distanceMeters: sets.distanceMeters,
 };
 
+export type StatisticsData = { rows: StatisticsRow[]; exercises: Map<string, StatisticsExercise> };
+
 // Every set of the user's ended workouts that started in the time span (from included, to not),
 // with the exercises they belong to and their muscle groups. The statistics page uses this.
-export async function listStatistics(
-  db: AppDatabase,
-  userId: string,
-  span: { from: Date; to: Date },
-): Promise<{ rows: StatisticsRow[]; exercises: Map<string, StatisticsExercise> }> {
-  const inSpan = and(
-    eq(workouts.userId, userId),
-    isNotNull(workouts.endedAt),
-    isNull(workouts.deletedAt),
-    isNull(workoutExercises.deletedAt),
-    gte(workouts.startedAt, span.from),
-    lt(workouts.startedAt, span.to),
+export async function listStatistics(db: AppDatabase, userId: string, span: { from: Date; to: Date }): Promise<StatisticsData> {
+  return loadStatistics(
+    db,
+    and(
+      eq(workouts.userId, userId),
+      isNotNull(workouts.endedAt),
+      gte(workouts.startedAt, span.from),
+      lt(workouts.startedAt, span.to),
+    ),
   );
+}
+
+// The same for one workout: the muscle map of a workout (decision 046) uses it.
+export async function listWorkoutStatistics(db: AppDatabase, workoutId: string): Promise<StatisticsData> {
+  return loadStatistics(db, eq(workouts.id, workoutId));
+}
+
+async function loadStatistics(db: AppDatabase, which: SQL | undefined): Promise<StatisticsData> {
+  const inSpan = and(which, isNull(workouts.deletedAt), isNull(workoutExercises.deletedAt));
   const found = await db
     .select({
       workoutId: workouts.id,
@@ -69,6 +77,7 @@ async function loadExercises(db: AppDatabase, ids: string[]): Promise<Map<string
       .select({
         exerciseId: exerciseMuscleGroups.exerciseId,
         id: muscleGroups.id,
+        key: muscleGroups.key,
         name: muscleGroups.name,
         role: exerciseMuscleGroups.role,
       })
