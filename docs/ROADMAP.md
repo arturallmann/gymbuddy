@@ -171,6 +171,15 @@ Use the app at the gym, find what gets in the way, and fix it. Online features m
   (graphify helps find it, decision 017); make names follow `docs/GLOSSARY.md`; bring `docs/` in line with
   the code; update dependencies and fix the security alerts GitHub reports (Dependabot).
   Done when: the checks pass, the app works on a phone as before, and no docs describe code that is gone.
+- [ ] **5.7** Project structure: split `src/components/` (81 files in one folder) into one folder per area,
+  for example `workout/`, `exercises/`, `history/` (with the calendar), `statistics/`, `templates/`,
+  `settings/`, `app/` (providers and listeners from the root layout) and `ui/` (shared pieces such as `Tabs`,
+  `OptionGroup`, `NumberStepper`, `ConfirmAction`, `BackLink`). Tests stay next to their file.
+  Split the biggest files into smaller ones by topic: `src/db/workouts.ts`, `src/db/templates.ts`,
+  `src/db/exercises.ts`, `src/lib/statistics.ts` and `src/components/CalendarView.tsx`.
+  Only files move and split; no behavior changes. Update the folder layout in `docs/ARCHITECTURE.md` and add
+  a decision entry for the new structure.
+  Done when: the checks pass, no test was changed except its imports, and the app works on a phone as before.
 
 ## Ideas (not planned)
 
