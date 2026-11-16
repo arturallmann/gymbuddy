@@ -406,6 +406,14 @@ the same rule the calendar uses for months and weeks; both use `useSwipe()`. A s
 field or in something that scrolls sideways (such as a row of chips) belongs to that element. The tabs
 change at once, without a sliding animation, so the page stays as simple as a tap on a tab.
 
+## 045 — Tabs, months and weeks slide in
+Date: 2026-11-16
+A changed tab (by tap or swipe, decision 044) and a changed month or week in the calendar slide in from the
+side they come from: the next one from the right, the one before from the left, over 200 ms with a short fade.
+The slide plays after the change; the content does not follow the finger during the swipe, which would fight
+with scrolling up and down. Phones that ask for reduced motion get no slide. `useTabs()` keeps the chosen tab
+and the direction; the classes `slide-from-right` and `slide-from-left` live in `globals.css`.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

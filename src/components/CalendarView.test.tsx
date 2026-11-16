@@ -110,9 +110,12 @@ describe('month view', () => {
     await user.click(screen.getByRole('button', { name: 'Next month' }));
     expect(screen.getByText('December 2026')).toBeInTheDocument();
     expect(navigation.replace).toHaveBeenLastCalledWith('/calendar?view=month&date=2026-12-01');
+    // The next month slides in from the right, the one before from the left (decision 045).
+    expect(screen.getByRole('grid').parentElement).toHaveClass('slide-from-right');
 
     await user.click(screen.getByRole('button', { name: 'Today' }));
     expect(screen.getByText('November 2026')).toBeInTheDocument();
+    expect(screen.getByRole('grid').parentElement).toHaveClass('slide-from-left');
 
     const area = screen.getByRole('grid').parentElement!;
     fireEvent.touchStart(area, { touches: [{ clientX: 300, clientY: 100 }] });

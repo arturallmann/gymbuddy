@@ -50,6 +50,19 @@ describe('ExerciseDetailView', () => {
     expect(screen.getByRole('tab', { name: 'About' })).toHaveAttribute('aria-selected', 'true');
   });
 
+  test('slide the new tab in from the side it comes from (decision 045)', async () => {
+    const { user } = await setup('curl');
+    const heading = await screen.findByRole('heading', { name: 'Barbell Curl' });
+    expect(screen.getByRole('tabpanel')).not.toHaveClass('slide-from-right');
+
+    swipe(heading, 300, 100);
+    expect(screen.getByRole('tabpanel')).toHaveClass('slide-from-right');
+    await openTab(user, 'Progress');
+    expect(screen.getByRole('tabpanel')).toHaveClass('slide-from-left');
+    await openTab(user, 'Notes');
+    expect(screen.getByRole('tabpanel')).toHaveClass('slide-from-right');
+  });
+
   test('leave a swipe that starts in a text field to the field', async () => {
     const { user } = await setup('curl');
     await openTab(user, 'Notes');
