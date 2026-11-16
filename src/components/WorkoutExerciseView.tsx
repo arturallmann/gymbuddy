@@ -19,6 +19,7 @@ import { shortDescription } from '@/lib/exercises';
 import { PHASE_LABELS, defaultPhase } from '@/lib/phases';
 import type { SetValues } from '@/lib/sets';
 import { getUnits } from '@/lib/units';
+import { workoutExerciseBack, workoutExerciseHref } from '@/lib/addExercise';
 import ExercisePreferencesForm from './ExercisePreferencesForm';
 import SetLog, { type SetLogItem } from './SetLog';
 import Tabs, { tabPanelProps } from './Tabs';
@@ -52,6 +53,9 @@ export default function WorkoutExerciseView() {
   const params = useSearchParams();
   const id = params.get('id');
   const exerciseId = params.get('exercise');
+  // The list the exercise was opened from, kept after its first set (Android Back returns there).
+  const backParam = params.get('back');
+  const back = workoutExerciseBack(backParam);
   const phasesOn = features.phases;
   const [loaded, setLoaded] = useState<Loaded | undefined>(undefined);
   const { tab, changeTab, swipe, slide } = useTabs<Tab>(TABS, 'log');
@@ -69,7 +73,7 @@ export default function WorkoutExerciseView() {
       if (!workout) return null;
       const existing = (await listWorkoutExercises(db, workout.id)).find((item) => item.exerciseId === exerciseId);
       if (existing) {
-        router.replace(`/workout/exercise?id=${existing.id}`);
+        router.replace(workoutExerciseHref(existing.id, backParam));
         return 'redirected';
       }
       const detail = await getExerciseDetail(db, settings.userId, exerciseId);
@@ -98,7 +102,7 @@ export default function WorkoutExerciseView() {
     return () => {
       current = false;
     };
-  }, [db, router, settings.userId, id, exerciseId, phasesOn]);
+  }, [db, router, settings.userId, id, exerciseId, phasesOn, backParam]);
 
   const pending = loaded?.item.id === null ? loaded.item : null;
   // The first set adds the exercise to the workout; the address then names the new workout exercise.
@@ -106,9 +110,9 @@ export default function WorkoutExerciseView() {
     async (values: SetValues) => {
       if (!pending) return;
       const newId = await addWorkoutExerciseWithSet(db, pending.workoutId, pending.exerciseId, pending.phase, values);
-      router.replace(`/workout/exercise?id=${newId}`);
+      router.replace(workoutExerciseHref(newId, backParam));
     },
-    [db, router, pending],
+    [db, router, pending, backParam],
   );
 
   if (loaded === undefined) {
@@ -121,7 +125,7 @@ export default function WorkoutExerciseView() {
   return (
     <main {...swipe} className="mx-auto flex min-h-screen overflow-x-clip max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
-        <BackLink href="/workout" label="Back to workout" />
+        <BackLink href={back.href} label={back.label} />
         <h1 className="min-w-0 break-words text-2xl font-bold">{item?.name ?? 'Exercise'}</h1>
       </header>
       {!item ? (

@@ -91,7 +91,7 @@ export default function AddExerciseView() {
             items={found}
             use={use}
             showImages={features.exerciseImages}
-            href={(exercise) => logExerciseHref(exercise.id)}
+            href={(exercise) => logExerciseHref(exercise.id, addExerciseHref(category))}
           />
         ))
       ) : (

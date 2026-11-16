@@ -7,7 +7,7 @@ import { listMuscleGroups, searchExercises, type ExerciseListItem } from '@/db/e
 import type { MuscleGroup } from '@/db/schema';
 import { useExerciseUse } from '@/hooks/useExerciseUse';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
-import { addExerciseHref, logExerciseHref, parseCategory } from '@/lib/addExercise';
+import { addExerciseHref, logExerciseHref, muscleGroupHref, parseCategory } from '@/lib/addExercise';
 import { CATEGORY_LABELS } from '@/lib/exercises';
 import ExerciseResults from './ExerciseResults';
 import BackLink from './BackLink';
@@ -66,7 +66,7 @@ export default function MuscleGroupExercises() {
           items={loaded.items}
           use={use}
           showImages={features.exerciseImages}
-          href={(exercise) => logExerciseHref(exercise.id)}
+          href={(exercise) => logExerciseHref(exercise.id, muscleGroupHref(loaded.group.id, category))}
         />
       )}
     </main>

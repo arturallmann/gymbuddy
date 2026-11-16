@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { listMuscleGroups, searchExercises, type ExerciseListItem } from '@/db/exercises';
 import type { Category, MuscleGroup } from '@/db/schema';
 import { useExerciseUse } from '@/hooks/useExerciseUse';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
+import { exerciseBrowserHref, exerciseDetailHref, parseBrowserFilter } from '@/lib/exerciseBrowser';
 import CategoryFilter from './CategoryFilter';
 import ExerciseResults from './ExerciseResults';
 
@@ -14,14 +16,19 @@ import ExerciseResults from './ExerciseResults';
 const BROWSE_LIMIT = 2000;
 
 // Search the exercise library by name, category, muscle group and custom exercises only (decision 035).
+// The search and filters live in the address (/exercises?q=…&muscle=…&category=…&custom=1), and each
+// exercise page gets that address as `back`, so its back arrow and Android Back return to the same list.
 export default function ExerciseBrowser() {
   const db = useDatabase();
   const { userId } = useSettings().settings;
   const features = useFeatures();
-  const [query, setQuery] = useState('');
-  const [muscleGroupId, setMuscleGroupId] = useState('');
-  const [category, setCategory] = useState<Category | null>(null);
-  const [customOnly, setCustomOnly] = useState(false);
+  const params = useSearchParams();
+  const [initial] = useState(() => parseBrowserFilter(params));
+  const [query, setQuery] = useState(initial.query);
+  const [muscleGroupId, setMuscleGroupId] = useState(initial.muscleGroupId);
+  const [category, setCategory] = useState<Category | null>(initial.category);
+  const [customOnly, setCustomOnly] = useState(initial.customOnly);
+  const href = exerciseBrowserHref({ query, muscleGroupId, category, customOnly });
   const use = useExerciseUse();
   const [groups, setGroups] = useState<MuscleGroup[]>([]);
   const [found, setFound] = useState<ExerciseListItem[] | undefined>(undefined);
@@ -41,6 +48,11 @@ export default function ExerciseBrowser() {
       current = false;
     };
   }, [db, userId, query, muscleGroupId, category, customOnly]);
+
+  // Without a navigation, so typing in the search field does not load the page again.
+  useEffect(() => {
+    if (`${window.location.pathname}${window.location.search}` !== href) window.history.replaceState(null, '', href);
+  }, [href]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -85,7 +97,12 @@ export default function ExerciseBrowser() {
           {found.length === 0 ? (
             <p className="text-muted">No exercise found.</p>
           ) : (
-            <ExerciseResults items={found} use={use} showImages={features.exerciseImages} />
+            <ExerciseResults
+              items={found}
+              use={use}
+              showImages={features.exerciseImages}
+              href={(exercise) => exerciseDetailHref(exercise.id, href)}
+            />
           )}
         </>
       )}

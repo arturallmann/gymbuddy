@@ -22,9 +22,10 @@ test('list the exercises where the muscle group is primary, to log a set', async
   await renderWithDatabase(<MuscleGroupExercises />, { db });
 
   expect(await screen.findByRole('heading', { name: 'Biceps' })).toBeInTheDocument();
+  // The exercise page returns to this muscle group.
   expect(screen.getByRole('link', { name: /Barbell Curl/ })).toHaveAttribute(
     'href',
-    expect.stringMatching(/^\/workout\/exercise\?exercise=/),
+    expect.stringMatching(new RegExp(`^/workout/exercise\\?exercise=.+&back=${encodeURIComponent(`/workout/add/muscle?id=${biceps.id}`)}$`)),
   );
   // Biceps is only a secondary muscle group of Bench Press.
   expect(screen.queryByRole('link', { name: /Bench Press/ })).not.toBeInTheDocument();

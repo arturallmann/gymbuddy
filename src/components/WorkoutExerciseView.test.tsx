@@ -210,6 +210,29 @@ describe('an exercise from the Add exercise page', () => {
     expect(await listSets(db, item.id)).toEqual([expect.objectContaining({ reps: 5, position: 1 })]);
   });
 
+  test('go back to the muscle group it was opened from, also after the first set', async () => {
+    const { db, workout, exerciseId } = await withExercise();
+    const back = '/workout/add/muscle?id=g1&category=strength';
+    navigation.params = new URLSearchParams({ exercise: exerciseId, back });
+    const { user } = await renderWithDatabase(<WorkoutExerciseView />, { db });
+
+    expect(await screen.findByRole('link', { name: 'Back to muscle group' })).toHaveAttribute('href', back);
+
+    await user.type(await screen.findByRole('textbox', { name: 'Reps' }), '5');
+    await user.click(screen.getByRole('button', { name: 'Log set' }));
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalled());
+    const [item] = await listWorkoutExercises(db, workout.id);
+    expect(navigation.replace).toHaveBeenCalledWith(`/workout/exercise?id=${item.id}&back=${encodeURIComponent(back)}`);
+  });
+
+  test('go back to the workout when the back address is not part of the Add exercise flow', async () => {
+    const { db, exerciseId } = await withExercise();
+    navigation.params = new URLSearchParams({ exercise: exerciseId, back: 'https://example.com/' });
+    await renderWithDatabase(<WorkoutExerciseView />, { db });
+
+    expect(await screen.findByRole('link', { name: 'Back to workout' })).toHaveAttribute('href', '/workout');
+  });
+
   test('add a stretch to the cool-down phase when phases are on, without a phase choice before', async () => {
     const { db, workout } = await withExercise({ phases: true, stretch: true });
     const { user } = await renderWithDatabase(<WorkoutExerciseView />, { db });
