@@ -51,13 +51,27 @@ export default function MuscleMap({ values, format, names, selected, onSelect }:
                   choose();
                 }
               }}
-              className={`cursor-pointer outline-none ${FILLS[heatLevel(value, top)]} ${
-                selected === key ? 'stroke-ink' : 'stroke-page'
-              }`}
-              strokeWidth={selected === key ? 1.6 : 1}
+              className={`cursor-pointer stroke-page outline-none ${FILLS[heatLevel(value, top)]}`}
+              strokeWidth={1}
             />
           );
         });
+    // The outline of the chosen muscle group, drawn above every area so no neighbor covers it.
+    const outline = (mirrored: boolean) =>
+      BODY_AREAS[view]
+        .filter((area) => selected && area.muscleGroup === selected && (!mirrored || !area.center))
+        .map((area, index) => (
+          <path
+            key={`outline-${index}`}
+            d={area.d}
+            data-outline={area.muscleGroup}
+            fill="none"
+            strokeWidth={1.6}
+            strokeLinejoin="round"
+            pointerEvents="none"
+            className="stroke-ink"
+          />
+        ));
     // Wider invisible tap areas around small muscle groups, drawn last so they lie on top.
     const tapAreas = (mirrored: boolean) =>
       BODY_AREAS[view]
@@ -87,6 +101,8 @@ export default function MuscleMap({ values, format, names, selected, onSelect }:
           <g transform={MIRROR}>{draw(true)}</g>
           <g>{tapAreas(false)}</g>
           <g transform={MIRROR}>{tapAreas(true)}</g>
+          <g>{outline(false)}</g>
+          <g transform={MIRROR}>{outline(true)}</g>
         </svg>
         <figcaption className="text-xs uppercase tracking-wide text-muted">{view === 'front' ? 'Front' : 'Back'}</figcaption>
       </figure>
