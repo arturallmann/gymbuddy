@@ -45,7 +45,16 @@ and changed images → `seedLibrary()` with the stored files in one transaction.
 ```
 src/
   app/            Next.js routes (pages only, no API routes)
-  components/     React components
+  components/     React components, one folder per area (decision 049):
+    app/          Providers and listeners of the root layout (database, settings, Android Back, library update)
+    ui/           Shared pieces: Tabs, OptionGroup, NumberStepper, ConfirmAction, ToggleRow, BackLink, icons
+    home/         The home page: menu, "Start workout", today's workouts
+    workout/      The active workout: workout exercises, set form, exercise groups, timers, "Add exercise"
+    exercises/    The exercise browser, exercise pages, custom exercises and photos
+    history/      Workout history, workout detail page and the calendar
+    statistics/   Statistics page, muscle map, personal records, the "Workout ended" page
+    templates/    Routines and saved supersets
+    settings/     Settings and first-time setup pieces: units, theme, feature toggles, body, export, import
   db/
     schema.ts     Drizzle schema (single source of truth for tables)
     client.ts     Opens the database and runs migrations at app start
@@ -56,10 +65,14 @@ src/
     seed.ts       Seeds the exercise library on first start
     settings.ts   Queries for the local user and settings
     appState.ts   Queries for app state, such as the library version
-    workouts.ts   Queries for workouts, workout exercises and sets
+    workouts.ts   Queries for workouts: start, end, delete, the active workout, the workout history
+    workoutExercises.ts  Queries for workout exercises: add, move, phases, remove
+    sets.ts       Queries for sets: log, edit, remove, the last sets of an exercise
     groups.ts     Queries for exercise groups (make superset, ungroup, rest)
-    templates.ts  Queries for templates: saved supersets and routines, copying them into workouts
-    exercises.ts  Queries for exercises, muscle groups and images, and custom exercises
+    templates.ts  Queries for templates: saving saved supersets and routines, list, rename, delete
+    templateWorkouts.ts  Copying templates into workouts, starting from a routine, template targets
+    exercises.ts  Queries for exercises: search, muscle groups, images, details, equipment
+    customExercises.ts  Queries for custom exercises and their photos
     preferences.ts  Queries for exercise preferences (notes and unit override)
     export.ts     Queries that build export rows
     progress.ts   The one history query for the history view and the chart view, and exercise use
@@ -97,8 +110,8 @@ time span and the address; `listWorkoutHistory()` loads the workouts of that spa
 ## Statistics (decision 043)
 
 `/statistics` (`StatisticsView`, home page menu): `listStatistics()` loads the sets of ended workouts in the
-time span with their exercises and muscle groups; `src/lib/statistics.ts` counts workouts, volume, personal
-records and muscle group sets, using `listBodyweights()` for the bodyweight of each workout's day.
+time span with their exercises and muscle groups; `src/lib/statistics.ts` counts workouts, volume and
+muscle group sets, and `src/lib/personalRecords.ts` the e1RM and personal records, using `listBodyweights()` for the bodyweight of each workout's day.
 The workout detail page uses `listHistoryUpTo()` for the personal records a workout reached.
 The muscle map (decision 046) draws the shapes from `src/lib/muscleMap.ts` with `MuscleMap`; one workout's
 muscle groups come from `listWorkoutStatistics()`. `useWorkoutSummary()` loads everything the workout detail

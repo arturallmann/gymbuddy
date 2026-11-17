@@ -4,7 +4,7 @@ import { DndContext, closestCenter, useSensor, useSensors, type DragEndEvent, ty
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import Link from 'next/link';
 import { useRef, useState, type ReactNode } from 'react';
-import type { WorkoutExerciseItem } from '@/db/workouts';
+import type { WorkoutExerciseItem } from '@/db/workoutExercises';
 import { toBlocks, type Block } from '@/lib/blocks';
 import { HandleSensor, LONG_PRESS, LongPressSensor } from '@/lib/dragSensors';
 import { useBackHandler } from '@/hooks/useBackHandler';

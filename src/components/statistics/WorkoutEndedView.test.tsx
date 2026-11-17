@@ -1,7 +1,9 @@
 import { screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { getLocalSettings } from '@/db/settings';
-import { addSet, addWorkoutExercise, endWorkout, startWorkout } from '@/db/workouts';
+import { addSet } from '@/db/sets';
+import { addWorkoutExercise } from '@/db/workoutExercises';
+import { endWorkout, startWorkout } from '@/db/workouts';
 import { backStack } from '@/lib/backStack';
 import { createTestDatabase } from '@/testing/database';
 import { addTestLibrary } from '@/testing/exercises';

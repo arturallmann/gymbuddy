@@ -9,10 +9,10 @@ import { PHASES, type Phase } from '@/db/schema';
 import {
   addWorkoutExerciseWithSet,
   changeWorkoutExercisePhase,
-  getActiveWorkout,
   getWorkoutExercise,
   listWorkoutExercises,
-} from '@/db/workouts';
+} from '@/db/workoutExercises';
+import { getActiveWorkout } from '@/db/workouts';
 import { useExercisePreferences } from '@/hooks/useExercisePreferences';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
 import { shortDescription } from '@/lib/exercises';

@@ -450,6 +450,20 @@ live in the address, and each exercise page gets that address as `back`, so Back
 Only addresses of the "Add exercise" flow and of the exercise browser count as `back`; anything else goes to the
 workout or the exercise browser.
 
+## 049 — Components in one folder per area; big files split by topic
+Date: 2026-11-17
+`src/components/` had grown to 81 components in one folder (5.7). They now live in one folder per area:
+`app/` (providers and listeners of the root layout), `ui/` (pieces shared across areas), `home/`, `workout/`,
+`exercises/`, `history/` (with the calendar), `statistics/`, `templates/` and `settings/`. A component used by
+several areas goes in `ui/`; otherwise it lives with the page that uses it. Tests stay next to their file.
+Files of more than about 300 lines were split by topic: `src/db/workouts.ts` into workouts, workout
+exercises (`workoutExercises.ts`) and sets (`sets.ts`); templates into saving (`templates.ts`) and use in
+workouts (`templateWorkouts.ts`); custom exercises into `customExercises.ts`; personal records and the e1RM into
+`src/lib/personalRecords.ts`; the calendar into `CalendarMonth` and `CalendarWeek`. The shared transaction type
+is `Transaction` in `src/db/driver.ts`. Nothing changed in behavior.
+A separate `tests/` folder was rejected: a test next to its file shows at a glance what has tests, and moves with it.
+Barrel files (`index.ts` that re-export a folder) were rejected too: imports name the real file.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

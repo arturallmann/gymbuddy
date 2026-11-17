@@ -3,6 +3,8 @@ import {
   calendarHref,
   calendarTitle,
   dayCategories,
+  dayCellLabel,
+  dayLabel,
   dayKey,
   firstDayOfWeek,
   monthWeeks,
@@ -72,6 +74,13 @@ describe('labels', () => {
     // The browser puts (thin) spaces around the dash or not, depending on its version.
     expect(calendarTitle('week', day(11, 15), MONDAY, 'en-GB')).toMatch(/^9\s?–\s?15 Nov 2026$/);
     expect(calendarTitle('week', day(12, 1), MONDAY, 'en-GB')).toMatch(/^30 Nov\s?–\s?6 Dec 2026$/);
+  });
+
+  test('name a day with today and its number of workouts', () => {
+    expect(dayLabel(day(11, 15), 'en-GB')).toBe('Sunday 15 November');
+    expect(dayCellLabel(day(11, 15), day(11, 15), 0, 'en-GB')).toBe('Sunday 15 November, today');
+    expect(dayCellLabel(day(11, 14), day(11, 15), 1, 'en-GB')).toBe('Saturday 14 November, 1 workout');
+    expect(dayCellLabel(day(11, 15), day(11, 15), 2, 'en-GB')).toBe('Sunday 15 November, today, 2 workouts');
   });
 
   test('name the weekdays in calendar order', () => {

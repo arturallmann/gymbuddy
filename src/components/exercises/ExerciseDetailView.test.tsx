@@ -1,7 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { createCustomExercise } from '@/db/exercises';
+import { createCustomExercise } from '@/db/customExercises';
 import { exercises } from '@/db/schema';
 import { getLocalSettings } from '@/db/settings';
 import { EMPTY_CUSTOM_EXERCISE } from '@/lib/exercises';

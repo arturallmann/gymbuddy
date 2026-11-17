@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { createCustomExercise, getExerciseDetail, searchExercises } from '@/db/exercises';
+import { createCustomExercise } from '@/db/customExercises';
+import { getExerciseDetail, searchExercises } from '@/db/exercises';
 import { getLocalSettings } from '@/db/settings';
 import { EMPTY_CUSTOM_EXERCISE } from '@/lib/exercises';
 import { createTestDatabase } from '@/testing/database';

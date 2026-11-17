@@ -1,8 +1,8 @@
 'use client';
 
-import type { WorkoutExerciseItem } from '@/db/workouts';
+import type { WorkoutExerciseItem } from '@/db/workoutExercises';
 import { useExercisePreferences } from '@/hooks/useExercisePreferences';
-import { PERSONAL_RECORD_LABELS, formatPersonalRecord, type PersonalRecordKind } from '@/lib/statistics';
+import { PERSONAL_RECORD_LABELS, formatPersonalRecord, type PersonalRecordKind } from '@/lib/personalRecords';
 
 type Records = Map<string, { kind: PersonalRecordKind; value: number }[]>;
 

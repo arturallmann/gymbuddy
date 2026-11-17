@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import type { WorkoutSet } from '@/db/schema';
-import { getTemplateTargets, type Targets } from '@/db/templates';
-import { addSet, deleteSet, getLastSets, listSets, updateSet } from '@/db/workouts';
+import { getTemplateTargets, type Targets } from '@/db/templateWorkouts';
+import { addSet, deleteSet, getLastSets, listSets, updateSet } from '@/db/sets';
 import type { SetValues } from '@/lib/sets';
 
 // The sets of one workout exercise, the sets of this exercise in the last workout, and the

@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import { getLocalSettings } from './settings';
 import { listHistoryUpTo, listStatistics, listWorkoutStatistics } from './statistics';
-import { addSet, addWorkoutExercise, deleteSet, deleteWorkout, endWorkout, startWorkout } from './workouts';
+import { addSet, deleteSet } from './sets';
+import { addWorkoutExercise } from './workoutExercises';
+import { deleteWorkout, endWorkout, startWorkout } from './workouts';
 import { createTestDatabase } from '@/testing/database';
 import { addTestLibrary } from '@/testing/exercises';
 

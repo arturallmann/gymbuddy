@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { CustomExerciseInput } from '@/db/exercises';
+import type { CustomExerciseInput } from '@/db/customExercises';
 import { CATEGORIES, LOAD_TYPES, type Category, type LoadType, type MuscleGroup } from '@/db/schema';
 import { CATEGORY_LABELS, LOAD_TYPE_LABELS, equipmentLabel } from '@/lib/exercises';
 

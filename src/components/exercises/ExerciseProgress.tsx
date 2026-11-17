@@ -7,7 +7,7 @@ import type { Exercise } from '@/db/schema';
 import { useBodyweights } from '@/hooks/useBodyweights';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
 import { chartMetrics, chartPoints, historyByWorkout } from '@/lib/progress';
-import { byWorkout, personalRecords } from '@/lib/statistics';
+import { byWorkout, personalRecords } from '@/lib/personalRecords';
 import type { Units } from '@/lib/units';
 import ExerciseChart from './ExerciseChart';
 import ExerciseHistory from './ExerciseHistory';

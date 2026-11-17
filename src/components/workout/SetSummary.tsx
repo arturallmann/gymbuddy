@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import type { LoadType, WorkoutSet } from '@/db/schema';
-import { listSets } from '@/db/workouts';
+import { listSets } from '@/db/sets';
 import { useExercisePreferences } from '@/hooks/useExercisePreferences';
 import { formatSet } from '@/lib/sets';
 
