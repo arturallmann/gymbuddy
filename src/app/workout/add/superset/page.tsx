@@ -1,4 +1,4 @@
-import AddSavedSupersetView from '@/components/AddSavedSupersetView';
+import AddSavedSupersetView from '@/components/templates/AddSavedSupersetView';
 
 export default function Page() {
   return <AddSavedSupersetView />;

@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import BackLink from '@/components/BackLink';
-import ElapsedTime from '@/components/ElapsedTime';
-import SaveRoutine from '@/components/SaveRoutine';
-import WorkoutExercises from '@/components/WorkoutExercises';
+import BackLink from '@/components/ui/BackLink';
+import ElapsedTime from '@/components/workout/ElapsedTime';
+import SaveRoutine from '@/components/templates/SaveRoutine';
+import WorkoutExercises from '@/components/workout/WorkoutExercises';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
 import { useFeatures } from '@/hooks/useSettings';
 

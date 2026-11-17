@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import WorkoutEndedView from '@/components/WorkoutEndedView';
+import WorkoutEndedView from '@/components/statistics/WorkoutEndedView';
 
 // The id is in the address, which a static export only knows in the browser.
 export default function WorkoutEndedPage() {

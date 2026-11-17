@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import HomeMenu from '@/components/HomeMenu';
-import CalendarIcon from '@/components/icons/CalendarIcon';
-import StartWorkout from '@/components/StartWorkout';
-import TodaysWorkouts from '@/components/TodaysWorkouts';
-import DumbbellIcon from '@/components/icons/DumbbellIcon';
-import GearIcon from '@/components/icons/GearIcon';
+import HomeMenu from '@/components/home/HomeMenu';
+import CalendarIcon from '@/components/ui/icons/CalendarIcon';
+import StartWorkout from '@/components/home/StartWorkout';
+import TodaysWorkouts from '@/components/home/TodaysWorkouts';
+import DumbbellIcon from '@/components/ui/icons/DumbbellIcon';
+import GearIcon from '@/components/ui/icons/GearIcon';
 
 // The home page stays clean (decision 035): the app name at the top left, the calendar, the menu and
 // the settings at the top right (decision 041), "Start workout" in the middle and today's workouts below it.

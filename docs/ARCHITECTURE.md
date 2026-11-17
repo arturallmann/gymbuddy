@@ -130,7 +130,7 @@ page and the "Workout ended" page (`/workout/ended?id=…`, opened by "End worko
 3. `src/lib/csv.ts` builds CSV text; `src/lib/excel.ts` builds `.xlsx` files with ExcelJS, loaded only on export.
 4. `src/native/files.ts` saves the file to the cache folder with the Filesystem plugin (in the browser it downloads).
 5. `src/native/share.ts` opens the phone's share menu.
-The Export section on the settings page (`src/components/ExportData.tsx`) runs these steps.
+The Export section on the settings page (`src/components/settings/ExportData.tsx`) runs these steps.
 
 ## Import
 

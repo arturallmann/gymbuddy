@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
-import SettingsProvider from '@/components/SettingsProvider';
+import SettingsProvider from '@/components/app/SettingsProvider';
 import { DatabaseContext } from '@/db/DatabaseContext';
 import type { AppDatabase } from '@/db/driver';
 import { getLocalSettings, updateSettings, type SettingsChange } from '@/db/settings';

@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
-import ExerciseBrowser from '@/components/ExerciseBrowser';
-import BackLink from '@/components/BackLink';
+import ExerciseBrowser from '@/components/exercises/ExerciseBrowser';
+import BackLink from '@/components/ui/BackLink';
 
 export default function ExercisesPage() {
   return (

@@ -195,7 +195,7 @@ Use the app at the gym, find what gets in the way, and fix it. Online features m
   `settings/`, `app/` (providers and listeners from the root layout) and `ui/` (shared pieces such as `Tabs`,
   `OptionGroup`, `NumberStepper`, `ConfirmAction`, `BackLink`). Tests stay next to their file.
   Split the biggest files into smaller ones by topic: `src/db/workouts.ts`, `src/db/templates.ts`,
-  `src/db/exercises.ts`, `src/lib/statistics.ts` and `src/components/CalendarView.tsx`.
+  `src/db/exercises.ts`, `src/lib/statistics.ts` and `src/components/history/CalendarView.tsx`.
   Only files move and split; no behavior changes. Update the folder layout in `docs/ARCHITECTURE.md` and add
   a decision entry for the new structure.
   Done when: the checks pass, no test was changed except its imports, and the app works on a phone as before.
