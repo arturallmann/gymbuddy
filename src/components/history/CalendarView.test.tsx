@@ -143,7 +143,7 @@ describe('week view', () => {
     expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
   });
 
-  test('list the seven days, with rest days, and open a day in place', async () => {
+  test('list the seven days, past days without a workout left empty, and open a day in place', async () => {
     const { user } = await setup();
 
     await user.click(screen.getByRole('radio', { name: 'Week' }));
@@ -152,10 +152,11 @@ describe('week view', () => {
     const nov9 = await screen.findByRole('button', { name: 'Monday 9 November, 1 workout' });
     expect(nov9).toHaveTextContent('Squat');
     expect(screen.getByRole('button', { name: 'Sunday 15 November, today' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Tuesday 10 November' })).toHaveTextContent('Rest day');
-    // No "Rest day" for days still to come.
+    // A day without a workout shows only its weekday and number, past or still to come (decision 050).
+    expect(screen.getByRole('button', { name: 'Tuesday 10 November' })).toHaveTextContent(/^Tue10$/);
+    expect(screen.queryByText('Rest day')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Next week' }));
-    expect(screen.getByRole('button', { name: 'Monday 16 November' })).not.toHaveTextContent('Rest day');
+    expect(screen.getByRole('button', { name: 'Monday 16 November' })).toHaveTextContent(/^Mon16$/);
     await user.click(screen.getByRole('button', { name: 'Previous week' }));
 
     const again = await screen.findByRole('button', { name: 'Monday 9 November, 1 workout' });

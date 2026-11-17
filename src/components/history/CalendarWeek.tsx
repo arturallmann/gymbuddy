@@ -18,8 +18,8 @@ type Props = {
   onToggle: (day: Date) => void;
 };
 
-// The week view of the calendar (decision 040): the seven days with bars and exercise names, or "Rest day"
-// for a past day without a workout. A day with workouts opens in place to list them.
+// The week view of the calendar (decision 040): the seven days with bars and exercise names; a day without
+// a workout stays empty (decision 050). A day with workouts opens in place to list them.
 export default function CalendarWeek({ date, firstDay, today, open, workoutsOn, back, onToggle }: Props) {
   const names = weekdayNames(firstDay);
   return (
@@ -46,7 +46,7 @@ export default function CalendarWeek({ date, firstDay, today, open, workoutsOn, 
               </span>
               <span className="flex min-w-0 flex-1 flex-col gap-1">
                 <CategoryBars categories={dayCategories(workouts)} hasWorkout={workouts.length > 0} />
-                <span className="truncate text-sm text-muted">{workouts.length > 0 ? exerciseNames.join(', ') : day > today ? '' : 'Rest day'}</span>
+                <span className="truncate text-sm text-muted">{exerciseNames.join(', ')}</span>
               </span>
               {workouts.length > 0 && (
                 <span aria-hidden className="text-muted">

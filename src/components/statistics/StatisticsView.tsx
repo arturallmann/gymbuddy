@@ -174,11 +174,11 @@ export default function StatisticsView() {
       </header>
       <Tabs label="Statistics" tabs={TABS} value={tab} onChange={changeTab} />
       {tab === 'bodyweight' ? (
-        <div {...tabPanelProps('bodyweight')} key={tab} className={slide}>
+        <div key={tab} {...tabPanelProps('bodyweight')} className={slide}>
           <BodyweightSection />
         </div>
       ) : (
-        <div {...tabPanelProps(tab)} key={tab} className={`flex flex-col gap-4 ${slide}`}>
+        <div key={tab} {...tabPanelProps(tab)} className={`flex flex-col gap-4 ${slide}`}>
           <OptionGroup label="Time span" hideLabel options={SPANS} value={span} onChange={setSpan} />
           {input &&
             (input.rows.length === 0 ? (

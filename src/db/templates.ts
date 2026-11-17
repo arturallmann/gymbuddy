@@ -49,32 +49,88 @@ async function insertTemplateRows(tx: Transaction, templateId: string, sources: 
   }
 }
 
-// Saves an exercise group as a saved superset (template kind `superset`, decision 026).
-// Each exercise keeps its order, phase and the group's rest. Its targets come from the logged
-// sets: the number of sets as target sets, and the values of its last set.
-export async function saveGroupAsTemplate(db: AppDatabase, userId: string, groupId: string, name: string): Promise<string> {
+// The rows a saved superset gets from an exercise group: each exercise with its order, phase and the
+// group's type and rest, and targets from its logged sets.
+async function supersetSources(db: AppDatabase, groupId: string): Promise<Source[]> {
   const detail = await getWorkoutGroup(db, groupId);
   if (!detail) {
     throw new Error(`Exercise group ${groupId} not found`);
   }
   const setsPerMember = await Promise.all(detail.members.map((member) => listSets(db, member.id)));
+  return detail.members.map((member, index) => ({
+    exerciseId: member.exerciseId,
+    phase: member.phase,
+    groupKey: SUPERSET_GROUP_KEY,
+    groupType: detail.group.groupType,
+    restSeconds: detail.group.restSeconds,
+    sets: setsPerMember[index],
+  }));
+}
+
+// Saves an exercise group as a saved superset (template kind `superset`, decision 026).
+// Each exercise keeps its order, phase and the group's rest. Its targets come from the logged
+// sets: the number of sets as target sets, and the values of its last set.
+export async function saveGroupAsTemplate(db: AppDatabase, userId: string, groupId: string, name: string): Promise<string> {
+  const sources = await supersetSources(db, groupId);
   const templateId = crypto.randomUUID();
   await db.transaction(async (tx) => {
     await tx.insert(templates).values({ id: templateId, userId, kind: 'superset', name: name.trim() });
-    await insertTemplateRows(
-      tx,
-      templateId,
-      detail.members.map((member, index) => ({
-        exerciseId: member.exerciseId,
-        phase: member.phase,
-        groupKey: SUPERSET_GROUP_KEY,
-        groupType: detail.group.groupType,
-        restSeconds: detail.group.restSeconds,
-        sets: setsPerMember[index],
-      })),
-    );
+    await insertTemplateRows(tx, templateId, sources);
   });
   return templateId;
+}
+
+export type SavedSupersetMatch = { id: string; name: string };
+
+// The saved superset that "Save superset" changes instead of saving a new one (5.2.2, decision 051):
+// the one the exercise group was added from, otherwise the newest one with the same exercises in the
+// same order. Null when there is none, or the group does not exist.
+export async function findSavedSuperset(db: AppDatabase, userId: string, groupId: string): Promise<SavedSupersetMatch | null> {
+  const detail = await getWorkoutGroup(db, groupId);
+  if (!detail) return null;
+  const saved = await db
+    .select({ id: templates.id, name: templates.name })
+    .from(templates)
+    .where(and(eq(templates.userId, userId), eq(templates.kind, 'superset'), isNull(templates.deletedAt)))
+    .orderBy(desc(templates.updatedAt), desc(templates.createdAt));
+  const origin = saved.find((template) => template.id === detail.group.templateId);
+  if (origin) return origin;
+  if (saved.length === 0) return null;
+  const rows = await db
+    .select({ templateId: templateExercises.templateId, exerciseId: templateExercises.exerciseId })
+    .from(templateExercises)
+    .where(and(inArray(templateExercises.templateId, saved.map((template) => template.id)), isNull(templateExercises.deletedAt)))
+    .orderBy(asc(templateExercises.position));
+  const exercisesOf = (templateId: string) => rows.filter((row) => row.templateId === templateId).map((row) => row.exerciseId);
+  const wanted = detail.members.map((member) => member.exerciseId).join(',');
+  return saved.find((template) => exercisesOf(template.id).join(',') === wanted) ?? null;
+}
+
+// Changes a saved superset to match an exercise group (5.2.2): its exercises, order, rest and targets
+// come from the group, its name stays. The old rows get deletedAt. One transaction.
+export async function updateSavedSuperset(
+  db: AppDatabase,
+  userId: string,
+  templateId: string,
+  groupId: string,
+  updatedAt: Date = new Date(),
+): Promise<void> {
+  const sources = await supersetSources(db, groupId);
+  await db.transaction(async (tx) => {
+    const [template] = await tx
+      .select({ id: templates.id })
+      .from(templates)
+      .where(and(eq(templates.id, templateId), eq(templates.userId, userId), eq(templates.kind, 'superset'), isNull(templates.deletedAt)));
+    if (!template) {
+      throw new Error(`Saved superset ${templateId} not found`);
+    }
+    await tx
+      .update(templateExercises)
+      .set({ deletedAt: updatedAt, updatedAt })
+      .where(and(eq(templateExercises.templateId, templateId), isNull(templateExercises.deletedAt)));
+    await insertTemplateRows(tx, templateId, sources);
+    await tx.update(templates).set({ updatedAt }).where(eq(templates.id, templateId));
+  });
 }
 
 // Saves a whole workout as a routine (template kind `routine`, decision 027): every workout

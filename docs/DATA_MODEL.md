@@ -153,6 +153,9 @@ Library updates never change `exercise_preferences`.
 - Prefill order for the set form: last workout with this exercise first, then template targets.
 - A saved superset made from a workout (decision 026) has one row per exercise, all with the same
   `groupKey`, the group's `groupType` and `restSeconds`, and targets from the sets logged in the group.
+- "Save superset" on a group that matches a saved superset (it was added from it, or has the same exercises in
+  the same order) updates that saved superset instead (decision 051): its old `template_exercises` get `deletedAt`,
+  new rows are written, and its name stays.
 - Deleting a template writes `deletedAt` to it and its `template_exercises`. Workouts that used it keep their copies.
 - Template targets reach the set form through the origin of a workout exercise: its group's `templateId`,
   otherwise its workout's `templateId` (a routine). Only the prefill reads them; the structure of the

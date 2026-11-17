@@ -58,6 +58,9 @@ describe('workout page', () => {
     await withActiveWorkout();
 
     expect(await screen.findByRole('link', { name: 'Add exercise' })).toHaveAttribute('href', '/workout/add');
+    // A drawn plus, centered in its button; a text "+" sat low (5.2.5).
+    expect(screen.getByRole('link', { name: 'Add exercise' }).querySelector('svg')).not.toBeNull();
+    expect(screen.getByRole('link', { name: 'Add exercise' })).not.toHaveTextContent('+');
     expect(screen.queryByRole('button', { name: 'Discard workout' })).not.toBeInTheDocument();
   });
 

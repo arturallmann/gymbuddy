@@ -1,11 +1,20 @@
+import { eq } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 import { makeSuperset } from './groups';
-import { exercises, templateExercises, templates, users } from './schema';
+import { exercises, templateExercises, templates, users, workoutGroups } from './schema';
 import { getLocalSettings } from './settings';
-import { deleteTemplate, listTemplates, renameTemplate, saveGroupAsTemplate } from './templates';
+import {
+  deleteTemplate,
+  findSavedSuperset,
+  listTemplates,
+  renameTemplate,
+  saveGroupAsTemplate,
+  updateSavedSuperset,
+} from './templates';
+import { addTemplateToWorkout } from './templateWorkouts';
 import { addSet } from './sets';
 import { addWorkoutExercise } from './workoutExercises';
-import { startWorkout } from './workouts';
+import { endWorkout, startWorkout } from './workouts';
 import { createTestDatabase } from '@/testing/database';
 
 const values = { setType: 'normal' as const, weightGrams: 20000, reps: 10, durationSeconds: null, distanceMeters: null, rpe: null, notes: null };
@@ -90,5 +99,85 @@ describe('renameTemplate and deleteTemplate', () => {
     expect(await listTemplates(db, userId, 'superset')).toEqual([]);
     const rows = await db.select().from(templateExercises);
     expect(rows.every((row) => row.deletedAt !== null)).toBe(true);
+  });
+});
+
+// 5.2.2 (decision 051): "Save superset" changes the saved superset a group came from, or one with the same
+// exercises in the same order, instead of saving a second one.
+describe('findSavedSuperset and updateSavedSuperset', () => {
+  test('find nothing before a saved superset exists', async () => {
+    const { db, userId, groupId } = await setup();
+    expect(await findSavedSuperset(db, userId, groupId)).toBeNull();
+    expect(await findSavedSuperset(db, userId, 'unknown')).toBeNull();
+  });
+
+  test('find a saved superset with the same exercises in the same order, not in another order', async () => {
+    const { db, userId, groupId } = await setup();
+    const id = await saveGroupAsTemplate(db, userId, groupId, 'Arms');
+    expect(await findSavedSuperset(db, userId, groupId)).toEqual({ id, name: 'Arms' });
+
+    // Swap the order of the saved rows: Plank first.
+    const rows = await db.select().from(templateExercises);
+    for (const row of rows) await db.update(templateExercises).set({ position: 3 - row.position }).where(eq(templateExercises.id, row.id));
+    expect(await findSavedSuperset(db, userId, groupId)).toBeNull();
+  });
+
+  test('find the saved superset a group was added from, even after its exercises changed', async () => {
+    const { db, userId, groupId, first } = await setup();
+    const id = await saveGroupAsTemplate(db, userId, groupId, 'Arms');
+    await endWorkout(db, first.id);
+    const second = await startWorkout(db, userId);
+    await addTemplateToWorkout(db, second.id, id);
+    const [group] = await db.select().from(workoutGroups).where(eq(workoutGroups.workoutId, second.id));
+    // The saved superset changes afterwards (another order), so only its origin still matches.
+    const rows = await db.select().from(templateExercises);
+    for (const row of rows) await db.update(templateExercises).set({ position: 3 - row.position }).where(eq(templateExercises.id, row.id));
+
+    expect(await findSavedSuperset(db, userId, group.id)).toEqual({ id, name: 'Arms' });
+  });
+
+  test('ignore deleted saved supersets and those of another user', async () => {
+    const { db, userId, groupId } = await setup();
+    const gone = await saveGroupAsTemplate(db, userId, groupId, 'Gone');
+    await deleteTemplate(db, userId, gone);
+    const otherId = crypto.randomUUID();
+    await db.insert(users).values({ id: otherId });
+    const theirs = crypto.randomUUID();
+    await db.insert(templates).values({ id: theirs, userId: otherId, kind: 'superset', name: 'Theirs' });
+
+    expect(await findSavedSuperset(db, userId, groupId)).toBeNull();
+    await expect(updateSavedSuperset(db, userId, theirs, groupId)).rejects.toThrow('not found');
+    await expect(updateSavedSuperset(db, userId, gone, groupId)).rejects.toThrow('not found');
+  });
+
+  test('change the exercises, rest and targets, keep the name, and delete the old rows', async () => {
+    const { db, userId, ids, groupId } = await setup();
+    const id = await saveGroupAsTemplate(db, userId, groupId, 'Arms');
+    await addSet(db, ids[0], values);
+    await addSet(db, ids[0], { ...values, weightGrams: 25000, reps: 6 });
+    await db.update(workoutGroups).set({ restSeconds: 120 }).where(eq(workoutGroups.id, groupId));
+
+    await updateSavedSuperset(db, userId, id, groupId);
+
+    const saved = await listTemplates(db, userId, 'superset');
+    expect(saved).toHaveLength(1);
+    expect(saved[0]).toMatchObject({ id, name: 'Arms' });
+    expect(saved[0].exercises.map((item) => [item.name, item.position, item.restSeconds])).toEqual([
+      ['Curl', 1, 120],
+      ['Plank', 2, 120],
+    ]);
+    expect(saved[0].exercises[0]).toMatchObject({ targetSets: 2, targetWeightGrams: 25000, targetReps: 6 });
+    const all = await db.select().from(templateExercises).where(eq(templateExercises.templateId, id));
+    expect(all.filter((row) => row.deletedAt !== null)).toHaveLength(2);
+  });
+
+  test('leave one set of rows when two updates run at once', async () => {
+    const { db, userId, groupId } = await setup();
+    const id = await saveGroupAsTemplate(db, userId, groupId, 'Arms');
+
+    await Promise.all([updateSavedSuperset(db, userId, id, groupId), updateSavedSuperset(db, userId, id, groupId)]);
+
+    const [saved] = await listTemplates(db, userId, 'superset');
+    expect(saved.exercises.map((item) => item.name)).toEqual(['Curl', 'Plank']);
   });
 });

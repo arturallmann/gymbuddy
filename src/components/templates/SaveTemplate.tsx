@@ -15,13 +15,55 @@ type Props = {
   // In a page's top bar: a small button, and the form and the message on their own line below
   // (the top bar wraps).
   compact?: boolean;
+  // A saved template to change instead of saving a new one (5.2.2): the button then says `updateLabel`
+  // and updates it in one tap, keeping its name.
+  existing?: { name: string; updateLabel: string; onUpdate: () => Promise<void> } | null;
 };
 
-// Asks for a name, then saves a template: a saved superset or a routine.
-export default function SaveTemplate({ label, defaultName, listHref, listLabel, onSave, compact = false }: Props) {
+// Asks for a name, then saves a template: a saved superset or a routine. With `existing`, it updates
+// that template instead, without asking for a name.
+export default function SaveTemplate({ label, defaultName, listHref, listLabel, onSave, compact = false, existing = null }: Props) {
   const [name, setName] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  const [updated, setUpdated] = useState<string | null>(null);
   useBackHandler(name !== null ? () => setName(null) : null);
+
+  if (existing && name === null) {
+    return (
+      <div className="flex flex-col items-start gap-2">
+        <button
+          type="button"
+          onClick={async () => {
+            setSaved(null);
+            await existing.onUpdate();
+            setUpdated(existing.name);
+          }}
+          className="rounded-lg border bg-surface px-4 py-2 font-semibold"
+        >
+          {existing.updateLabel}
+        </button>
+        <p role="status" className="text-sm text-muted">
+          {updated ? (
+            <>
+              Updated “{updated}”.{' '}
+              <Link href={listHref} className="text-link">
+                {listLabel}
+              </Link>
+            </>
+          ) : saved ? (
+            <>
+              Saved as “{saved}”.{' '}
+              <Link href={listHref} className="text-link">
+                {listLabel}
+              </Link>
+            </>
+          ) : (
+            <>Changes “{existing.name}” to these exercises, rest and targets.</>
+          )}
+        </p>
+      </div>
+    );
+  }
 
   if (name === null) {
     return (

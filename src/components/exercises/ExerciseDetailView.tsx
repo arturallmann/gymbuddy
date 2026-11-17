@@ -86,12 +86,12 @@ export default function ExerciseDetailView() {
           </div>
           <Tabs label="Exercise" tabs={TABS} value={tab} onChange={changeTab} />
           {tab === 'progress' && (
-            <div {...tabPanelProps('progress')} key={tab} className={`flex flex-col gap-4 ${slide}`}>
+            <div key={tab} {...tabPanelProps('progress')} className={`flex flex-col gap-4 ${slide}`}>
               {preferences !== undefined && <ExerciseProgress exercise={exercise} units={units} />}
             </div>
           )}
           {tab === 'about' && (
-            <div {...tabPanelProps('about')} key={tab} className={`flex flex-col gap-4 ${slide}`}>
+            <div key={tab} {...tabPanelProps('about')} className={`flex flex-col gap-4 ${slide}`}>
               {features.exerciseImages && exercise.source === 'custom' && (
                 <ExercisePhotos exerciseId={exercise.id} name={exercise.name} images={detail.images} onChange={reload} />
               )}
@@ -153,7 +153,7 @@ export default function ExerciseDetailView() {
             </div>
           )}
           {tab === 'notes' && preferences !== undefined && (
-            <section {...tabPanelProps('notes')} key={tab} className={`flex flex-col gap-2 ${slide}`}>
+            <section key={tab} {...tabPanelProps('notes')} className={`flex flex-col gap-2 ${slide}`}>
               <h2 className="text-sm font-semibold uppercase text-muted">Notes and units</h2>
               <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
             </section>
