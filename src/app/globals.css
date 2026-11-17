@@ -107,6 +107,17 @@
     -webkit-user-select: none;
     user-select: none;
   }
+  /* A long press on a link or image would pick it up to drag it, or open the phone's link menu (5.2.5).
+     Links select no text either; drags in the app (dnd-kit) do not use the native drag. */
+  a,
+  img {
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+  }
+  a {
+    -webkit-user-select: none;
+    user-select: none;
+  }
   button:not(:disabled):active,
   a:active,
   [role='button']:active {

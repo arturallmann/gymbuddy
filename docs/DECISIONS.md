@@ -464,6 +464,23 @@ is `Transaction` in `src/db/driver.ts`. Nothing changed in behavior.
 A separate `tests/` folder was rejected: a test next to its file shows at a glance what has tests, and moves with it.
 Barrel files (`index.ts` that re-export a folder) were rejected too: imports name the real file.
 
+## 050 — No "Rest day" in the calendar
+Date: 2026-11-17
+The week view of the calendar wrote "Rest day" under a past day without a workout (decision 040). The user found
+it noisy after trying it on a phone (5.2.6): such a day now shows only its weekday and number, like a day still to
+come. This replaces that part of decision 040.
+
+## 051 — "Save superset" updates a matching saved superset
+Date: 2026-11-17
+Saving the same superset again made a second saved superset with the same exercises (5.2.2). Now the group page
+looks for a matching saved superset first: the one the exercise group was added from (`workout_groups.templateId`),
+otherwise the newest one with the same exercises in the same order. When there is one, the button says
+"Update saved superset" and names it; one tap gives it the group's exercises, order, rest and targets, and keeps its
+name (`findSavedSuperset()`, `updateSavedSuperset()`). Its old `template_exercises` rows get `deletedAt` and new
+rows are written, in one transaction. Without a match, "Save superset" asks for a name as before (decision 026).
+The same exercises in another order count as a different superset. Asking "update or save new" each time was not
+chosen: the button already says what it does.
+
 ## Open questions
 - Pricing (draft): free app plus a cheap yearly plan, no monthly plan. Recommendation so far:
   about 4.99€ per year plus a lifetime option; logging, history and CSV export always free.

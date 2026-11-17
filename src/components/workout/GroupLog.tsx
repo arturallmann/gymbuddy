@@ -22,11 +22,13 @@ type Props = {
   onUngroup?: () => Promise<void>;
   // Without onSaveTemplate there is no "Save superset" (supersets or templates toggle off).
   onSaveTemplate?: (name: string) => Promise<void>;
+  // The saved superset "Save superset" would change instead (5.2.2), with how to update it.
+  savedSuperset?: { name: string; onUpdate: () => Promise<void> } | null;
 };
 
 // The rounds table and the guided set form of one exercise group. Tapping a set edits it;
 // tapping an empty cell logs that exercise next instead of the one in turn.
-export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveTemplate }: Props) {
+export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveTemplate, savedSuperset = null }: Props) {
   const { group, members } = detail;
   const features = useFeatures();
   const { data, add, update } = useGroupSets(members, group.workoutId);
@@ -177,6 +179,7 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
           listHref="/saved-supersets"
           listLabel="Saved supersets"
           onSave={onSaveTemplate}
+          existing={savedSuperset && { ...savedSuperset, updateLabel: 'Update saved superset' }}
         />
       )}
 

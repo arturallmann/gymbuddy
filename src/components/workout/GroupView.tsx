@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import { changeGroupRest, getWorkoutGroup, ungroupWorkoutExercises, type GroupDetail } from '@/db/groups';
-import { saveGroupAsTemplate } from '@/db/templates';
+import { findSavedSuperset, saveGroupAsTemplate, updateSavedSuperset, type SavedSupersetMatch } from '@/db/templates';
 import { useFeatures, useSettings } from '@/hooks/useSettings';
 import GroupLog from './GroupLog';
 import BackLink from '@/components/ui/BackLink';
@@ -18,17 +18,24 @@ export default function GroupView() {
   const { userId } = useSettings().settings;
   const id = useSearchParams().get('id');
   const [detail, setDetail] = useState<GroupDetail | null | undefined>(undefined);
+  // The saved superset "Save superset" changes instead of saving a second one (5.2.2, decision 051).
+  const [match, setMatch] = useState<SavedSupersetMatch | null>(null);
 
   const reload = useCallback(async () => setDetail(id ? await getWorkoutGroup(db, id) : null), [db, id]);
+  const reloadMatch = useCallback(async () => setMatch(id ? await findSavedSuperset(db, userId, id) : null), [db, userId, id]);
   useEffect(() => {
     let current = true;
-    (id ? getWorkoutGroup(db, id) : Promise.resolve(null))
-      .then((loaded) => current && setDetail(loaded))
+    Promise.all([id ? getWorkoutGroup(db, id) : null, id ? findSavedSuperset(db, userId, id) : null])
+      .then(([loaded, found]) => {
+        if (!current) return;
+        setDetail(loaded);
+        setMatch(found);
+      })
       .catch((reason: unknown) => console.error(reason));
     return () => {
       current = false;
     };
-  }, [db, id]);
+  }, [db, userId, id]);
 
   if (detail === undefined) {
     return null;
@@ -53,8 +60,17 @@ export default function GroupView() {
             features.supersets && features.templates
               ? async (name) => {
                   await saveGroupAsTemplate(db, userId, detail.group.id, name);
+                  await reloadMatch();
                 }
               : undefined
+          }
+          savedSuperset={
+            match && {
+              name: match.name,
+              onUpdate: async () => {
+                await updateSavedSuperset(db, userId, match.id, detail.group.id);
+              },
+            }
           }
           onUngroup={
             features.supersets

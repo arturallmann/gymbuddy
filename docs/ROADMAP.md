@@ -157,25 +157,34 @@ Use the app at the gym, find what gets in the way, and fix it. Online features m
   Done when: every page was tried on a phone and each problem found is a task in this phase.
 - [ ] **5.2** Fix the problems found in 5.1, one task each, with a test that fails without the fix.
   Found so far (first round on a phone, 2026-11-16):
-  - [ ] **5.2.1** Exercise page of a custom exercise, "About" tab: the phase choice stands below the save
-    button; it belongs above it.
-  - [ ] **5.2.2** "Save superset" when a saved superset with the same exercises already exists: change that
+  - [x] **5.2.1** Workout exercise page, "About" tab: the phase choice stood below the save button of
+    "Notes and units"; it now stands above that form.
+  - [x] **5.2.2** "Save superset" when a saved superset with the same exercises already exists: change that
     saved superset instead of creating a second one. Needs a decision first: what counts as "the same"
-    (same exercises, same order?) and whether the user is asked.
-  - [ ] **5.2.3** Muscle map, back side: an area of the lower back covers part of the lats. Fix the shapes in
+    (same exercises, same order?) and whether the user is asked. Done as decision 051.
+  - [x] **5.2.3** Muscle map, back side: an area of the lower back covers part of the lats. Fix the shapes in
     `src/lib/muscleMap.ts` so no area overlaps another.
-  - [ ] **5.2.4** Muscle map on the "Workout ended" page and the statistics page: the box with the chosen
+  - [x] **5.2.4** Muscle map on the "Workout ended" page and the statistics page: the box with the chosen
     muscle group's sets, volume and exercises opens below the map, often off screen, and a larger box
     reaches further down. Bring it into view when a muscle group is chosen (for example scroll it into view,
     or show it in a panel at the bottom of the screen).
-  - [ ] **5.2.5** Press and hold on the + button of the workout page turns it into a draggable link. Stop this
+  - [x] **5.2.5** Press and hold on the + button of the workout page turns it into a draggable link. Stop this
     for every link and image in the app (see the check in 5.1). Also: the + sits slightly too low inside its
     round button; center it.
-  - [ ] **5.2.6** Calendar, week view: a past day without a workout stays empty instead of showing "Rest day".
-    This changes decision 040.
-  - [ ] **5.2.7** React warns "Each child in a list should have a unique key" on the workout exercise page and
+  - [x] **5.2.6** Calendar, week view: a past day without a workout stays empty instead of showing "Rest day".
+    This changes decision 040 (decision 050).
+  - [x] **5.2.7** React warns "Each child in a list should have a unique key" on the workout exercise page and
     the statistics page (found with the webapp-testing skill). Probably the tab panel, which spreads
     `tabPanelProps()` next to its `key`.
+  Found with the webapp-testing skill on 8 screen sizes (320 to 841 px wide, including the Galaxy Z Fold
+  cover and inner screens), 2026-11-17:
+  - [ ] **5.2.8** At 320 px wide, top bars collide: the app name runs into the calendar icon on the home page,
+    and "Save as routine" covers the "Workout" title. 344 px (Fold cover screen) and wider are fine.
+  - [ ] **5.2.9** The four statistics tabs are tight up to about 360 px: "Muscle groups" wraps onto two lines,
+    and at 320 px "Workouts" and "Exercises" run together.
+  - [ ] **5.2.10** On the unfolded Fold in landscape, the muscle map is taller than the screen, so the
+    "Workout ended" page shows only part of the body until the user scrolls. A height limit on wide screens
+    would keep front and back in view.
 - [ ] **5.3** Smaller polish found while using the app, such as keeping the search text of the
   "Add exercise" page when Back returns to it (decision 048).
 - [ ] **5.4** App logo. Start with a preview page of logo ideas in the "Bumper Plate" colors (decision 030)

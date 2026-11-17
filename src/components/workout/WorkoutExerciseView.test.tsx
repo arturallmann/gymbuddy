@@ -168,6 +168,15 @@ describe('phase', () => {
     expect(screen.getByRole('combobox', { name: 'Phase' })).toHaveValue('warmup');
   });
 
+  test('show the phase choice above the notes and units form and its save button', async () => {
+    const { user } = await withItem(true);
+
+    await user.click(await screen.findByRole('tab', { name: 'About' }));
+    const phase = await screen.findByRole('combobox', { name: 'Phase' });
+    const notes = screen.getByRole('region', { name: 'Notes and units' });
+    expect(phase.compareDocumentPosition(notes) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   test('hide the phase choice when phases are off', async () => {
     const { user } = await withItem(false);
 

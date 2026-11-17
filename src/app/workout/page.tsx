@@ -9,6 +9,7 @@ import SaveRoutine from '@/components/templates/SaveRoutine';
 import WorkoutExercises from '@/components/workout/WorkoutExercises';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
 import { useFeatures } from '@/hooks/useSettings';
+import PlusIcon from '@/components/ui/icons/PlusIcon';
 
 // The active workout. "Save as routine" sits in the top bar; "End workout" and the + button,
 // which opens the "Add exercise" page, sit in a bar at the bottom (decision 032). There is no
@@ -57,9 +58,9 @@ export default function WorkoutPage() {
               <Link
                 href="/workout/add"
                 aria-label="Add exercise"
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-3xl leading-none text-on-primary shadow-lg"
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary shadow-lg"
               >
-                <span aria-hidden>+</span>
+                <PlusIcon />
               </Link>
             </div>
           </div>

@@ -134,7 +134,7 @@ export default function WorkoutExerciseView() {
         <>
           <Tabs label="Exercise" tabs={TABS} value={tab} onChange={changeTab} />
           {tab === 'log' ? (
-            <div {...tabPanelProps('log')} key={tab} className={`flex flex-col gap-4 ${slide}`}>
+            <div key={tab} {...tabPanelProps('log')} className={`flex flex-col gap-4 ${slide}`}>
               {preferences?.notes && (
                 <p className="break-words text-sm">
                   <span className="text-muted">Note: </span>
@@ -153,7 +153,7 @@ export default function WorkoutExerciseView() {
               )}
             </div>
           ) : (
-            <div {...tabPanelProps('about')} key={tab} className={`flex flex-col gap-4 ${slide}`}>
+            <div key={tab} {...tabPanelProps('about')} className={`flex flex-col gap-4 ${slide}`}>
               {detail && (
                 <section aria-label="About the exercise" className="flex flex-col gap-2">
                   {features.exerciseImages && image && (
@@ -172,12 +172,7 @@ export default function WorkoutExerciseView() {
                   </Link>
                 </section>
               )}
-              {preferences !== undefined && (
-                <section aria-label="Notes and units" className="flex flex-col gap-2">
-                  <h2 className="text-sm font-semibold uppercase text-muted">Notes and units</h2>
-                  <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
-                </section>
-              )}
+              {/* The phase stands before the notes form, so it is not read as part of what "Save" saves (5.2.1). */}
               {features.phases && item.id !== null && (
                 <label className="flex items-center gap-3 text-sm">
                   <span className="shrink-0 text-muted">Phase</span>
@@ -198,6 +193,12 @@ export default function WorkoutExerciseView() {
                     ))}
                   </select>
                 </label>
+              )}
+              {preferences !== undefined && (
+                <section aria-label="Notes and units" className="flex flex-col gap-2">
+                  <h2 className="text-sm font-semibold uppercase text-muted">Notes and units</h2>
+                  <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
+                </section>
               )}
             </div>
           )}

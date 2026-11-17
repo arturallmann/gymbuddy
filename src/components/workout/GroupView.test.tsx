@@ -188,6 +188,44 @@ describe('GroupView', () => {
     ]);
   });
 
+  // 5.2.2 (decision 051): a matching saved superset is updated, never saved a second time.
+  test('update the saved superset after saving it, instead of saving a second one', async () => {
+    const { db, userId, ids, groupId } = await setup();
+    await addSet(db, ids[0], values);
+    const { user } = await open(db, groupId);
+    await user.click(await screen.findByRole('button', { name: 'Save superset' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await screen.findByText(/Saved as “Curl \+ Press”/);
+
+    expect(screen.queryByRole('button', { name: 'Save superset' })).not.toBeInTheDocument();
+    await addSet(db, ids[1], { ...values, weightGrams: 30000, reps: 5 });
+    await user.click(screen.getByRole('button', { name: 'Update saved superset' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Updated “Curl + Press”.');
+    const saved = await listTemplates(db, userId, 'superset');
+    expect(saved).toHaveLength(1);
+    expect(saved[0].exercises.map((item) => [item.name, item.targetSets, item.targetWeightGrams])).toEqual([
+      ['Curl', 1, 20000],
+      ['Press', 1, 30000],
+    ]);
+  });
+
+  test('offer to update the saved superset a group was added from, naming it', async () => {
+    const { db, userId, ids, groupId } = await setup();
+    await addSet(db, ids[0], values);
+    const templateId = await saveGroupAsTemplate(db, userId, groupId, 'Arms');
+    await deleteWorkout(db, (await getWorkoutGroup(db, groupId))!.group.workoutId);
+    const workout = await startWorkout(db, userId);
+    const [curl] = await addTemplateToWorkout(db, workout.id, templateId);
+    const copied = (await listWorkoutExercises(db, workout.id)).find((item) => item.id === curl)!;
+    navigation.params = new URLSearchParams({ id: copied.groupId! });
+    await renderWithDatabase(<GroupView />, { db });
+
+    expect(await screen.findByRole('button', { name: 'Update saved superset' })).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Changes “Arms” to these exercises, rest and targets.');
+    expect(screen.queryByRole('button', { name: 'Save superset' })).not.toBeInTheDocument();
+  });
+
   test('hide Save superset when templates are off', async () => {
     const { db, groupId } = await setup({ templates: false });
     await open(db, groupId);

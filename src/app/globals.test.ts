@@ -16,3 +16,9 @@ test('slide content in from either side, and not at all with reduced motion (dec
   expect(css).toMatch(/\.slide-from-left\s*\{\s*animation: slide-from-left/);
   expect(css).toMatch(/prefers-reduced-motion: reduce\)\s*\{\s*\.slide-from-right,\s*\.slide-from-left\s*\{\s*animation: none/);
 });
+
+// 5.2.5: holding the + on the workout page picked it up as a draggable link.
+test('never let a long press drag a link or image, or open the link menu', () => {
+  expect(css).toMatch(/a,\s*img\s*\{\s*-webkit-user-drag:\s*none;\s*-webkit-touch-callout:\s*none;/);
+  expect(css).toMatch(/\ba\s*\{\s*-webkit-user-select:\s*none;\s*user-select:\s*none;/);
+});
