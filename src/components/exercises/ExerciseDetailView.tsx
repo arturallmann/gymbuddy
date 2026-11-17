@@ -1,0 +1,164 @@
+'use client';
+
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useDatabase } from '@/db/DatabaseContext';
+import { deleteCustomExercise, getExerciseDetail, type ExerciseDetail } from '@/db/exercises';
+import { useExercisePreferences } from '@/hooks/useExercisePreferences';
+import { useFeatures, useSettings } from '@/hooks/useSettings';
+import { CATEGORY_LABELS, equipmentLabel, instructionSteps } from '@/lib/exercises';
+import { getUnits } from '@/lib/units';
+import ConfirmAction from '@/components/ui/ConfirmAction';
+import ExercisePreferencesForm from './ExercisePreferencesForm';
+import ExerciseProgress from './ExerciseProgress';
+import { exerciseDetailBack } from '@/lib/exerciseBrowser';
+import BackLink from '@/components/ui/BackLink';
+import Tabs, { tabPanelProps } from '@/components/ui/Tabs';
+import { useTabs } from '@/hooks/useTabs';
+import ExerciseImage from './ExerciseImage';
+import ExercisePhotos from './ExercisePhotos';
+
+type Tab = 'progress' | 'about' | 'notes';
+const TABS: { value: Tab; label: string }[] = [
+  { value: 'progress', label: 'Progress' },
+  { value: 'about', label: 'About' },
+  { value: 'notes', label: 'Notes' },
+];
+
+// One exercise in three tabs (decision 042): "Progress" (chart and history view), "About" (images or
+// photos, muscle groups, description, instructions, and edit or delete for a custom exercise) and
+// "Notes" (the user's notes and units for it).
+// The exercise id comes from the address: /exercises/detail?id=…&back=… (`back`: the exercise browser
+// with its filters, where the back arrow and Android Back return).
+export default function ExerciseDetailView() {
+  const db = useDatabase();
+  const router = useRouter();
+  const { settings } = useSettings();
+  const { userId } = settings;
+  const features = useFeatures();
+  const params = useSearchParams();
+  const id = params.get('id');
+  const back = exerciseDetailBack(params.get('back'));
+  const [detail, setDetail] = useState<ExerciseDetail | null | undefined>(undefined);
+  const { tab, changeTab, swipe, slide } = useTabs<Tab>(TABS, 'progress');
+  const { preferences, units, save } = useExercisePreferences(detail?.exercise.id ?? null);
+
+  useEffect(() => {
+    let current = true;
+    (id ? getExerciseDetail(db, userId, id) : Promise.resolve(null))
+      .then((loaded) => current && setDetail(loaded))
+      .catch((reason: unknown) => console.error(reason));
+    return () => {
+      current = false;
+    };
+  }, [db, userId, id]);
+
+  // After a photo was added or deleted.
+  const reload = async () => {
+    if (id) setDetail(await getExerciseDetail(db, userId, id));
+  };
+
+  if (detail === undefined) {
+    return null;
+  }
+  const exercise = detail?.exercise;
+  const primary = detail?.muscleGroups.filter((group) => group.role === 'primary') ?? [];
+  const secondary = detail?.muscleGroups.filter((group) => group.role === 'secondary') ?? [];
+  const steps = instructionSteps(exercise?.instructions ?? null);
+  return (
+    <main {...swipe} className="mx-auto flex min-h-screen overflow-x-clip max-w-xl flex-col gap-6 p-6">
+      <header className="flex items-center gap-4">
+        <BackLink href={back} label="Back to exercises" />
+      </header>
+      {!detail || !exercise ? (
+        <p className="text-muted">This exercise does not exist.</p>
+      ) : (
+        <>
+          <div>
+            <h1 className="break-words text-2xl font-bold">{exercise.name}</h1>
+            <p className="text-muted">
+              {exercise.source === 'custom' && 'Custom exercise · '}
+              {CATEGORY_LABELS[exercise.category]}
+              {exercise.equipment && ` · ${equipmentLabel(exercise.equipment)}`}
+            </p>
+          </div>
+          <Tabs label="Exercise" tabs={TABS} value={tab} onChange={changeTab} />
+          {tab === 'progress' && (
+            <div {...tabPanelProps('progress')} key={tab} className={`flex flex-col gap-4 ${slide}`}>
+              {preferences !== undefined && <ExerciseProgress exercise={exercise} units={units} />}
+            </div>
+          )}
+          {tab === 'about' && (
+            <div {...tabPanelProps('about')} key={tab} className={`flex flex-col gap-4 ${slide}`}>
+              {features.exerciseImages && exercise.source === 'custom' && (
+                <ExercisePhotos exerciseId={exercise.id} name={exercise.name} images={detail.images} onChange={reload} />
+              )}
+              {features.exerciseImages && exercise.source !== 'custom' && detail.images.length > 0 && (
+                <div className="grid grid-cols-2 gap-2">
+                  {detail.images.map((image, index) => (
+                    <ExerciseImage
+                      key={image.id}
+                      path={image.path}
+                      storedFile={image.storedFile}
+                      alt={`${exercise.name}, image ${index + 1}`}
+                      width={400}
+                      height={300}
+                      className="h-auto w-full rounded"
+                    />
+                  ))}
+                </div>
+              )}
+              {primary.length > 0 && (
+                <p>
+                  <span className="text-muted">Primary muscle groups: </span>
+                  {primary.map((group) => group.name).join(', ')}
+                </p>
+              )}
+              {secondary.length > 0 && (
+                <p>
+                  <span className="text-muted">Secondary muscle groups: </span>
+                  {secondary.map((group) => group.name).join(', ')}
+                </p>
+              )}
+              {exercise.description && <p className="break-words">{exercise.description}</p>}
+              {steps.length > 0 && (
+                <section className="flex flex-col gap-2">
+                  <h2 className="text-lg font-semibold">Instructions</h2>
+                  <ol className="flex list-decimal flex-col gap-2 pl-5">
+                    {steps.map((step, index) => (
+                      <li key={index}>{step}</li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+              {exercise.source === 'custom' && (
+                <div className="flex flex-col items-start gap-4">
+                  <Link href={`/exercises/edit?id=${exercise.id}`} className="rounded-lg border bg-surface px-4 py-2 font-semibold">
+                    Edit
+                  </Link>
+                  <ConfirmAction
+                    label="Delete exercise"
+                    question="Delete this exercise? Workouts that used it keep their sets."
+                    confirmLabel="Delete"
+                    keepLabel="Keep exercise"
+                    onConfirm={async () => {
+                      await deleteCustomExercise(db, userId, exercise.id);
+                      router.push('/exercises');
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          {tab === 'notes' && preferences !== undefined && (
+            <section {...tabPanelProps('notes')} key={tab} className={`flex flex-col gap-2 ${slide}`}>
+              <h2 className="text-sm font-semibold uppercase text-muted">Notes and units</h2>
+              <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
+            </section>
+          )}
+        </>
+      )}
+    </main>
+  );
+}

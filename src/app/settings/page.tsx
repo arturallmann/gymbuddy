@@ -1,12 +1,12 @@
 'use client';
 
-import BodySettings from '@/components/BodySettings';
-import ExportData from '@/components/ExportData';
-import FeatureSettings from '@/components/FeatureSettings';
-import ImportData from '@/components/ImportData';
-import ThemeSettings from '@/components/ThemeSettings';
-import UnitSettings from '@/components/UnitSettings';
-import BackLink from '@/components/BackLink';
+import BodySettings from '@/components/settings/BodySettings';
+import ExportData from '@/components/settings/ExportData';
+import FeatureSettings from '@/components/settings/FeatureSettings';
+import ImportData from '@/components/settings/ImportData';
+import ThemeSettings from '@/components/settings/ThemeSettings';
+import UnitSettings from '@/components/settings/UnitSettings';
+import BackLink from '@/components/ui/BackLink';
 
 export default function SettingsPage() {
   return (

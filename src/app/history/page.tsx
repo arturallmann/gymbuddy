@@ -1,5 +1,5 @@
-import WorkoutHistory from '@/components/WorkoutHistory';
-import BackLink from '@/components/BackLink';
+import WorkoutHistory from '@/components/history/WorkoutHistory';
+import BackLink from '@/components/ui/BackLink';
 
 export default function WorkoutHistoryPage() {
   return (

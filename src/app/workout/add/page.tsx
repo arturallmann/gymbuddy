@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import AddExerciseView from '@/components/AddExerciseView';
+import AddExerciseView from '@/components/workout/AddExerciseView';
 
 // The category filter is in the address, which a static export only knows in the browser,
 // so the view renders on the client inside Suspense.

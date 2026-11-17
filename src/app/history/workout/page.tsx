@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import WorkoutDetail from '@/components/WorkoutDetail';
+import WorkoutDetail from '@/components/history/WorkoutDetail';
 
 // The id is in the address, which a static export only knows in the browser,
 // so the detail renders on the client inside Suspense.

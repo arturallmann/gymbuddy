@@ -1,5 +1,5 @@
-import TemplateList from '@/components/TemplateList';
-import BackLink from '@/components/BackLink';
+import TemplateList from '@/components/templates/TemplateList';
+import BackLink from '@/components/ui/BackLink';
 
 export default function RoutinesPage() {
   return (

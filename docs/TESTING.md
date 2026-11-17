@@ -33,7 +33,7 @@ A `.test.ts` file that needs a browser can start with `// @vitest-environment js
 |---|---|---|
 | Pure helpers in `src/lib/` | Plain inputs and outputs. Round trips for conversions. | `src/lib/units.test.ts` |
 | Queries in `src/db/` | `createTestDatabase()`: an in-memory database with all migrations | `src/db/settings.test.ts` |
-| Components | Testing Library: render, click as a user would, check what the user sees | `src/components/ToggleRow.test.tsx` |
+| Components | Testing Library: render, click as a user would, check what the user sees | `src/components/ui/ToggleRow.test.tsx` |
 | Components and pages that read or write data | `renderWithDatabase()`, then check the screen and the saved rows | `src/app/settings/page.test.tsx` |
 | Startup code that calls the plugin | `createFakePlugin()` in place of the real plugin | `src/db/client.test.ts` |
 
@@ -59,7 +59,7 @@ Rules:
 | `addTestLibrary(db)` | `exercises.ts` | Two library exercises with muscle groups, images and instructions. |
 
 Pages that use `next/navigation` mock it with `vi.mock('next/navigation', ...)`
-(see `src/components/SetupGate.test.tsx`).
+(see `src/components/app/SetupGate.test.tsx`).
 
 ## Limits of the test database
 

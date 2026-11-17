@@ -2,9 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import FeatureToggleList from '@/components/FeatureToggleList';
-import PresetPicker from '@/components/PresetPicker';
-import UnitPicker from '@/components/UnitPicker';
+import FeatureToggleList from '@/components/settings/FeatureToggleList';
+import PresetPicker from '@/components/settings/PresetPicker';
+import UnitPicker from '@/components/settings/UnitPicker';
 import type { FeatureToggles, Preset } from '@/db/schema';
 import { useSettings } from '@/hooks/useSettings';
 import { PRESET_FEATURES } from '@/lib/features';
