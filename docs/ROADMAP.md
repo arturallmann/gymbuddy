@@ -211,6 +211,21 @@ Use the app at the gym, find what gets in the way, and fix it. Online features m
   Only files move and split; no behavior changes. Update the folder layout in `docs/ARCHITECTURE.md` and add
   a decision entry for the new structure.
   Done when: the checks pass, no test was changed except its imports, and the app works on a phone as before.
+- [ ] **5.8** Pie chart of muscle groups on the statistics page ("Muscle groups" tab): each muscle group's
+  share of the sets (or the volume) in the chosen time span, with the same counting as the muscle map
+  (1 for a primary, ½ for a secondary muscle group, decision 043). Own SVG, no chart library (like decision 029).
+  Needs a decision first: next to the muscle map or instead of it, how many slices before the rest becomes
+  "Other", and the colors (named colors only, decision 030). "Pie chart" is a new term for `docs/GLOSSARY.md`.
+  Done when: the slices add up to the sets of the time span and match the muscle map's numbers.
+- [ ] **5.9** Rest timer for single workout exercises: today the rest timer starts only after a round of an
+  exercise group (decision 025). After logging a set of a workout exercise that is not in a group, a rest
+  timer counts down too, behind the `restTimer` feature toggle.
+  Needs a decision first: where the rest length lives (one default in the settings, per exercise in the exercise
+  preferences, or per workout exercise), its default (90 s like groups?), and whether it starts on its own or
+  with a tap. A signal while the phone is locked needs the Local Notifications plugin (decision 023,
+  `docs/IDEAS.md`).
+  Done when: logging a set starts the rest, it signals at zero like the stretch timer, and with the toggle off
+  nothing shows.
 
 ## Ideas (not planned)
 
