@@ -9,7 +9,7 @@ import {
   moveWorkoutExercise,
   moveWorkoutExerciseTo,
   type WorkoutExerciseItem,
-} from '@/db/workouts';
+} from '@/db/workoutExercises';
 
 async function loadAll(db: ReturnType<typeof useDatabase>, workoutId: string) {
   const items = await listWorkoutExercises(db, workoutId);

@@ -1,5 +1,5 @@
 // Display helpers for exercises. Pure functions: no database, no React.
-import type { CustomExerciseInput } from '@/db/exercises';
+import type { CustomExerciseInput } from '@/db/customExercises';
 import type { Category, Exercise, LoadType } from '@/db/schema';
 
 // Where the bundled image lives in the app: "3_4_Sit-Up/0.jpg" → "/exercise-images/3_4_Sit-Up/0.jpg".

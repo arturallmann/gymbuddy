@@ -183,7 +183,7 @@ has a bodyweight).
 ## Statistics (decision 043)
 
 All statistics are derived at query time from the fixed fields; nothing derived is stored.
-The counting rules live in `src/lib/statistics.ts`.
+The counting rules live in `src/lib/statistics.ts`, the e1RM and personal records in `src/lib/personalRecords.ts`.
 
 - **Bodyweight:** a row in `bodyweights` applies from the start of the day it was measured until the next
   one. A new bodyweight is a new row, so earlier workouts keep their bodyweight. Before the first row a

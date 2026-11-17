@@ -94,6 +94,19 @@ export function weekdayNames(firstDay: number, locale?: string): string[] {
   return Array.from({ length: 7 }, (_, i) => format.format(new Date(2026, 0, 4 + ((firstDay + i) % 7))));
 }
 
+// A day for screen readers and panel titles, such as "Sunday 15 November".
+export function dayLabel(date: Date, locale?: string): string {
+  return new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long' }).format(date);
+}
+
+// The name of a day in the calendar: the day, "today" and the number of workouts, such as
+// "Sunday 15 November, today, 2 workouts".
+export function dayCellLabel(date: Date, today: Date, workoutCount: number, locale?: string): string {
+  return [dayLabel(date, locale), isSameDay(date, today) ? 'today' : null, workoutCount ? `${workoutCount} workout${workoutCount > 1 ? 's' : ''}` : null]
+    .filter(Boolean)
+    .join(', ');
+}
+
 // The categories of the exercises done, once each, in a fixed order for the bars in a day cell.
 const CATEGORY_ORDER: Category[] = ['strength', 'cardio', 'stretch', 'mobility'];
 export function dayCategories(workouts: { exercises: { category: Category }[] }[]): Category[] {

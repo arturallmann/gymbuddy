@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
 import type { WorkoutSet } from '@/db/schema';
-import { listSets, type WorkoutExerciseItem } from '@/db/workouts';
+import { listSets } from '@/db/sets';
+import { type WorkoutExerciseItem } from '@/db/workoutExercises';
 import { useExercisePreferences } from '@/hooks/useExercisePreferences';
-import { PERSONAL_RECORD_LABELS, formatPersonalRecord, type PersonalRecordKind } from '@/lib/statistics';
+import { PERSONAL_RECORD_LABELS, formatPersonalRecord, type PersonalRecordKind } from '@/lib/personalRecords';
 import SetList from '@/components/workout/SetList';
 
 type Props = {

@@ -1,6 +1,6 @@
 'use client';
 
-import type { WorkoutExerciseItem } from '@/db/workouts';
+import type { WorkoutExerciseItem } from '@/db/workoutExercises';
 import { useGroupSets } from '@/hooks/useGroupSets';
 import { roundRows } from '@/lib/rounds';
 import { formatSet } from '@/lib/sets';

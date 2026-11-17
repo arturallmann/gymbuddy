@@ -5,16 +5,10 @@ import { listBodyweights } from '@/db/bodyweights';
 import { useDatabase } from '@/db/DatabaseContext';
 import type { Bodyweight, Workout } from '@/db/schema';
 import { listHistoryUpTo, listWorkoutStatistics } from '@/db/statistics';
-import { getWorkout, listWorkoutExercises, type WorkoutExerciseItem } from '@/db/workouts';
-import {
-  bodyweightAt,
-  byWorkout,
-  muscleGroupSummaries,
-  newPersonalRecordsIn,
-  setVolume,
-  type MuscleGroupSummary,
-  type PersonalRecordKind,
-} from '@/lib/statistics';
+import { getWorkout } from '@/db/workouts';
+import { listWorkoutExercises, type WorkoutExerciseItem } from '@/db/workoutExercises';
+import { bodyweightAt, muscleGroupSummaries, setVolume, type MuscleGroupSummary } from '@/lib/statistics';
+import { byWorkout, newPersonalRecordsIn, type PersonalRecordKind } from '@/lib/personalRecords';
 import { useSettings } from './useSettings';
 
 export type WorkoutStats = {

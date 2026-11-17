@@ -2,7 +2,8 @@
 // Charts use only the fixed fields and never parse notes (decision 010).
 import type { HistoryRow } from '@/db/progress';
 import type { Bodyweight, Exercise, LoadType, WorkoutSet } from '@/db/schema';
-import { bodyweightAt, estimatedOneRepMax, totalVolume } from './statistics';
+import { bodyweightAt, totalVolume } from './statistics';
+import { estimatedOneRepMax } from './personalRecords';
 import { formatDistance, formatDuration, formatWeight, type Units } from './units';
 
 export type Metric = 'weight' | 'e1rm' | 'reps' | 'volume' | 'duration' | 'distance';

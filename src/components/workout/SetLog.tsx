@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { WorkoutExerciseItem } from '@/db/workouts';
+import type { WorkoutExerciseItem } from '@/db/workoutExercises';
 import { useFeatures } from '@/hooks/useSettings';
 import { useSets } from '@/hooks/useSets';
 import { formatSet, setFormValues, type SetValues } from '@/lib/sets';

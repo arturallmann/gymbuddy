@@ -3,14 +3,8 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
-import {
-  createCustomExercise,
-  getExerciseDetail,
-  listEquipment,
-  listMuscleGroups,
-  updateCustomExercise,
-  type CustomExerciseInput,
-} from '@/db/exercises';
+import { createCustomExercise, updateCustomExercise, type CustomExerciseInput } from '@/db/customExercises';
+import { getExerciseDetail, listEquipment, listMuscleGroups } from '@/db/exercises';
 import type { MuscleGroup } from '@/db/schema';
 import { useSettings } from '@/hooks/useSettings';
 import { EMPTY_CUSTOM_EXERCISE } from '@/lib/exercises';

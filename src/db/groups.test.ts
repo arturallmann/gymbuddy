@@ -10,16 +10,15 @@ import {
 } from './groups';
 import { exercises, workoutGroups } from './schema';
 import { getLocalSettings } from './settings';
+import { addSet, listSets } from './sets';
 import {
-  addSet,
   addWorkoutExercise,
   changeWorkoutExercisePhase,
   deleteWorkoutExercise,
-  listSets,
   listWorkoutExercises,
   moveWorkoutExercise,
-  startWorkout,
-} from './workouts';
+} from './workoutExercises';
+import { startWorkout } from './workouts';
 import { createTestDatabase } from '@/testing/database';
 
 async function setup(names = ['Squat', 'Curl', 'Press', 'Row', 'Stretch']) {

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useDatabase } from '@/db/DatabaseContext';
-import { addExercisePhoto, deleteExercisePhoto, type ExerciseImageItem } from '@/db/exercises';
+import { addExercisePhoto, deleteExercisePhoto } from '@/db/customExercises';
+import { type ExerciseImageItem } from '@/db/exercises';
 import { useBackHandler } from '@/hooks/useBackHandler';
 import { useSettings } from '@/hooks/useSettings';
 import { pickPhoto, type PhotoSource } from '@/native/photos';

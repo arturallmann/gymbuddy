@@ -2,7 +2,9 @@ import { describe, expect, test } from 'vitest';
 import { listExerciseHistory, listExerciseUse } from './progress';
 import { exercises, users } from './schema';
 import { getLocalSettings } from './settings';
-import { addSet, addWorkoutExercise, deleteSet, deleteWorkout, deleteWorkoutExercise, endWorkout, startWorkout } from './workouts';
+import { addSet, deleteSet } from './sets';
+import { addWorkoutExercise, deleteWorkoutExercise } from './workoutExercises';
+import { deleteWorkout, endWorkout, startWorkout } from './workouts';
 import { createTestDatabase } from '@/testing/database';
 
 const values = { setType: 'normal' as const, weightGrams: 60000, reps: 8, durationSeconds: null, distanceMeters: null, rpe: null, notes: null };

@@ -2,7 +2,7 @@
 
 import type { LoadType } from '@/db/schema';
 import { formatWorkoutDate } from '@/lib/dates';
-import { PERSONAL_RECORD_LABELS, formatPersonalRecord, type PersonalRecord } from '@/lib/statistics';
+import { PERSONAL_RECORD_LABELS, formatPersonalRecord, type PersonalRecord } from '@/lib/personalRecords';
 import type { Units } from '@/lib/units';
 
 type Props = { records: PersonalRecord[]; loadType: LoadType; units: Units };

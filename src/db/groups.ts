@@ -1,7 +1,7 @@
 import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import type { AppDatabase } from './driver';
 import { exercises, workoutExercises, workoutGroups, type WorkoutGroup } from './schema';
-import type { WorkoutExerciseItem } from './workouts';
+import type { WorkoutExerciseItem } from './workoutExercises';
 import { gatherIds } from '@/lib/blocks';
 
 // Rest after a round of a new superset, until the user changes it.

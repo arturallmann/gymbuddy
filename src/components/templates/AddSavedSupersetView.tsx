@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useDatabase } from '@/db/DatabaseContext';
-import { addTemplateToWorkout } from '@/db/templates';
+import { addTemplateToWorkout } from '@/db/templateWorkouts';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
 import SavedSupersetPicker from './SavedSupersetPicker';
 import BackLink from '@/components/ui/BackLink';

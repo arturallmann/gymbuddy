@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { WorkoutExerciseItem } from '@/db/workouts';
+import type { WorkoutExerciseItem } from '@/db/workoutExercises';
 import { useFeatures } from '@/hooks/useSettings';
 import { useWorkoutExercises } from '@/hooks/useWorkoutExercises';
 import { PHASE_LABELS, groupByPhase } from '@/lib/phases';

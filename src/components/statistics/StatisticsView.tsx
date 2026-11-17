@@ -7,11 +7,10 @@ import { listStatistics } from '@/db/statistics';
 import { useBodyweights } from '@/hooks/useBodyweights';
 import { useSettings } from '@/hooks/useSettings';
 import { firstDayOfWeek } from '@/lib/calendar';
+import { PERSONAL_RECORD_LABELS, formatPersonalRecord } from '@/lib/personalRecords';
 import {
-  PERSONAL_RECORD_LABELS,
   SPAN_LABELS,
   exerciseSummaries,
-  formatPersonalRecord,
   formatSetCount,
   formatSets,
   muscleGroupSummaries,

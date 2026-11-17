@@ -137,3 +137,6 @@ export function createDatabase(conn: SqlConnection) {
 }
 
 export type AppDatabase = ReturnType<typeof createDatabase>;
+
+// The database inside db.transaction(), for helpers that write as part of a larger transaction.
+export type Transaction = Parameters<Parameters<AppDatabase['transaction']>[0]>[0];

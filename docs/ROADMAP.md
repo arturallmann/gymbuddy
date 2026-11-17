@@ -173,6 +173,9 @@ Use the app at the gym, find what gets in the way, and fix it. Online features m
     round button; center it.
   - [ ] **5.2.6** Calendar, week view: a past day without a workout stays empty instead of showing "Rest day".
     This changes decision 040.
+  - [ ] **5.2.7** React warns "Each child in a list should have a unique key" on the workout exercise page and
+    the statistics page (found with the webapp-testing skill). Probably the tab panel, which spreads
+    `tabPanelProps()` next to its `key`.
 - [ ] **5.3** Smaller polish found while using the app, such as keeping the search text of the
   "Add exercise" page when Back returns to it (decision 048).
 - [ ] **5.4** App logo. Start with a preview page of logo ideas in the "Bumper Plate" colors (decision 030)
@@ -190,7 +193,7 @@ Use the app at the gym, find what gets in the way, and fix it. Online features m
   (graphify helps find it, decision 017); make names follow `docs/GLOSSARY.md`; bring `docs/` in line with
   the code; update dependencies and fix the security alerts GitHub reports (Dependabot).
   Done when: the checks pass, the app works on a phone as before, and no docs describe code that is gone.
-- [ ] **5.7** Project structure: split `src/components/` (81 files in one folder) into one folder per area,
+- [x] **5.7** Project structure (decision 049): split `src/components/` (81 files in one folder) into one folder per area,
   for example `workout/`, `exercises/`, `history/` (with the calendar), `statistics/`, `templates/`,
   `settings/`, `app/` (providers and listeners from the root layout) and `ui/` (shared pieces such as `Tabs`,
   `OptionGroup`, `NumberStepper`, `ConfirmAction`, `BackLink`). Tests stay next to their file.
