@@ -61,6 +61,29 @@ Rules:
 Pages that use `next/navigation` mock it with `vi.mock('next/navigation', ...)`
 (see `src/components/SetupGate.test.tsx`).
 
+## Checking pages in a browser (webapp-testing skill)
+
+Claude can open the dev server in a headless Chromium at phone size, tap through pages and take screenshots,
+with Anthropic's `webapp-testing` skill in `.claude/skills/webapp-testing/` (Python Playwright).
+Playwright is a developer tool on the machine, not an app dependency. It lives in its own environment:
+
+```
+python3 -m venv ~/.local/share/playwright-venv
+~/.local/share/playwright-venv/bin/pip install playwright
+~/.local/share/playwright-venv/bin/playwright install chromium
+```
+
+Run scripts with that Python and let the skill's helper start and stop the dev server:
+
+```
+PY=~/.local/share/playwright-venv/bin/python
+$PY .claude/skills/webapp-testing/scripts/with_server.py --server "npm run dev" --port 3000 --timeout 120 -- $PY -u check.py
+```
+
+Use a phone viewport (`viewport={'width': 412, 'height': 915}`, `is_mobile=True`, `has_touch=True`).
+A fresh browser starts in first-time setup. The browser is not the phone: Android Back, press and hold,
+and the SQLite plugin still need the check on a phone below.
+
 ## Limits of the test database
 
 The test connection runs the same bridge (`src/db/driver.ts`) as the app, but on better-sqlite3,
