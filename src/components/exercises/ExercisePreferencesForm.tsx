@@ -80,7 +80,7 @@ export default function ExercisePreferencesForm({ preferences, settingsUnits, on
         </label>
       </div>
       <div className="flex items-center gap-3">
-        <button type="submit" disabled={saving} className="rounded-lg border bg-surface px-4 py-2 font-semibold disabled:opacity-50">
+        <button type="submit" disabled={saving} className="rounded-lg border bg-surface px-4 py-2 font-medium disabled:opacity-50">
           Save
         </button>
         {saved && (

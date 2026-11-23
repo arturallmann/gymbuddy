@@ -19,9 +19,9 @@ export default function WorkoutSummary({ volume, sets, exercises, records }: Pro
     <section aria-label="Workout summary">
       <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {tiles.map((tile) => (
-          <div key={tile.label} className="flex flex-col rounded-lg border border-line bg-surface p-3">
-            <dt className="text-xs text-muted">{tile.label}</dt>
-            <dd className="text-lg font-bold tabular-nums">{tile.value}</dd>
+          <div key={tile.label} className="flex flex-col rounded-lg border bg-surface p-3">
+            <dt className="text-sm text-muted">{tile.label}</dt>
+            <dd className="text-2xl font-medium tabular-nums">{tile.value}</dd>
           </div>
         ))}
       </dl>

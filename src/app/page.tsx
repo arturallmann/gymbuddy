@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-2">
-        <h1 className="flex min-w-0 flex-1 items-center gap-2 text-2xl font-bold">
+        <h1 className="flex min-w-0 flex-1 items-center gap-2 text-2xl font-semibold">
           <span className="text-link">
             <DumbbellIcon />
           </span>

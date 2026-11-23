@@ -27,7 +27,7 @@ export default function PresetPicker({
             preset === value ? 'border-primary ring-2 ring-primary' : 'border-line-strong'
           }`}
         >
-          <span className="font-semibold">{PRESET_LABELS[preset]}</span>
+          <span className="font-medium">{PRESET_LABELS[preset]}</span>
           <span className="text-sm text-muted">{PRESET_DESCRIPTIONS[preset]}</span>
         </button>
       ))}

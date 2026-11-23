@@ -47,7 +47,7 @@ export default function ExerciseChart({ metrics, pointsFor, units }: Props) {
           {shown && (
             <p role="status" className="text-sm">
               <span className="text-muted">{formatWorkoutDate(shown.startedAt)}: </span>
-              <span className="font-semibold">{formatMetric(shown.value, metric, units)}</span>
+              <span className="font-medium">{formatMetric(shown.value, metric, units)}</span>
             </p>
           )}
           <svg

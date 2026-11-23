@@ -65,7 +65,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
       ) : features.phases ? (
         groupByPhase(items).map((phaseGroup) => (
           <section key={phaseGroup.phase} aria-label={PHASE_LABELS[phaseGroup.phase]} className="flex flex-col gap-2">
-            <h2 className="text-sm font-semibold uppercase text-muted">{PHASE_LABELS[phaseGroup.phase]}</h2>
+            <h2 className="text-sm font-medium text-muted">{PHASE_LABELS[phaseGroup.phase]}</h2>
             {renderList(phaseGroup.items)}
           </section>
         ))
@@ -83,7 +83,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
                 await group(chosen);
                 setChosen(null);
               }}
-              className="flex-1 rounded-lg bg-primary px-4 py-2 font-semibold text-on-primary disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2 font-medium text-on-primary disabled:opacity-50"
             >
               Make superset ({chosen.length})
             </button>
@@ -94,7 +94,7 @@ export default function WorkoutExercises({ workoutId }: { workoutId: string }) {
         </div>
       ) : (
         canGroup && (
-          <button type="button" onClick={() => setChosen([])} className="rounded-lg border bg-surface px-6 py-3 font-semibold">
+          <button type="button" onClick={() => setChosen([])} className="rounded-lg border bg-surface px-6 py-3 font-medium">
             Make superset
           </button>
         )

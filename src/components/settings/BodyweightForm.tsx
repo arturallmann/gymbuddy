@@ -50,7 +50,7 @@ export default function BodyweightForm({ current, onSave }: Props) {
         {current ? (
           <>
             <span className="text-muted">Bodyweight: </span>
-            <span className="font-semibold">{formatWeight(current.weightGrams, weightUnit)}</span>
+            <span className="font-medium">{formatWeight(current.weightGrams, weightUnit)}</span>
             <span className="text-muted"> · {formatWorkoutDate(current.measuredAt)}</span>
           </>
         ) : (
@@ -71,7 +71,7 @@ export default function BodyweightForm({ current, onSave }: Props) {
           }}
           className={inputClass}
         />
-        <button type="submit" disabled={saving} className="shrink-0 rounded-lg border bg-surface px-4 py-2 font-semibold disabled:opacity-50">
+        <button type="submit" disabled={saving} className="shrink-0 rounded-lg border bg-surface px-4 py-2 font-medium disabled:opacity-50">
           Save
         </button>
       </div>

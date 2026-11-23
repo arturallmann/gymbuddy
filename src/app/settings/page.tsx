@@ -13,26 +13,26 @@ export default function SettingsPage() {
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-8 p-6">
       <header className="flex items-center gap-4">
         <BackLink href="/" label="Back" />
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-semibold">Settings</h1>
       </header>
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Units</h2>
+        <h2 className="text-lg font-medium">Units</h2>
         <UnitSettings />
       </section>
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Body</h2>
+        <h2 className="text-lg font-medium">Body</h2>
         <BodySettings />
       </section>
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Theme</h2>
+        <h2 className="text-lg font-medium">Theme</h2>
         <ThemeSettings />
       </section>
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Features</h2>
+        <h2 className="text-lg font-medium">Features</h2>
         <FeatureSettings />
       </section>
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Export and import</h2>
+        <h2 className="text-lg font-medium">Export and import</h2>
         <ExportData />
         <ImportData />
       </section>

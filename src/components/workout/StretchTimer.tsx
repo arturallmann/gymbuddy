@@ -47,11 +47,11 @@ export default function StretchTimer({ initialSeconds, onLog }: Props) {
     signalled.current = false;
     setState({ status: 'running', endsAt: Date.now() + seconds * 1000 });
   };
-  const button = 'rounded-lg border px-4 py-2 font-semibold';
+  const button = 'rounded-lg border px-4 py-2 font-medium';
 
   return (
     <section aria-label="Stretch timer" className="flex flex-col items-center gap-3 rounded-lg border bg-surface p-4">
-      <h2 className="rounded-full bg-accent px-3 py-0.5 text-sm font-semibold text-on-accent">Stretch timer</h2>
+      <h2 className="rounded-full bg-accent px-3 py-0.5 text-sm font-medium text-on-accent">Stretch timer</h2>
       <p role="timer" className="text-5xl tabular-nums">
         {formatDuration(left)}
       </p>
@@ -86,7 +86,7 @@ export default function StretchTimer({ initialSeconds, onLog }: Props) {
       )}
       {state.status === 'done' && (
         <div className="flex flex-col items-center gap-3">
-          <p role="status" className="font-semibold text-success">Done</p>
+          <p role="status" className="font-medium text-success">Done</p>
           <div className="flex gap-3">
             <button
               type="button"

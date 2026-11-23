@@ -39,7 +39,7 @@ export default function SetupPage() {
     router.replace('/');
   }
 
-  const primary = 'flex-1 rounded-lg bg-primary px-4 py-3 font-semibold text-on-primary disabled:opacity-50';
+  const primary = 'flex-1 rounded-lg bg-primary px-4 py-3 font-medium text-on-primary disabled:opacity-50';
   const secondary = 'flex-1 rounded-lg border border-line-strong bg-surface px-4 py-3';
 
   return (
@@ -48,7 +48,7 @@ export default function SetupPage() {
         <p className="text-sm text-muted">
           Step {step === 'units' ? 1 : step === 'preset' ? 2 : 3} of 3
         </p>
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-2xl font-semibold">
           {step === 'units' ? 'Units' : step === 'preset' ? 'Preset' : 'Fine-tune features'}
         </h1>
         <p className="text-muted">You can change all of this later in Settings.</p>

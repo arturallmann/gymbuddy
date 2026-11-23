@@ -42,7 +42,7 @@ export default function WorkoutDetail() {
       ) : (
         <>
           <div>
-            <h1 className="text-2xl font-bold">{formatWorkoutDate(workout.startedAt)}</h1>
+            <h1 className="text-2xl font-semibold">{formatWorkoutDate(workout.startedAt)}</h1>
             <p className="text-muted">
               {workout.endedAt
                 ? formatWorkoutDuration((workout.endedAt.getTime() - workout.startedAt.getTime()) / 1000)

@@ -18,7 +18,7 @@ export default function StartWorkout() {
   if (workout) {
     return (
       <Link href="/workout" className="flex flex-col items-center rounded-lg bg-primary px-6 py-3 text-on-primary">
-        <span className="font-semibold">Continue workout</span>
+        <span className="font-medium">Continue workout</span>
         <ElapsedTime since={workout.startedAt} />
       </Link>
     );
@@ -32,7 +32,7 @@ export default function StartWorkout() {
         await start();
         router.push('/workout');
       }}
-      className="rounded-lg bg-primary px-6 py-3 font-semibold text-on-primary disabled:opacity-50"
+      className="rounded-lg bg-primary px-6 py-3 font-medium text-on-primary disabled:opacity-50"
     >
       Start workout
     </button>

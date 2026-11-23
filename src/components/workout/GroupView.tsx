@@ -44,7 +44,7 @@ export default function GroupView() {
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
         <BackLink href="/workout" label="Back to workout" />
-        <h1 className="text-2xl font-bold">Superset</h1>
+        <h1 className="text-2xl font-semibold">Superset</h1>
       </header>
       {!detail ? (
         <p className="text-muted">This superset does not exist.</p>

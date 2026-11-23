@@ -28,7 +28,7 @@ export default function WorkoutPage() {
       <header className="flex flex-wrap items-center gap-x-4 gap-y-3">
         <BackLink href="/" label="Back" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-bold">Workout</h1>
+          <h1 className="text-2xl font-semibold">Workout</h1>
           {workout && (
             <p className="text-sm text-muted">
               <ElapsedTime since={workout.startedAt} />
@@ -51,7 +51,7 @@ export default function WorkoutPage() {
                   // With the statistics feature toggle the "Workout ended" page shows what it did (decision 046).
                   router.push(features.statistics ? `/workout/ended?id=${workout.id}` : '/');
                 }}
-                className="flex-1 rounded-lg border bg-surface px-6 py-3 font-semibold disabled:opacity-50"
+                className="flex-1 rounded-lg border bg-surface px-6 py-3 font-medium disabled:opacity-50"
               >
                 End workout
               </button>

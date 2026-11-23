@@ -95,18 +95,18 @@ export default function StatisticsView() {
       <div className="flex flex-col gap-4">
         <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {tiles.map((tile) => (
-            <div key={tile.label} className="flex flex-col rounded-lg border border-line bg-surface p-3">
-              <dt className="text-xs text-muted">{tile.label}</dt>
-              <dd className="text-lg font-bold tabular-nums">{tile.value}</dd>
+            <div key={tile.label} className="flex flex-col rounded-lg border bg-surface p-3">
+              <dt className="text-sm text-muted">{tile.label}</dt>
+              <dd className="text-2xl font-medium tabular-nums">{tile.value}</dd>
             </div>
           ))}
         </dl>
         <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-semibold uppercase text-muted">Volume per week</h2>
+          <h2 className="text-sm font-medium text-muted">Volume per week</h2>
           <WeeklyBars weeks={bars} value={(week) => week.volume} format={volume} label="Volume per week" />
         </section>
         <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-semibold uppercase text-muted">Workouts per week</h2>
+          <h2 className="text-sm font-medium text-muted">Workouts per week</h2>
           <WeeklyBars weeks={bars} value={(week) => week.workouts} format={(v) => String(v)} label="Workouts per week" />
         </section>
       </div>
@@ -119,8 +119,8 @@ export default function StatisticsView() {
       <ul className="flex flex-col gap-2">
         {summaries.map(({ exercise, workouts, sets, volume: total, top }) => (
           <li key={exercise.id}>
-            <Link href={`/exercises/detail?id=${exercise.id}`} className="flex flex-col rounded-lg border border-line bg-surface p-3">
-              <span className="break-words font-semibold">{exercise.name}</span>
+            <Link href={`/exercises/detail?id=${exercise.id}`} className="flex flex-col rounded-lg border bg-surface p-3">
+              <span className="break-words font-medium">{exercise.name}</span>
               <span className="text-sm text-muted">
                 {plural(workouts, 'workout')} · {plural(sets, 'set')}
                 {total ? ` · ${volume(total)}` : ''}
@@ -128,7 +128,7 @@ export default function StatisticsView() {
               {top && (
                 <span className="text-sm">
                   <span className="text-muted">{PERSONAL_RECORD_LABELS[top.kind]}: </span>
-                  <span className="font-semibold tabular-nums">{formatPersonalRecord(top.kind, top.value, exercise.loadType, units)}</span>
+                  <span className="font-medium tabular-nums">{formatPersonalRecord(top.kind, top.value, exercise.loadType, units)}</span>
                 </span>
               )}
             </Link>
@@ -170,7 +170,7 @@ export default function StatisticsView() {
     <main {...swipe} className="mx-auto flex min-h-screen overflow-x-clip max-w-xl flex-col gap-4 p-6">
       <header className="flex items-center gap-4">
         <BackLink href="/" label="Back" />
-        <h1 className="text-2xl font-bold">Statistics</h1>
+        <h1 className="text-2xl font-semibold">Statistics</h1>
       </header>
       <Tabs label="Statistics" tabs={TABS} value={tab} onChange={changeTab} />
       {tab === 'bodyweight' ? (
