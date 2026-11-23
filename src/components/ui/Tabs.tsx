@@ -26,7 +26,7 @@ export default function Tabs<T extends string>({
           aria-selected={tab.value === value}
           aria-controls={`panel-${tab.value}`}
           onClick={() => onChange(tab.value)}
-          className={`flex-1 border-b-[3px] py-2 text-sm font-semibold ${
+          className={`flex-auto border-b-2 px-1 py-2 text-sm font-medium transition-colors ${
             tab.value === value ? 'border-primary text-ink' : 'border-transparent text-muted'
           }`}
         >

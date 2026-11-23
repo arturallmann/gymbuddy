@@ -5,6 +5,7 @@ import { useBackHandler } from '@/hooks/useBackHandler';
 import { useWorkoutSummary } from '@/hooks/useWorkoutSummary';
 import { formatTime } from '@/lib/dates';
 import { formatWorkoutDuration } from '@/lib/units';
+import CheckIcon from '@/components/ui/icons/CheckIcon';
 import WorkoutMuscleMap from './WorkoutMuscleMap';
 import WorkoutRecordList from './WorkoutRecordList';
 import WorkoutSummary from './WorkoutSummary';
@@ -29,10 +30,10 @@ export default function WorkoutEndedView() {
       ) : (
         <>
           <header className="flex flex-col items-center gap-1 pt-2 text-center">
-            <span aria-hidden className="grid h-12 w-12 place-items-center rounded-full bg-success text-2xl font-bold text-surface">
-              ✓
+            <span aria-hidden className="grid h-12 w-12 place-items-center rounded-full bg-success text-surface">
+              <CheckIcon className="h-7 w-7" />
             </span>
-            <h1 className="text-2xl font-bold">Workout ended</h1>
+            <h1 className="text-2xl font-semibold">Workout ended</h1>
             <p className="text-sm text-muted">
               {day(workout.startedAt)} · {formatTime(workout.startedAt)}
               {workout.endedAt &&
@@ -49,7 +50,7 @@ export default function WorkoutEndedView() {
           <WorkoutRecordList items={loaded.items} records={loaded.stats.records} />
         </>
       )}
-      <button type="button" onClick={done} className="rounded-lg bg-primary px-6 py-3 font-semibold text-on-primary">
+      <button type="button" onClick={done} className="rounded-lg bg-primary px-6 py-3 font-medium text-on-primary">
         Done
       </button>
     </main>

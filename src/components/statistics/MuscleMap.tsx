@@ -104,7 +104,7 @@ export default function MuscleMap({ values, format, names, selected, onSelect }:
           <g>{outline(false)}</g>
           <g transform={MIRROR}>{outline(true)}</g>
         </svg>
-        <figcaption className="text-xs uppercase tracking-wide text-muted">{view === 'front' ? 'Front' : 'Back'}</figcaption>
+        <figcaption className="text-xs text-muted">{view === 'front' ? 'Front' : 'Back'}</figcaption>
       </figure>
     );
   };

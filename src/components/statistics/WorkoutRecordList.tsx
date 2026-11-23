@@ -10,7 +10,7 @@ function RecordRows({ item, records }: { item: WorkoutExerciseItem; records: { k
   const { units } = useExercisePreferences(item.exerciseId);
   return records.map((record) => (
     <li key={record.kind} className="flex flex-wrap items-center gap-2 text-sm">
-      <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-on-accent">PR</span>
+      <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-on-accent">PR</span>
       <span>
         {item.name} · {PERSONAL_RECORD_LABELS[record.kind]} {formatPersonalRecord(record.kind, record.value, item.loadType, units)}
       </span>
@@ -24,8 +24,8 @@ export default function WorkoutRecordList({ items, records }: { items: WorkoutEx
   const withRecords = first.filter((item) => (records.get(item.exerciseId) ?? []).length > 0);
   if (withRecords.length === 0) return null;
   return (
-    <section aria-label="Personal records" className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-3">
-      <h2 className="font-semibold">Personal records</h2>
+    <section aria-label="Personal records" className="flex flex-col gap-2 rounded-lg border bg-surface p-3">
+      <h2 className="font-medium">Personal records</h2>
       <ul className="flex flex-col gap-1">
         {withRecords.map((item) => (
           <RecordRows key={item.id} item={item} records={records.get(item.exerciseId)!} />

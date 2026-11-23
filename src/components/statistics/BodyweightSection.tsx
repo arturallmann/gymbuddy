@@ -33,10 +33,10 @@ export default function BodyweightSection() {
         </svg>
       )}
       {bodyweights.length > 0 && (
-        <ul aria-label="Bodyweights" className="flex flex-col divide-y divide-line rounded-lg border border-line bg-surface">
+        <ul aria-label="Bodyweights" className="flex flex-col divide-y divide-line rounded-lg border bg-surface">
           {[...bodyweights].reverse().map((entry) => (
             <li key={entry.id} className="flex items-center gap-3 px-3 py-2">
-              <span className="font-semibold tabular-nums">{formatWeight(entry.weightGrams, weightUnit)}</span>
+              <span className="font-medium tabular-nums">{formatWeight(entry.weightGrams, weightUnit)}</span>
               <span className="flex-1 text-sm text-muted">{formatWorkoutDate(entry.measuredAt)}</span>
               <button
                 type="button"

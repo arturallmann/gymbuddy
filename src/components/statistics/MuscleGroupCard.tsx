@@ -34,15 +34,15 @@ export default function MuscleGroupCard({ muscleGroup, summary, weeks, emptyText
     return <p className="text-center text-sm text-muted">Tap a muscle group to see its sets and exercises.</p>;
   }
   return (
-    <section ref={card} aria-label={summary?.name ?? muscleGroupLabel(muscleGroup)} className="scroll-mb-6 flex flex-col gap-1 rounded-lg border border-line bg-surface p-3">
-      <h2 className="font-semibold">{summary?.name ?? muscleGroupLabel(muscleGroup)}</h2>
+    <section ref={card} aria-label={summary?.name ?? muscleGroupLabel(muscleGroup)} className="scroll-mb-6 flex flex-col gap-1 rounded-lg border bg-surface p-3">
+      <h2 className="font-medium">{summary?.name ?? muscleGroupLabel(muscleGroup)}</h2>
       {!summary ? (
         <p className="text-sm text-muted">{emptyText}</p>
       ) : (
         <dl className="flex flex-col gap-1 text-sm">
           <div className="flex justify-between gap-2">
             <dt className="text-muted">Sets{perWeek}</dt>
-            <dd className="font-semibold tabular-nums">{formatSets(round((summary.primarySets + summary.secondarySets) / weeks))}</dd>
+            <dd className="font-medium tabular-nums">{formatSets(round((summary.primarySets + summary.secondarySets) / weeks))}</dd>
           </div>
           <div className="flex justify-between gap-2">
             <dt className="text-muted">As primary · as secondary (½)</dt>

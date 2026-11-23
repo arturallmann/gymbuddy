@@ -21,7 +21,7 @@ export default function AddSavedSupersetView() {
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-4 p-6">
       <header className="flex items-center gap-4">
         <BackLink href="/workout/add" label="Back to add exercise" />
-        <h1 className="min-w-0 text-2xl font-bold">Saved supersets</h1>
+        <h1 className="min-w-0 text-2xl font-semibold">Saved supersets</h1>
       </header>
       {workout ? (
         <SavedSupersetPicker

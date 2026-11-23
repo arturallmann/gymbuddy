@@ -56,7 +56,7 @@ export default function ImportData() {
         Reads files in the export format. Workouts that are already in the app are skipped.
       </p>
       <label
-        className={`self-start rounded-lg border bg-surface px-4 py-2 font-semibold ${busy ? 'opacity-50' : 'cursor-pointer'}`}
+        className={`self-start rounded-lg border bg-surface px-4 py-2 font-medium ${busy ? 'opacity-50' : 'cursor-pointer'}`}
       >
         Import CSV or Excel
         <input

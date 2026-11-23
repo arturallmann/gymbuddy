@@ -7,6 +7,7 @@ import { listWorkoutHistory, type WorkoutHistoryItem } from '@/db/workouts';
 import { useBackHandler } from '@/hooks/useBackHandler';
 import { useSwipe } from '@/hooks/useSwipe';
 import { slideClass } from '@/lib/swipe';
+import ChevronIcon from '@/components/ui/icons/ChevronIcon';
 import { useSettings } from '@/hooks/useSettings';
 import {
   calendarHref,
@@ -92,12 +93,12 @@ export default function CalendarView() {
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-4 overflow-x-clip p-6">
       <header className="flex items-center gap-4">
         <BackLink href="/" label="Back" />
-        <h1 className="min-w-0 flex-1 text-2xl font-bold">Calendar</h1>
+        <h1 className="min-w-0 flex-1 text-2xl font-semibold">Calendar</h1>
         {!showsDay(view, date, today, firstDay) && (
           <button
             type="button"
             onClick={() => go(view, today, null)}
-            className="shrink-0 rounded-full border bg-surface px-3 py-1 text-sm font-semibold text-link"
+            className="shrink-0 rounded-full border bg-surface px-3 py-1 text-sm font-medium text-link"
           >
             Today
           </button>
@@ -109,15 +110,15 @@ export default function CalendarView() {
           type="button"
           aria-label={`Previous ${view}`}
           onClick={() => move(-1)}
-          className="h-10 w-10 rounded-lg border bg-surface text-lg"
+          className="grid h-10 w-10 place-items-center rounded-lg border bg-surface"
         >
-          ‹
+          <ChevronIcon direction="left" />
         </button>
-        <p aria-live="polite" className="flex-1 text-center font-semibold tabular-nums">
+        <p aria-live="polite" className="flex-1 text-center font-medium tabular-nums">
           {calendarTitle(view, date, firstDay)}
         </p>
-        <button type="button" aria-label={`Next ${view}`} onClick={() => move(1)} className="h-10 w-10 rounded-lg border bg-surface text-lg">
-          ›
+        <button type="button" aria-label={`Next ${view}`} onClick={() => move(1)} className="grid h-10 w-10 place-items-center rounded-lg border bg-surface">
+          <ChevronIcon direction="right" />
         </button>
       </div>
       <div key={spanKey} className={`flex flex-col gap-3 ${slideClass(moved)}`} {...swipe}>

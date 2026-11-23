@@ -15,3 +15,10 @@ test('type a value, or step it with − and +, keeping the label on the input', 
   expect(onChange).toHaveBeenCalledWith('50');
   expect(onStep.mock.calls).toEqual([[-1], [1]]);
 });
+
+test('draw − and + as icons, so they sit in the center of their buttons', () => {
+  render(<NumberStepper label="Reps" value="5" onChange={vi.fn()} onStep={vi.fn()} inputMode="numeric" lessLabel="One rep less" moreLabel="One rep more" />);
+
+  expect(screen.getByRole('button', { name: 'One rep less' })).toHaveTextContent(/^$/);
+  expect(screen.getByRole('button', { name: 'One rep more' })).toHaveTextContent(/^$/);
+});

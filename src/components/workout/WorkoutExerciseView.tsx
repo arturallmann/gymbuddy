@@ -126,7 +126,7 @@ export default function WorkoutExerciseView() {
     <main {...swipe} className="mx-auto flex min-h-screen overflow-x-clip max-w-xl flex-col gap-6 p-6">
       <header className="flex items-center gap-4">
         <BackLink href={back.href} label={back.label} />
-        <h1 className="min-w-0 break-words text-2xl font-bold">{item?.name ?? 'Exercise'}</h1>
+        <h1 className="min-w-0 break-words text-2xl font-semibold">{item?.name ?? 'Exercise'}</h1>
       </header>
       {!item ? (
         <p className="text-muted">This exercise is not in the workout.</p>
@@ -196,7 +196,7 @@ export default function WorkoutExerciseView() {
               )}
               {preferences !== undefined && (
                 <section aria-label="Notes and units" className="flex flex-col gap-2">
-                  <h2 className="text-sm font-semibold uppercase text-muted">Notes and units</h2>
+                  <h2 className="text-sm font-medium text-muted">Notes and units</h2>
                   <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
                 </section>
               )}

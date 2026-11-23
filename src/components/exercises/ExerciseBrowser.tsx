@@ -56,7 +56,7 @@ export default function ExerciseBrowser() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href="/exercises/edit" className="rounded-lg border bg-surface px-4 py-2 text-center font-semibold">
+      <Link href="/exercises/edit" className="rounded-lg border bg-surface px-4 py-2 text-center font-medium">
         New custom exercise
       </Link>
       <input

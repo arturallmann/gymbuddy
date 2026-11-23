@@ -56,7 +56,7 @@ export default function ExportData() {
             type="button"
             disabled={busy}
             onClick={() => run(format)}
-            className="rounded-lg border bg-surface px-4 py-2 font-semibold disabled:opacity-50"
+            className="rounded-lg border bg-surface px-4 py-2 font-medium disabled:opacity-50"
           >
             {label}
           </button>

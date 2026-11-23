@@ -65,7 +65,7 @@ export default function HeightForm() {
             </label>
           </>
         )}
-        <button type="submit" className="shrink-0 rounded-lg border bg-surface px-4 py-2 font-semibold">
+        <button type="submit" className="shrink-0 rounded-lg border bg-surface px-4 py-2 font-medium">
           Save
         </button>
       </div>
