@@ -53,7 +53,7 @@ export default function MuscleGroupExercises() {
       <header className="flex items-center gap-4">
         <BackLink href={addExerciseHref(category)} label="Back to add exercise" />
         <div className="min-w-0">
-          <h1 className="break-words text-2xl font-bold capitalize">{loaded?.group.name ?? 'Muscle group'}</h1>
+          <h1 className="break-words text-2xl font-semibold capitalize">{loaded?.group.name ?? 'Muscle group'}</h1>
           {category && <p className="text-sm text-muted">{CATEGORY_LABELS[category]}</p>}
         </div>
       </header>

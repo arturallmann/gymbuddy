@@ -19,7 +19,7 @@ export default function ExerciseResults({ items, use, showImages, href }: Props)
   if (doneBefore.length === 0) {
     return <ExerciseList items={rest} showImages={showImages} href={href} />;
   }
-  const heading = 'text-sm font-semibold uppercase text-muted';
+  const heading = 'text-sm font-medium text-muted';
   return (
     <div className="flex flex-col gap-4">
       <section aria-label="Done before" className="flex flex-col gap-1">

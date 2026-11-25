@@ -139,7 +139,7 @@ export default function CustomExerciseForm({ initial, muscleGroups, equipment, s
       <button
         type="submit"
         disabled={saving}
-        className="rounded-lg bg-primary px-4 py-2 font-semibold text-on-primary disabled:opacity-50"
+        className="rounded-lg bg-primary px-4 py-2 font-medium text-on-primary disabled:opacity-50"
       >
         {submitLabel}
       </button>

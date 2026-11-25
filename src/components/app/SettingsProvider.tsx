@@ -44,7 +44,7 @@ export default function SettingsProvider({ children }: { children: ReactNode }) 
   if (error) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-2 p-6 text-center">
-        <p className="font-bold">The settings could not load.</p>
+        <p className="font-semibold">The settings could not load.</p>
         <p className="text-sm text-muted">{error}</p>
       </main>
     );

@@ -119,7 +119,7 @@ export default function TemplateList({ kind }: { kind: TemplateKind }) {
                 </form>
               ) : (
                 <div className="flex items-start gap-2">
-                  <h2 className="min-w-0 flex-1 break-words font-semibold">{item.name}</h2>
+                  <h2 className="min-w-0 flex-1 break-words font-medium">{item.name}</h2>
                   <button
                     type="button"
                     onClick={() => setRenaming({ id: item.id, name: item.name })}
@@ -137,7 +137,7 @@ export default function TemplateList({ kind }: { kind: TemplateKind }) {
                     </li>
                   ) : (
                     <li key={block.groupId} className="flex flex-col gap-1">
-                      <span className="text-xs uppercase text-link">
+                      <span className="text-xs text-link">
                         Superset
                         {block.items[0].restSeconds !== null && ` · Rest ${formatDuration(block.items[0].restSeconds)}`}
                       </span>
@@ -159,7 +159,7 @@ export default function TemplateList({ kind }: { kind: TemplateKind }) {
                     await startWorkoutFromRoutine(db, settings.userId, item.id);
                     router.push('/workout');
                   }}
-                  className="rounded-lg bg-primary px-4 py-2 font-semibold text-on-primary"
+                  className="rounded-lg bg-primary px-4 py-2 font-medium text-on-primary"
                 >
                   Start
                 </button>

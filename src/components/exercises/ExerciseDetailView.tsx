@@ -77,7 +77,7 @@ export default function ExerciseDetailView() {
       ) : (
         <>
           <div>
-            <h1 className="break-words text-2xl font-bold">{exercise.name}</h1>
+            <h1 className="break-words text-2xl font-semibold">{exercise.name}</h1>
             <p className="text-muted">
               {exercise.source === 'custom' && 'Custom exercise · '}
               {CATEGORY_LABELS[exercise.category]}
@@ -125,7 +125,7 @@ export default function ExerciseDetailView() {
               {exercise.description && <p className="break-words">{exercise.description}</p>}
               {steps.length > 0 && (
                 <section className="flex flex-col gap-2">
-                  <h2 className="text-lg font-semibold">Instructions</h2>
+                  <h2 className="text-lg font-medium">Instructions</h2>
                   <ol className="flex list-decimal flex-col gap-2 pl-5">
                     {steps.map((step, index) => (
                       <li key={index}>{step}</li>
@@ -135,7 +135,7 @@ export default function ExerciseDetailView() {
               )}
               {exercise.source === 'custom' && (
                 <div className="flex flex-col items-start gap-4">
-                  <Link href={`/exercises/edit?id=${exercise.id}`} className="rounded-lg border bg-surface px-4 py-2 font-semibold">
+                  <Link href={`/exercises/edit?id=${exercise.id}`} className="rounded-lg border bg-surface px-4 py-2 font-medium">
                     Edit
                   </Link>
                   <ConfirmAction
@@ -154,7 +154,7 @@ export default function ExerciseDetailView() {
           )}
           {tab === 'notes' && preferences !== undefined && (
             <section key={tab} {...tabPanelProps('notes')} className={`flex flex-col gap-2 ${slide}`}>
-              <h2 className="text-sm font-semibold uppercase text-muted">Notes and units</h2>
+              <h2 className="text-sm font-medium text-muted">Notes and units</h2>
               <ExercisePreferencesForm preferences={preferences} settingsUnits={getUnits(settings)} onSave={save} />
             </section>
           )}

@@ -38,7 +38,7 @@ export default function SaveTemplate({ label, defaultName, listHref, listLabel, 
             await existing.onUpdate();
             setUpdated(existing.name);
           }}
-          className="rounded-lg border bg-surface px-4 py-2 font-semibold"
+          className="rounded-lg border bg-surface px-4 py-2 font-medium"
         >
           {existing.updateLabel}
         </button>
@@ -76,8 +76,8 @@ export default function SaveTemplate({ label, defaultName, listHref, listLabel, 
           }}
           className={
             compact
-              ? 'shrink-0 rounded-lg border bg-surface px-3 py-2 text-sm font-semibold'
-              : 'rounded-lg border bg-surface px-4 py-2 font-semibold'
+              ? 'shrink-0 rounded-lg border bg-surface px-3 py-2 text-sm font-medium'
+              : 'rounded-lg border bg-surface px-4 py-2 font-medium'
           }
         >
           {label}
@@ -113,7 +113,7 @@ export default function SaveTemplate({ label, defaultName, listHref, listLabel, 
         <button
           type="submit"
           disabled={!name.trim()}
-          className="flex-1 rounded-lg bg-primary px-4 py-2 font-semibold text-on-primary disabled:opacity-50"
+          className="flex-1 rounded-lg bg-primary px-4 py-2 font-medium text-on-primary disabled:opacity-50"
         >
           Save
         </button>

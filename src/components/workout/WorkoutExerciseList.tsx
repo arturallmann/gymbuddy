@@ -129,7 +129,7 @@ export default function WorkoutExerciseList({
                   className="flex items-center gap-2 rounded-lg border border-primary bg-surface p-3"
                 >
                   <Link href={`/workout/group?id=${block.groupId}`} className="min-w-0 flex-1 break-words">
-                    {renderGroup ? renderGroup(block.items) : <span className="font-semibold">{name}</span>}
+                    {renderGroup ? renderGroup(block.items) : <span className="font-medium">{name}</span>}
                   </Link>
                   {arrows}
                   {onUngroup && !selection && (
@@ -153,7 +153,7 @@ export default function WorkoutExerciseList({
                       onChange={() => selection.onToggle(item.id)}
                       className="h-5 w-5 shrink-0"
                     />
-                    <span className="min-w-0 flex-1 break-words font-semibold">{item.name}</span>
+                    <span className="min-w-0 flex-1 break-words font-medium">{item.name}</span>
                   </label>
                 </SortableBlock>
               );
@@ -170,7 +170,7 @@ export default function WorkoutExerciseList({
                           setRemoving(null);
                           onRemove(item.id);
                         }}
-                        className="flex-1 rounded-lg bg-danger px-4 py-2 font-semibold text-on-danger"
+                        className="flex-1 rounded-lg bg-danger px-4 py-2 font-medium text-on-danger"
                       >
                         Remove
                       </button>
@@ -185,7 +185,7 @@ export default function WorkoutExerciseList({
             return (
               <SortableBlock key={item.id} id={item.id} disabled={false} className="flex items-center gap-2 rounded-lg border bg-surface p-3">
                 <Link href={`/workout/exercise?id=${item.id}`} className="min-w-0 flex-1 break-words">
-                  <span className="font-semibold">{item.name}</span>
+                  <span className="font-medium">{item.name}</span>
                   {renderBody?.(item)}
                 </Link>
                 {arrows}

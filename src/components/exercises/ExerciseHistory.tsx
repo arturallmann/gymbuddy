@@ -20,7 +20,7 @@ export default function ExerciseHistory({ workouts, loadType, units }: Props) {
     <ol aria-label="History" className="flex flex-col gap-4">
       {workouts.map((workout) => (
         <li key={workout.workoutId} className="flex flex-col gap-2">
-          <Link href={`/history/workout?id=${workout.workoutId}`} className="text-sm font-semibold text-link">
+          <Link href={`/history/workout?id=${workout.workoutId}`} className="text-sm font-medium text-link">
             {formatWorkoutDate(workout.startedAt)}
           </Link>
           {workout.items.map((item) => (

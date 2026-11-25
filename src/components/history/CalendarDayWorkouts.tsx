@@ -14,7 +14,7 @@ export default function CalendarDayWorkouts({ items, back }: { items: WorkoutHis
             href={`/history/workout?id=${workout.id}&back=${encodeURIComponent(back)}`}
             className="flex flex-col gap-0.5 rounded-lg border bg-page p-3"
           >
-            <span className="flex items-center justify-between gap-2 font-semibold">
+            <span className="flex items-center justify-between gap-2 font-medium">
               <span>
                 {formatTime(workout.startedAt)}
                 {workout.endedAt && ` · ${formatWorkoutDuration((workout.endedAt.getTime() - workout.startedAt.getTime()) / 1000)}`}

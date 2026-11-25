@@ -5,7 +5,7 @@ export default function CalendarDayNumber({ day, today }: { day: Date; today: Da
   return (
     <span
       className={`grid h-7 w-7 place-items-center rounded-full tabular-nums ${
-        isSameDay(day, today) ? 'bg-accent font-bold text-on-accent' : ''
+        isSameDay(day, today) ? 'bg-accent font-semibold text-on-accent' : ''
       }`}
     >
       {day.getDate()}

@@ -13,8 +13,8 @@ export default function WorkoutHistoryList({ items }: { items: WorkoutHistoryIte
       {items.map((workout) => (
         <li key={workout.id}>
           <Link href={`/history/workout?id=${workout.id}`} className="block rounded-lg border bg-surface p-3">
-            <span className="block font-semibold">{formatWorkoutDate(workout.startedAt)}</span>
-            <span className="block text-sm text-muted">
+            <span className="block font-medium">{formatWorkoutDate(workout.startedAt)}</span>
+            <span className="block text-sm text-muted tabular-nums">
               {workout.endedAt && formatWorkoutDuration((workout.endedAt.getTime() - workout.startedAt.getTime()) / 1000)}
               {' · '}
               {workout.setCount === 1 ? '1 set' : `${workout.setCount} sets`}

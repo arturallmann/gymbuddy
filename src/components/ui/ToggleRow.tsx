@@ -29,8 +29,8 @@ export default function ToggleRow({
         }`}
       >
         <span
-          className={`absolute top-1 h-5 w-5 rounded-full bg-on-primary transition-all ${
-            checked ? 'left-6' : 'left-1'
+          className={`absolute left-1 top-1 h-5 w-5 rounded-full bg-on-primary transition-transform ${
+            checked ? 'translate-x-5' : ''
           }`}
         />
       </button>

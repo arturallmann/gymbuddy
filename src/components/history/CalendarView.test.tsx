@@ -151,6 +151,10 @@ describe('week view', () => {
     expect(screen.getByText(/^9\s?–\s?15 Nov 2026$/)).toBeInTheDocument();
     const nov9 = await screen.findByRole('button', { name: 'Monday 9 November, 1 workout' });
     expect(nov9).toHaveTextContent('Squat');
+    // The arrows and the open mark are drawn icons, not text characters such as ‹ or ▾ that sit off center.
+    expect(nov9).not.toHaveTextContent(/[▾▴]/);
+    expect(screen.getByRole('button', { name: 'Next week' })).toHaveTextContent(/^$/);
+    expect(screen.getByRole('button', { name: 'Previous week' })).toHaveTextContent(/^$/);
     expect(screen.getByRole('button', { name: 'Sunday 15 November, today' })).toBeDisabled();
     // A day without a workout shows only its weekday and number, past or still to come (decision 050).
     expect(screen.getByRole('button', { name: 'Tuesday 10 November' })).toHaveTextContent(/^Tue10$/);

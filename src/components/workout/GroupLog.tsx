@@ -86,7 +86,7 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
 
       {editing && editedSet ? (
         <section aria-label="Edit set" className="flex flex-col gap-3">
-          <h2 className="font-semibold">
+          <h2 className="font-medium">
             Round {data.sets[editing.member].indexOf(editedSet) + 1} · {members[editing.member].name}
           </h2>
           <SetForm
@@ -106,7 +106,7 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
         </section>
       ) : (
         <section aria-label="Next set" className="flex flex-col gap-3">
-          <h2 className="font-semibold">
+          <h2 className="font-medium">
             Round {round} · {members[member].name}
           </h2>
           <SetForm
@@ -124,13 +124,13 @@ export default function GroupLog({ detail, restTimer, onRest, onUngroup, onSaveT
       )}
 
       {rows.length > 0 && (
-        <table className="w-full table-fixed text-sm">
+        <table className="w-full table-fixed text-sm tabular-nums">
           <caption className="sr-only">Rounds</caption>
           <thead>
             <tr>
               <th className="w-10 text-left text-muted">#</th>
               {members.map((item) => (
-                <th key={item.id} className="break-words text-left font-semibold">
+                <th key={item.id} className="break-words text-left font-medium">
                   {item.name}
                 </th>
               ))}

@@ -48,10 +48,10 @@ export default function ExercisePhotos({ exerciseId, name, images, onChange }: P
     }
   };
 
-  const button = 'flex-1 rounded-lg border bg-surface px-4 py-2 font-semibold disabled:opacity-50';
+  const button = 'flex-1 rounded-lg border bg-surface px-4 py-2 font-medium disabled:opacity-50';
   return (
     <section aria-label="Photos" className="flex flex-col gap-3">
-      <h2 className="text-lg font-semibold">Photos</h2>
+      <h2 className="text-lg font-medium">Photos</h2>
       {images.length === 0 && <p className="text-sm text-muted">No photos yet. The first photo shows in exercise lists.</p>}
       {images.length > 0 && (
         <ul className="grid grid-cols-2 gap-2">
@@ -78,7 +78,7 @@ export default function ExercisePhotos({ exerciseId, name, images, onChange }: P
                       await deleteExercisePhoto(db, userId, image.id);
                       await onChange();
                     }}
-                    className="w-full rounded-lg bg-danger px-3 py-1.5 text-sm font-semibold text-on-danger"
+                    className="w-full rounded-lg bg-danger px-3 py-1.5 text-sm font-medium text-on-danger"
                   >
                     Remove
                   </button>

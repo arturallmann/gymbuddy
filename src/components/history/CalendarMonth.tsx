@@ -28,7 +28,7 @@ export default function CalendarMonth({ date, firstDay, today, open, workoutsOn,
   return (
     <>
       <div role="grid" aria-label={calendarTitle('month', date, firstDay)} className="flex flex-col gap-0.5">
-        <div role="row" className="grid grid-cols-7 text-center text-xs font-semibold text-muted">
+        <div role="row" className="grid grid-cols-7 text-center text-xs font-medium text-muted">
           {names.map((name) => (
             <span key={name} role="columnheader" className="py-1">
               {name}
@@ -70,7 +70,7 @@ export default function CalendarMonth({ date, firstDay, today, open, workoutsOn,
       </div>
       {open && openWorkouts.length > 0 ? (
         <section aria-label={dayLabel(open)} className="flex flex-col gap-2 rounded-lg border bg-surface p-3">
-          <h2 className="text-sm font-semibold uppercase text-muted">{dayLabel(open)}</h2>
+          <h2 className="text-sm font-medium text-muted">{dayLabel(open)}</h2>
           <CalendarDayWorkouts items={openWorkouts} back={back} />
         </section>
       ) : (

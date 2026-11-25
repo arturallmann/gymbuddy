@@ -3,6 +3,7 @@ import { dayCategories, dayCellLabel, dayKey, isSameDay, weekDays, weekdayNames 
 import CalendarDayNumber from './CalendarDayNumber';
 import CalendarDayWorkouts from './CalendarDayWorkouts';
 import CategoryBars from './CategoryBars';
+import ChevronIcon from '@/components/ui/icons/ChevronIcon';
 
 type Props = {
   // A day of the shown week.
@@ -29,7 +30,7 @@ export default function CalendarWeek({ date, firstDay, today, open, workoutsOn, 
         const expanded = isSameDay(day, open);
         const exerciseNames = workouts.flatMap((workout) => workout.exerciseNames);
         return (
-          <li key={dayKey(day)} className="rounded-lg border border-line bg-surface">
+          <li key={dayKey(day)} className={`rounded-lg border ${workouts.length > 0 ? 'bg-surface' : 'border-transparent'}`}>
             <button
               type="button"
               disabled={workouts.length === 0}
@@ -38,9 +39,9 @@ export default function CalendarWeek({ date, firstDay, today, open, workoutsOn, 
               onClick={() => onToggle(day)}
               className="flex w-full items-center gap-3 p-2 text-left"
             >
-              <span className="flex w-10 shrink-0 flex-col items-center text-xs font-semibold uppercase text-muted">
+              <span className="flex w-10 shrink-0 flex-col items-center text-xs font-medium text-muted">
                 {names[index]}
-                <span className="text-base normal-case text-ink">
+                <span className="text-base text-ink">
                   <CalendarDayNumber day={day} today={today} />
                 </span>
               </span>
@@ -49,8 +50,8 @@ export default function CalendarWeek({ date, firstDay, today, open, workoutsOn, 
                 <span className="truncate text-sm text-muted">{exerciseNames.join(', ')}</span>
               </span>
               {workouts.length > 0 && (
-                <span aria-hidden className="text-muted">
-                  {expanded ? '▴' : '▾'}
+                <span className="text-muted">
+                  <ChevronIcon direction={expanded ? 'up' : 'down'} />
                 </span>
               )}
             </button>

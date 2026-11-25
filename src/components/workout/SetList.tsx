@@ -31,7 +31,7 @@ export default function SetList({ sets, loadType, units, onRemove, onEdit, editi
           </>
         );
         return (
-          <li key={set.id} className="flex items-start gap-3">
+          <li key={set.id} className="flex items-start gap-3 tabular-nums">
             <span className="w-6 shrink-0 text-muted">{index + 1}</span>
             {onEdit ? (
               <button

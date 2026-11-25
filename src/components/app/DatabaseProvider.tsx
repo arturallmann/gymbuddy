@@ -22,7 +22,7 @@ export default function DatabaseProvider({ children }: { children: ReactNode }) 
   if (error) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-2 p-6 text-center">
-        <p className="font-bold">The database could not open.</p>
+        <p className="font-semibold">The database could not open.</p>
         <p className="text-sm text-muted">{error}</p>
       </main>
     );

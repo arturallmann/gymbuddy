@@ -32,7 +32,7 @@ export default function SavedSupersetPicker({ onPick }: Props) {
         {items?.map((item) => (
           <li key={item.id}>
             <button type="button" onClick={() => onPick(item.id)} className="w-full break-words border-b border-line py-3 text-left">
-              <span className="block font-semibold">{item.name}</span>
+              <span className="block font-medium">{item.name}</span>
               <span className="block text-sm text-muted">
                 {item.exercises.map((exercise) => exercise.name).join(' + ')}
               </span>

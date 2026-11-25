@@ -28,7 +28,7 @@ export default function TodaysWorkouts() {
   }
   return (
     <section aria-label="Today" className="flex w-full flex-col gap-2 text-left">
-      <h2 className="text-sm font-semibold uppercase text-muted">Today</h2>
+      <h2 className="text-sm font-medium text-muted">Today</h2>
       <WorkoutHistoryList items={items} />
     </section>
   );

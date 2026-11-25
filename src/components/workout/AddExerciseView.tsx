@@ -59,7 +59,7 @@ export default function AddExerciseView() {
     <main className="mx-auto flex min-h-screen max-w-xl flex-col gap-4 p-6">
       <header className="flex items-center gap-4">
         <BackLink href="/workout" label="Back to workout" />
-        <h1 className="min-w-0 flex-1 text-xl font-bold">Add exercise</h1>
+        <h1 className="min-w-0 flex-1 text-xl font-semibold">Add exercise</h1>
         {features.supersets && features.templates && (
           <Link href="/workout/add/superset" className="shrink-0 text-sm text-link">
             Saved supersets
