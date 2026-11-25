@@ -82,6 +82,7 @@ If a needed term is missing, stop and ask before inventing one.
 - Branch name: `task/<roadmap number>-<short-name>`, for example `task/0.2-remove-server-code`.
 - Work that is not a roadmap task (cleanup, tooling, docs only): `chore/<short-name>`, for example `chore/remove-old-pages-add-graphify`.
 - Commit messages: short imperative summary, for example "Remove Prisma and API routes".
+- Commits have one author, from the git config. No `Co-Authored-By` trailer for Claude.
 - Commit after the checks pass. Do not commit failing code.
 - Push the branch and open a pull request with `gh pr create`. Never merge the pull request.
 - Never push to `master`. Never force-push.
